@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#1a0533"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="description" content="Zipplearn – Fast, Fun & Smart Learning for Classes 1–4"/>
+<link rel="manifest" href="manifest.json"/>
+<title>Zipplearn • Fast. Fun. Smart.</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+/* ============================================================
+   DESIGN SYSTEM — COSMIC LEARNING UNIVERSE
+   Each subject = a planet. Kids pilot their rocket through worlds.
+   Dark space canvas, neon-bright planet cards, playful + bold.
+============================================================ */
+:root {
+  /* Space canvas */
+  --space-void: #0f0520;
+  --space-deep: #160830;
+  --space-mid:  #1e0a3c;
+  --space-glow: rgba(100,100,255,0.08);
+
+  /* Subjects — each has 3 shades */
+  --math-1: #ff6b35;  --math-2: #ff8c5a;  --math-3: #ffd4c4;
+  --sci-1:  #00d4aa;  --sci-2:  #33ddb8;  --sci-3:  #c0f5ec;
+  --eng-1:  #a855f7;  --eng-2:  #bf7fff;  --eng-3:  #eed9ff;
+  --evs-1:  #22c55e;  --evs-2:  #4ade80;  --evs-3:  #bbf7d0;
+  --sst-1:  #f59e0b;  --sst-2:  #fbbf24;  --sst-3:  #fef3c7;
+
+  /* UI */
+  --gold:    #ffd700;
+  --silver:  #c0c0c0;
+  --white:   #ffffff;
+  --cream:   #fffdf4;
+  --danger:  #ff4757;
+  --success: #2ed573;
+
+  /* Typography */
+  --font-display: 'Fredoka One', cursive;
+  --font-body: 'Nunito', sans-serif;
+
+  /* Motion */
+  --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Radius */
+  --r-xl: 28px;
+  --r-lg: 20px;
+  --r-md: 14px;
+  --r-sm: 10px;
+
+  /* Shadows */
+  --shadow-neon-math: 0 0 30px rgba(255,107,53,0.4);
+  --shadow-neon-sci:  0 0 30px rgba(0,212,170,0.4);
+  --shadow-card: 0 8px 40px rgba(0,0,0,0.4);
+  --shadow-sm:   0 4px 16px rgba(0,0,0,0.3);
+}
+
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--space-void);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== STAR FIELD BACKGROUND ===== */
+.starfield {
+  position: fixed; inset: 0; z-index: 0;
+  overflow: hidden; pointer-events: none;
+}
+.star {
+  position: absolute; border-radius: 50%;
+  background: white; opacity: 0;
+  animation: twinkle var(--dur, 3s) ease-in-out infinite var(--delay, 0s);
+}
+@keyframes twinkle {
+  0%,100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: var(--bright, 0.8); transform: scale(1); }
+}
+.nebula {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: driftNebula 20s ease-in-out infinite alternate;
+}
+@keyframes driftNebula {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(40px, 30px) scale(1.1); }
+}
+
+/* ===== LAYOUT ===== */
+#app { position: relative; z-index: 1; min-height: 100vh; }
+.screen { display: none; min-height: 100vh; animation: screenIn 0.35s var(--smooth) both; }
+.screen.active { display: flex; flex-direction: column; }
+@keyframes screenIn { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform:none; } }
+
+/* ===== HEADER ===== */
+.app-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  background: rgba(13,13,43,0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  position: sticky; top: 0; z-index: 200;
+  flex-shrink: 0;
+}
+.logo-wrap { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.logo-planet {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 18px rgba(99,102,241,0.55), 0 0 4px rgba(99,102,241,0.3);
+  animation: logoPulse 3s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes logoPulse {
+  0%,100% { box-shadow: 0 0 18px rgba(99,102,241,0.55), 0 0 4px rgba(99,102,241,0.3); }
+  50%      { box-shadow: 0 0 28px rgba(139,92,246,0.75), 0 0 8px rgba(99,102,241,0.5); }
+}
+.logo-name { font-family: var(--font-display); font-size: 24px; color: white; letter-spacing: 0.5px; }
+.logo-tagline { font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 700; letter-spacing: 1.5px; }
+
+.header-right { display: flex; align-items: center; gap: 10px; }
+.xp-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,215,0,0.12); border: 1px solid rgba(255,215,0,0.25);
+  border-radius: 20px; padding: 6px 14px;
+  font-family: var(--font-display); font-size: 16px; color: var(--gold);
+  cursor: pointer; transition: all 0.2s;
+}
+.xp-badge:hover { background: rgba(255,215,0,0.2); }
+.nav-back {
+  display: none; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--r-sm); padding: 8px 14px;
+  color: rgba(255,255,255,0.7); font-family: var(--font-body); font-weight: 700; font-size: 13px;
+  cursor: pointer; transition: all 0.2s;
+}
+.nav-back:hover { background: rgba(255,255,255,0.1); color: white; }
+.nav-back.show { display: flex; }
+
+/* ===== HERO HOME ===== */
+.home-hero {
+  text-align: center;
+  padding: 52px 24px 32px;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px; padding: 7px 18px; margin-bottom: 24px;
+  font-size: 11px; font-weight: 800; letter-spacing: 2px; color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 8vw, 88px);
+  line-height: 1.05; margin-bottom: 16px;
+  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-title .accent { 
+  background: linear-gradient(135deg, #818cf8, #a78bfa, #e879f9);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-sub {
+  font-size: clamp(14px, 2.5vw, 18px); color: rgba(255,255,255,0.5);
+  max-width: 480px; margin: 0 auto 40px; line-height: 1.7;
+}
+
+/* ===== QUICK STATS ROW ===== */
+.stats-row {
+  display: flex; gap: 12px; justify-content: center;
+  flex-wrap: wrap; padding: 0 20px 40px;
+}
+.stat-chip {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px; padding: 14px 20px; text-align: center; min-width: 90px;
+  transition: all 0.2s;
+}
+.stat-chip:hover { background: rgba(255,255,255,0.07); transform: translateY(-2px); }
+.stat-val { font-family: var(--font-display); font-size: 26px; line-height: 1; }
+.stat-lbl { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; color: rgba(255,255,255,0.35); margin-top: 3px; }
+
+/* ===== CLASS PICKER ===== */
+.section-heading {
+  text-align: center;
+  font-size: 11px; font-weight: 800; letter-spacing: 2.5px; color: rgba(255,255,255,0.3);
+  text-transform: uppercase; margin-bottom: 16px;
+}
+.class-orbit {
+  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+  padding: 0 20px 48px;
+}
+.class-orb {
+  position: relative;
+  width: 100px; height: 100px; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.3s var(--bounce);
+  border: 2px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+  user-select: none;
+}
+.class-orb::before {
+  content: ''; position: absolute; inset: -50%;
+  background: conic-gradient(transparent 60%, rgba(255,255,255,0.15) 80%, transparent 100%);
+  animation: orbRing 4s linear infinite;
+}
+@keyframes orbRing { to { transform: rotate(360deg); } }
+.class-orb:hover { transform: scale(1.12) translateY(-6px); border-color: rgba(255,255,255,0.3); }
+.class-orb:active { transform: scale(0.96); }
+.class-orb.c1 { background: radial-gradient(circle at 35% 35%, #ff8c5a, #cc3d00); box-shadow: 0 8px 32px rgba(255,107,53,0.5); }
+.class-orb.c2 { background: radial-gradient(circle at 35% 35%, #33ddb8, #008a6e); box-shadow: 0 8px 32px rgba(0,212,170,0.5); }
+.class-orb.c3 { background: radial-gradient(circle at 35% 35%, #bf7fff, #7b2fd1); box-shadow: 0 8px 32px rgba(168,85,247,0.5); }
+.class-orb.c4 { background: radial-gradient(circle at 35% 35%, #fbbf24, #d97706); box-shadow: 0 8px 32px rgba(245,158,11,0.5); }
+.orb-num { font-family: var(--font-display); font-size: 26px; line-height: 1; color: white; position: relative; z-index:1; }
+.orb-label { font-size: 9px; font-weight: 800; letter-spacing: 1px; color: rgba(255,255,255,0.75); position: relative; z-index:1; margin-top:2px; }
+.orb-ring {
+  position: absolute; inset: -6px; border-radius: 50%;
+  border: 2px dashed rgba(255,255,255,0.2);
+  animation: orbRing 6s linear infinite;
+}
+
+/* ===== SUBJECT SHELF ===== */
+.subject-shelf {
+  padding: 8px 20px 48px;
+  max-width: 960px; margin: 0 auto;
+}
+.subject-planet {
+  display: flex; align-items: center; gap: 20px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--r-xl); padding: 20px 24px; margin-bottom: 14px;
+  cursor: pointer; transition: all 0.25s var(--bounce);
+  position: relative; overflow: hidden;
+}
+.subject-planet::before {
+  content: ''; position: absolute; right: -40px; top: -40px;
+  width: 140px; height: 140px; border-radius: 50%;
+  opacity: 0.06; transition: opacity 0.3s;
+}
+.subject-planet:hover { transform: translateX(6px); border-color: rgba(255,255,255,0.15); }
+.subject-planet:hover::before { opacity: 0.12; }
+.subject-planet.math::before { background: var(--math-1); }
+.subject-planet.sci::before  { background: var(--sci-1); }
+.subject-planet.eng::before  { background: var(--eng-1); }
+.subject-planet.evs::before  { background: var(--evs-1); }
+
+.sp-icon {
+  width: 60px; height: 60px; border-radius: 18px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 28px;
+  position: relative; z-index:1;
+}
+.sp-icon.math { background: linear-gradient(135deg, var(--math-1), var(--math-2)); box-shadow: var(--shadow-neon-math); }
+.sp-icon.sci  { background: linear-gradient(135deg, var(--sci-1), var(--sci-2));  box-shadow: var(--shadow-neon-sci); }
+.sp-icon.eng  { background: linear-gradient(135deg, var(--eng-1), var(--eng-2));  box-shadow: 0 0 30px rgba(168,85,247,0.4); }
+.sp-icon.evs  { background: linear-gradient(135deg, var(--evs-1), var(--evs-2));  box-shadow: 0 0 30px rgba(34,197,94,0.4); }
+
+.sp-info { flex: 1; position: relative; z-index:1; }
+.sp-name { font-family: var(--font-display); font-size: 22px; margin-bottom: 3px; }
+.sp-desc { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+.sp-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.sp-tag {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.5px; padding: 3px 10px;
+  border-radius: 20px; background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5);
+}
+.sp-tag.active { color: white; }
+.sp-tag.math-tag { background: rgba(255,107,53,0.2); color: var(--math-2); }
+.sp-tag.sci-tag  { background: rgba(0,212,170,0.2);  color: var(--sci-2); }
+.sp-tag.eng-tag  { background: rgba(168,85,247,0.2); color: var(--eng-2); }
+.sp-tag.evs-tag  { background: rgba(34,197,94,0.2);  color: var(--evs-2); }
+
+.sp-meta { text-align: right; position: relative; z-index:1; flex-shrink:0; }
+.sp-badge {
+  display: inline-block; font-size: 10px; font-weight: 800; padding: 4px 10px;
+  border-radius: 20px; letter-spacing: 0.5px; margin-bottom: 8px;
+}
+.sp-badge.live  { background: rgba(46,213,115,0.15); color: var(--success); border: 1px solid rgba(46,213,115,0.3); }
+.sp-badge.soon  { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.08); }
+.sp-arrow { font-size: 22px; color: rgba(255,255,255,0.25); display: block; transition: transform 0.2s; }
+.subject-planet:hover .sp-arrow { transform: translateX(4px); color: rgba(255,255,255,0.6); }
+
+/* ===== CLASS → SUBJECT SCREEN ===== */
+.content-area {
+  flex: 1; padding: 24px 20px 48px;
+  max-width: 960px; margin: 0 auto; width: 100%;
+}
+.screen-title-row {
+  display: flex; align-items: flex-start; gap: 14px; margin-bottom: 28px;
+}
+.stitle-icon {
+  width: 56px; height: 56px; border-radius: 16px; flex-shrink:0;
+  display: flex; align-items: center; justify-content: center; font-size: 26px;
+}
+.stitle-text h2 { font-family: var(--font-display); font-size: clamp(24px,4vw,36px); line-height: 1.1; }
+.stitle-text p  { font-size: 14px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+
+.xp-progress {
+  background: rgba(255,255,255,0.06); border-radius: 20px; height: 8px;
+  overflow: hidden; margin-bottom: 28px;
+}
+.xp-fill {
+  height: 100%; border-radius: 20px;
+  background: linear-gradient(90deg, #6366f1, #a78bfa);
+  transition: width 0.6s var(--smooth);
+}
+
+/* ===== GAMES GRID ===== */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+@media(min-width:600px)  { .games-grid { grid-template-columns: repeat(3, 1fr); } }
+@media(min-width:900px)  { .games-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.game-tile {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--r-lg); padding: 20px 14px 16px; text-align: center;
+  cursor: pointer; transition: all 0.25s var(--bounce);
+  position: relative; overflow: hidden;
+}
+.game-tile:hover { transform: translateY(-6px) scale(1.03); background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.15); }
+.game-tile:active { transform: scale(0.96); }
+
+.tile-glow {
+  position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
+  width: 80px; height: 40px; border-radius: 50%;
+  filter: blur(20px); opacity: 0; transition: opacity 0.3s;
+}
+.game-tile:hover .tile-glow { opacity: 0.5; }
+
+.tile-icon {
+  width: 60px; height: 60px; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center; font-size: 28px;
+  margin: 0 auto 12px; transition: transform 0.3s var(--bounce);
+}
+.game-tile:hover .tile-icon { transform: scale(1.15) rotate(-5deg); }
+.tile-name { font-family: var(--font-display); font-size: 14px; margin-bottom: 4px; line-height: 1.2; }
+.tile-desc { font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.4; }
+.tile-diff {
+  position: absolute; top: 10px; right: 10px;
+  font-size: 9px; font-weight: 800; letter-spacing: 0.5px;
+  padding: 3px 8px; border-radius: 20px; text-transform: uppercase;
+}
+.diff-easy   { background: rgba(46,213,115,0.15); color: #2ed573; }
+.diff-medium { background: rgba(255,215,0,0.15);  color: var(--gold); }
+.diff-hard   { background: rgba(255,71,87,0.15);  color: var(--danger); }
+.diff-new    { background: linear-gradient(135deg,rgba(168,85,247,0.3),rgba(255,107,53,0.3)); color: white; }
+
+/* tip card */
+.tip-card {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--r-md); padding: 16px 20px; margin-top: 24px;
+}
+.tip-icon { font-size: 22px; flex-shrink:0; margin-top:2px; }
+.tip-body strong { color: var(--gold); font-size: 13px; display:block; margin-bottom:3px; }
+.tip-body span { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+/* ===== GAME PLAY SCREEN ===== */
+.game-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; background: rgba(13,13,43,0.6); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  gap: 12px; flex-wrap: wrap;
+}
+.hud-group { display: flex; gap: 10px; align-items: center; }
+.hud-chip {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--r-sm); padding: 8px 14px; text-align: center; min-width: 64px;
+}
+.hud-val { font-family: var(--font-display); font-size: 20px; line-height: 1; }
+.hud-lbl { font-size: 9px; font-weight: 800; letter-spacing: 1.2px; color: rgba(255,255,255,0.3); margin-top:2px; }
+
+/* Timer arc */
+.timer-arc { position: relative; width: 56px; height: 56px; }
+.timer-arc svg { transform: rotate(-90deg); }
+.arc-bg    { stroke: rgba(255,255,255,0.07); fill: none; stroke-width: 5; }
+.arc-fill  { stroke: var(--gold); fill: none; stroke-width: 5; stroke-dasharray: 151; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
+.arc-num   { position: absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family: var(--font-display); font-size: 17px; }
+
+/* Streak dots */
+.streak-dots { display: flex; gap: 5px; align-items: center; }
+.s-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.15);
+  transition: all 0.3s var(--bounce);
+}
+.s-dot.lit { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 8px rgba(255,215,0,0.7); transform: scale(1.2); }
+.s-dot.lit:nth-child(even) { transform: scale(1.35); }
+
+/* ===== QUESTION CARD ===== */
+.q-card {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-xl); padding: 36px 28px; text-align: center;
+  margin-bottom: 20px;
+  animation: cardPop 0.4s var(--bounce) both;
+}
+@keyframes cardPop { from { transform: scale(0.88) translateY(10px); opacity:0; } }
+.q-label { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: rgba(255,255,255,0.25); margin-bottom: 10px; }
+.q-text  {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 7vw, 60px);
+  line-height: 1.15;
+}
+.q-hint  { font-size: 13px; color: rgba(255,255,255,0.35); margin-top: 10px; font-style: italic; }
+
+/* ===== ANSWER OPTIONS ===== */
+.opts-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.opts-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media(min-width: 500px) { .opts-4 { grid-template-columns: repeat(4, 1fr); } }
+.opts-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+
+.opt-btn {
+  background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-md); padding: 18px 10px;
+  font-family: var(--font-display); font-size: clamp(18px, 4vw, 28px);
+  color: white; cursor: pointer;
+  transition: all 0.2s var(--bounce);
+  text-align: center; outline: none;
+}
+.opt-btn:hover { transform: scale(1.06); background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); }
+.opt-btn:active { transform: scale(0.95); }
+.opt-btn.correct { background: rgba(46,213,115,0.15); border-color: var(--success); color: var(--success); animation: bounceOpt 0.5s var(--bounce); }
+.opt-btn.wrong   { background: rgba(255,71,87,0.12);  border-color: var(--danger);  color: var(--danger);  animation: shakeOpt 0.4s; }
+@keyframes bounceOpt { 0%,100%{transform:scale(1)} 40%{transform:scale(1.12)} 70%{transform:scale(0.97)} }
+@keyframes shakeOpt  { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 75%{transform:translateX(7px)} }
+
+/* ===== COUNTING OBJECTS ===== */
+.objects-display {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-xl); padding: 28px 20px;
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;
+  margin-bottom: 20px; min-height: 120px;
+  animation: cardPop 0.4s var(--bounce) both;
+}
+.obj-item {
+  font-size: clamp(26px, 5vw, 38px);
+  animation: popItem 0.3s var(--bounce) both;
+  transition: transform 0.15s;
+  cursor: default; user-select: none;
+}
+.obj-item:hover { transform: scale(1.25) rotate(12deg); }
+
+/* ===== REWARD OVERLAY ===== */
+.reward-overlay {
+  position: fixed; inset:0; z-index:500;
+  background: rgba(13,13,43,0.96); backdrop-filter: blur(16px);
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 32px;
+}
+.reward-overlay.show { display: flex; }
+.reward-confetti { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+.r-emoji { font-size: 88px; animation: bounceIn 0.6s var(--bounce) both; margin-bottom:16px; }
+@keyframes bounceIn { from{transform:scale(0) rotate(-25deg);opacity:0} }
+.r-title { font-family: var(--font-display); font-size: clamp(36px,7vw,60px); color: var(--gold); margin-bottom:8px; }
+.r-stars { display:flex; gap:10px; justify-content:center; margin:16px 0; }
+.r-star { font-size:40px; animation: popItem 0.4s var(--bounce) both; }
+.r-star:nth-child(2){animation-delay:0.12s} .r-star:nth-child(3){animation-delay:0.24s}
+.r-msg { font-size:17px; color:rgba(255,255,255,0.55); max-width:360px; line-height:1.6; margin-bottom:32px; }
+.r-score { font-family: var(--font-display); font-size:28px; color: var(--gold); margin-bottom:8px; }
+.confetti-piece {
+  position:absolute; border-radius:2px; top:-16px;
+  animation: cFall linear forwards;
+}
+@keyframes cFall { to { transform: translateY(110vh) rotate(900deg); opacity:0; } }
+@keyframes popItem { from{transform:scale(0);opacity:0} }
+
+/* ===== BUTTON SYSTEM ===== */
+.btn {
+  border:none; border-radius: var(--r-md); padding:15px 30px;
+  font-family: var(--font-body); font-weight: 800; font-size: 15px;
+  cursor: pointer; transition: all 0.2s var(--bounce);
+  display: inline-flex; align-items: center; gap: 8px;
+  letter-spacing: 0.3px;
+}
+.btn:hover { transform: translateY(-3px); }
+.btn:active { transform: scale(0.96); }
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold), #ff9500);
+  color: #1a0a00; box-shadow: 0 6px 24px rgba(255,215,0,0.35);
+}
+.btn-gold:hover { box-shadow: 0 10px 32px rgba(255,215,0,0.5); }
+.btn-ghost {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.1); color: white; }
+
+/* ===== FLOATING FEEDBACK ===== */
+.float-feedback {
+  position: fixed; top:45%; left:50%; transform: translate(-50%,-50%);
+  font-family: var(--font-display); font-size: 72px; z-index:400; pointer-events:none;
+  animation: floatFade 0.9s var(--smooth) forwards;
+}
+@keyframes floatFade {
+  0%   { opacity:1; transform:translate(-50%,-50%) scale(0.6); }
+  40%  { opacity:1; transform:translate(-50%,-80%) scale(1.2); }
+  100% { opacity:0; transform:translate(-50%,-140%) scale(1.4); }
+}
+
+/* ===== RESPONSIVE TWEAKS ===== */
+@media(max-width:400px) {
+  .class-orb { width:82px; height:82px; }
+  .orb-num { font-size:22px; }
+  .q-text { font-size: 28px; }
+}
+
+/* ===== SCROLL FADE ===== */
+.fade-in { animation: fadeInUp 0.45s var(--smooth) both; }
+.fade-in:nth-child(1){animation-delay:0.05s}
+.fade-in:nth-child(2){animation-delay:0.10s}
+.fade-in:nth-child(3){animation-delay:0.15s}
+.fade-in:nth-child(4){animation-delay:0.20s}
+.fade-in:nth-child(5){animation-delay:0.25s}
+.fade-in:nth-child(6){animation-delay:0.30s}
+@keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+</style>
+</head>
+<body>
+
+<!-- ===== STAR FIELD ===== -->
+<div class="starfield" id="starfield">
+  <div class="nebula" style="width:500px;height:500px;background:rgba(99,102,241,0.12);top:-100px;right:-100px;animation-delay:0s"></div>
+  <div class="nebula" style="width:400px;height:400px;background:rgba(139,92,246,0.09);bottom:0;left:-80px;animation-delay:10s;animation-direction:alternate-reverse"></div>
+  <div class="nebula" style="width:300px;height:300px;background:rgba(236,72,153,0.07);top:40%;right:10%;animation-delay:5s"></div>
+</div>
+
+<div id="app">
+
+<!-- ============ GLOBAL HEADER ============ -->
+<header class="app-header">
+  <div class="logo-wrap" onclick="nav.goHome()">
+    <div class="logo-planet">
+      <svg width="22" height="26" viewBox="0 0 22 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="13,1 3,14 10,14 9,25 19,12 12,12" fill="white" opacity="0.95"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-name">Zipplearn</div>
+      <div class="logo-tagline">FAST · FUN · SMART</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="xp-badge" title="Your total XP">⭐ <span id="hdr-xp">0</span></div>
+    <button class="nav-back" id="nav-back" onclick="nav.goBack()">← Back</button>
+  </div>
+</header>
+
+<!-- ============================================================
+     SCREEN: HOME
+============================================================ -->
+<section class="screen active" id="scr-home">
+  <div class="home-hero">
+    <div class="hero-eyebrow">⚡ For Every Kid • Classes 1–4</div>
+    <h1 class="hero-title">Learning at<br/><span class="accent">Lightning Speed</span></h1>
+    <p class="hero-sub">Earn stars, beat challenges, and level up your brain — all at the speed of fun. ⚡</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-chip"><div class="stat-val" id="st-xp">0</div><div class="stat-lbl">⭐ Total XP</div></div>
+    <div class="stat-chip"><div class="stat-val" id="st-played">0</div><div class="stat-lbl">🎮 Played</div></div>
+    <div class="stat-chip"><div class="stat-val" id="st-streak">0</div><div class="stat-lbl">🔥 Best Streak</div></div>
+    <div class="stat-chip"><div class="stat-val" id="st-correct">0</div><div class="stat-lbl">✅ Correct</div></div>
+  </div>
+
+  <p class="section-heading">Choose Your Class</p>
+  <div class="class-orbit">
+    <div class="class-orb c1" onclick="nav.openClass(1)">
+      <div class="orb-ring"></div>
+      <div class="orb-num">1st</div>
+      <div class="orb-label">BEGINNER</div>
+    </div>
+    <div class="class-orb c2" onclick="nav.openClass(2)">
+      <div class="orb-ring"></div>
+      <div class="orb-num">2nd</div>
+      <div class="orb-label">BUILDER</div>
+    </div>
+    <div class="class-orb c3" onclick="nav.openClass(3)">
+      <div class="orb-ring"></div>
+      <div class="orb-num">3rd</div>
+      <div class="orb-label">EXPLORER</div>
+    </div>
+    <div class="class-orb c4" onclick="nav.openClass(4)">
+      <div class="orb-ring"></div>
+      <div class="orb-num">4th</div>
+      <div class="orb-label">CHAMPION</div>
+    </div>
+  </div>
+
+  <p class="section-heading">Subjects Universe</p>
+  <div class="subject-shelf">
+    <div class="subject-planet math" onclick="nav.openSubject('math', APP.state.selectedClass || 1)">
+      <div class="sp-icon math">🔢</div>
+      <div class="sp-info">
+        <div class="sp-name">Mathematics</div>
+        <div class="sp-desc">Numbers, shapes, patterns, and puzzles that make you think!</div>
+        <div class="sp-tags">
+          <span class="sp-tag math-tag">Counting</span>
+          <span class="sp-tag math-tag">Arithmetic</span>
+          <span class="sp-tag math-tag">Fractions</span>
+          <span class="sp-tag math-tag">Geometry</span>
+        </div>
+      </div>
+      <div class="sp-meta">
+        <span class="sp-badge live">● LIVE</span>
+        <span class="sp-arrow">→</span>
+      </div>
+    </div>
+    <div class="subject-planet sci" style="pointer-events:none;opacity:0.5">
+      <div class="sp-icon sci">🔬</div>
+      <div class="sp-info">
+        <div class="sp-name">Science</div>
+        <div class="sp-desc">Discover how the world works through fun experiments!</div>
+        <div class="sp-tags">
+          <span class="sp-tag sci-tag">Living Things</span>
+          <span class="sp-tag sci-tag">Matter</span>
+          <span class="sp-tag sci-tag">Forces</span>
+        </div>
+      </div>
+      <div class="sp-meta">
+        <span class="sp-badge soon">COMING SOON</span>
+        <span class="sp-arrow">→</span>
+      </div>
+    </div>
+    <div class="subject-planet eng" style="pointer-events:none;opacity:0.5">
+      <div class="sp-icon eng">📖</div>
+      <div class="sp-info">
+        <div class="sp-name">English</div>
+        <div class="sp-desc">Read, write, spell and tell amazing stories!</div>
+        <div class="sp-tags">
+          <span class="sp-tag eng-tag">Vocabulary</span>
+          <span class="sp-tag eng-tag">Grammar</span>
+          <span class="sp-tag eng-tag">Reading</span>
+        </div>
+      </div>
+      <div class="sp-meta">
+        <span class="sp-badge soon">COMING SOON</span>
+        <span class="sp-arrow">→</span>
+      </div>
+    </div>
+    <div class="subject-planet evs" style="pointer-events:none;opacity:0.5">
+      <div class="sp-icon evs">🌿</div>
+      <div class="sp-info">
+        <div class="sp-name">EVS / GK</div>
+        <div class="sp-desc">Our planet, our community, our amazing world!</div>
+        <div class="sp-tags">
+          <span class="sp-tag evs-tag">Environment</span>
+          <span class="sp-tag evs-tag">Body</span>
+          <span class="sp-tag evs-tag">Community</span>
+        </div>
+      </div>
+      <div class="sp-meta">
+        <span class="sp-badge soon">COMING SOON</span>
+        <span class="sp-arrow">→</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCREEN: CLASS → SUBJECT GAMES
+============================================================ -->
+<section class="screen" id="scr-games">
+  <div class="content-area">
+    <div class="screen-title-row" id="stitle-row"></div>
+    <div class="xp-progress"><div class="xp-fill" id="xp-fill" style="width:12%"></div></div>
+    <div class="games-grid" id="games-grid"></div>
+    <div class="tip-card" id="tip-card" style="display:none">
+      <div class="tip-icon">💡</div>
+      <div class="tip-body"><strong id="tip-title"></strong><span id="tip-body"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCREEN: ACTIVE GAME
+============================================================ -->
+<section class="screen" id="scr-play">
+  <div class="game-header">
+    <div class="hud-group">
+      <div class="hud-chip"><div class="hud-val" id="hud-score">0</div><div class="hud-lbl">SCORE</div></div>
+      <div class="hud-chip"><div class="hud-val" id="hud-q">1/10</div><div class="hud-lbl">QUESTION</div></div>
+    </div>
+    <div class="streak-dots" id="streak-dots"></div>
+    <div class="timer-arc">
+      <svg width="56" height="56" viewBox="0 0 56 56">
+        <circle class="arc-bg" cx="28" cy="28" r="24"/>
+        <circle class="arc-fill" id="arc-fill" cx="28" cy="28" r="24" style="stroke-dashoffset:0"/>
+      </svg>
+      <div class="arc-num" id="arc-num">30</div>
+    </div>
+  </div>
+  <div style="flex:1; padding:20px; max-width:680px; margin:0 auto; width:100%;">
+    <div id="play-content"></div>
+  </div>
+</section>
+
+</div><!-- #app -->
+
+<!-- ===== REWARD OVERLAY ===== -->
+<div class="reward-overlay" id="reward-overlay">
+  <div class="reward-confetti" id="reward-confetti"></div>
+  <div class="r-emoji" id="r-emoji">🎉</div>
+  <div class="r-title" id="r-title">Amazing!</div>
+  <div class="r-stars" id="r-stars"></div>
+  <div class="r-score" id="r-score"></div>
+  <div class="r-msg" id="r-msg"></div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+    <button class="btn btn-gold" onclick="APP.playAgain()">Play Again 🎮</button>
+    <button class="btn btn-ghost" onclick="APP.closeReward()">Choose Game</button>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   LEARNVERSE — UNIVERSAL GAMIFIED LEARNING APP
+   Architecture: Subject Registry Pattern
+   Adding new subjects = add entry to SUBJECT_REGISTRY + GAME_REGISTRY
+================================================================ */
+
+// ================================================================
+// SUBJECT REGISTRY — THE EXTENSION POINT
+// To add Science later: add an entry here + games in GAME_REGISTRY
+// ================================================================
+const SUBJECT_REGISTRY = {
+  math: {
+    id: 'math',
+    name: 'Mathematics',
+    icon: '🔢',
+    iconClass: 'math',
+    color: 'var(--math-1)',
+    gradientFill: 'linear-gradient(90deg, #6366f1, #a78bfa)',
+    timerColor: '#818cf8',
+  },
+  // Future: sci, eng, evs entries go here
+};
+
+// ================================================================
+// GAME REGISTRY — organised by subject → class
+// Adding a new game = add an entry here + a renderer function below
+// ================================================================
+const GAME_REGISTRY = {
+  math: {
+    1: {
+      tip: { title: "Parent Tip 💡", body: "Let kids count real objects — buttons, stairs, fruits! Physical counting builds lasting number sense." },
+      games: [
+        { id:'count_objects', icon:'🍎', bg:'rgba(255,107,53,0.15)', name:'Object Counter', desc:'Count and choose!', diff:'easy' },
+        { id:'quiz_add1',     icon:'➕', bg:'rgba(46,213,115,0.12)', name:'Mini Adder',     desc:'Sums up to 10',    diff:'easy' },
+        { id:'compare_nums',  icon:'⚖️', bg:'rgba(255,215,0,0.12)',  name:'Bigger or Smaller?', desc:'Compare numbers', diff:'easy' },
+        { id:'missing_seq',   icon:'❓', bg:'rgba(168,85,247,0.12)', name:'Missing Number', desc:'Spot the gap!',   diff:'medium' },
+        { id:'odd_even',      icon:'🎭', bg:'rgba(0,212,170,0.12)',  name:'Odd or Even?',  desc:'Sort numbers',    diff:'easy' },
+        { id:'shape_quiz',    icon:'🔷', bg:'rgba(168,85,247,0.12)', name:'Shape Safari',  desc:'Name the shapes', diff:'easy', badge:'new' },
+      ]
+    },
+    2: {
+      tip: { title: "Try This! 🎯", body: "Group 10 coins into a pile = 1 'ten'. Makes place value visual and tactile for young learners." },
+      games: [
+        { id:'quiz_add2',   icon:'🧮', bg:'rgba(46,213,115,0.12)',  name:'2-Digit Adder',  desc:'Add up to 99',     diff:'medium' },
+        { id:'quiz_sub',    icon:'➖', bg:'rgba(255,71,87,0.12)',   name:'Take Away!',     desc:'Subtraction fun',  diff:'medium' },
+        { id:'place_value', icon:'🏠', bg:'rgba(0,212,170,0.12)',   name:'Tens & Units',   desc:'Place value',      diff:'easy'   },
+        { id:'missing_seq', icon:'❓', bg:'rgba(255,215,0,0.12)',   name:'Number Patterns',desc:'Fill the sequence',diff:'medium' },
+        { id:'odd_even',    icon:'🎭', bg:'rgba(168,85,247,0.12)',  name:'Odd or Even?',   desc:'Up to 100',        diff:'easy'   },
+        { id:'count_objects',icon:'🍎',bg:'rgba(255,107,53,0.12)', name:'Quick Counter',  desc:'Count to 20',      diff:'easy'   },
+      ]
+    },
+    3: {
+      tip: { title: "Magic Trick 🪄", body: "For 9× table: hold 10 fingers up. Fold the Nth finger for 9×N. Left digits = tens, right digits = units!" },
+      games: [
+        { id:'quiz_mul',    icon:'✖️', bg:'rgba(255,215,0,0.12)',   name:'Times Tables',   desc:'Master 2× to 10×', diff:'medium' },
+        { id:'quiz_div',    icon:'➗', bg:'rgba(46,213,115,0.12)',  name:'Fair Share',     desc:'Division fun',     diff:'medium' },
+        { id:'fractions',   icon:'🍕', bg:'rgba(255,107,53,0.12)', name:'Pizza Fractions',desc:'Slice & compare',  diff:'medium', badge:'new' },
+        { id:'quiz_add3',   icon:'🔢', bg:'rgba(0,212,170,0.12)',  name:'3-Digit Sums',   desc:'Big additions',    diff:'hard'   },
+        { id:'missing_seq', icon:'❓', bg:'rgba(168,85,247,0.12)', name:'Skip Counting',  desc:'Count by 3s, 4s…', diff:'medium' },
+        { id:'compare_nums',icon:'⚖️', bg:'rgba(255,71,87,0.12)',  name:'Number Compare', desc:'Up to 999',        diff:'easy'   },
+      ]
+    },
+    4: {
+      tip: { title: "Mental Math Hack ⚡", body: "Multiply by 25? Multiply by 100, then divide by 4. So 36×25 = 3600÷4 = 900. Impress everyone!" },
+      games: [
+        { id:'quiz_mul',    icon:'⚡', bg:'rgba(255,215,0,0.12)',   name:'Speed Multiply', desc:'Beat the clock!',  diff:'hard'   },
+        { id:'quiz_div',    icon:'🔗', bg:'rgba(46,213,115,0.12)',  name:'Division Dash',  desc:'Fast division',    diff:'hard'   },
+        { id:'quiz_add3',   icon:'🚀', bg:'rgba(0,212,170,0.12)',   name:'Large Numbers',  desc:'Thousands range',  diff:'hard'   },
+        { id:'fractions',   icon:'🧩', bg:'rgba(255,107,53,0.12)',  name:'Fraction Wars',  desc:'Compare fractions',diff:'hard',badge:'new' },
+        { id:'missing_seq', icon:'🔭', bg:'rgba(168,85,247,0.12)', name:'Hard Patterns',  desc:'Complex sequences',diff:'hard'   },
+        { id:'quiz_sub',    icon:'🏗️', bg:'rgba(255,71,87,0.12)',   name:'Big Subtraction',desc:'Up to 9999',       diff:'hard'   },
+      ]
+    }
+  }
+  // sci: { 1: {...}, 2: {...} ... } — add here when ready
+};
+
+// ================================================================
+// STATE
+// ================================================================
+const APP = (() => {
+  const S = {
+    xp:       +localStorage.getItem('lv_xp')      || 0,
+    played:   +localStorage.getItem('lv_played')  || 0,
+    correct:  +localStorage.getItem('lv_correct') || 0,
+    bestStreak: +localStorage.getItem('lv_streak')|| 0,
+    // session
+    selectedClass:   1,
+    selectedSubject: 'math',
+    selectedGame:    null,
+    score:     0,
+    qNum:      0,
+    streak:    0,
+    timeLeft:  30,
+    timerInt:  null,
+    maxQ:      10,
+  };
+
+  function save() {
+    localStorage.setItem('lv_xp',      S.xp);
+    localStorage.setItem('lv_played',  S.played);
+    localStorage.setItem('lv_correct', S.correct);
+    localStorage.setItem('lv_streak',  S.bestStreak);
+  }
+
+  function refreshStats() {
+    ['xp','played','streak','correct'].forEach(k => {
+      const map = {xp:S.xp, played:S.played, streak:S.bestStreak, correct:S.correct};
+      const el = document.getElementById('st-'+k);
+      if(el) el.textContent = map[k];
+    });
+    const hdr = document.getElementById('hdr-xp');
+    if(hdr) hdr.textContent = S.xp;
+  }
+
+  // ── NAVIGATION ──────────────────────────────────────────────
+  const nav = {
+    history: ['home'],
+
+    goHome() {
+      nav.history = ['home'];
+      showScreen('home');
+      refreshStats();
+    },
+
+    openClass(cls) {
+      S.selectedClass = cls;
+      // if only one subject live, go straight to it
+      nav.history.push('games');
+      showScreen('games');
+      renderGamesScreen(S.selectedSubject, cls);
+    },
+
+    openSubject(subjectId, cls) {
+      S.selectedSubject = subjectId;
+      S.selectedClass   = cls;
+      nav.history.push('games');
+      showScreen('games');
+      renderGamesScreen(subjectId, cls);
+    },
+
+    startGame(gameId) {
+      S.selectedGame = gameId;
+      S.score  = 0; S.qNum = 0; S.streak = 0;
+      clearInterval(S.timerInt);
+      nav.history.push('play');
+      showScreen('play');
+      initHUD();
+      loadQ(gameId);
+    },
+
+    goBack() {
+      if(nav.history.length > 1) {
+        nav.history.pop();
+        const last = nav.history[nav.history.length-1];
+        if(last==='home')  { nav.goHome(); }
+        if(last==='games') { showScreen('games'); }
+      } else { nav.goHome(); }
+    }
+  };
+
+  // ── SCREEN RENDERER ─────────────────────────────────────────
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById('scr-'+id).classList.add('active');
+    const back = document.getElementById('nav-back');
+    back.classList.toggle('show', id !== 'home');
+  }
+
+  function renderGamesScreen(subjectId, cls) {
+    const subDef  = SUBJECT_REGISTRY[subjectId];
+    const clsData = GAME_REGISTRY[subjectId]?.[cls];
+    if(!clsData) return;
+
+    // Title row
+    document.getElementById('stitle-row').innerHTML = `
+      <div class="stitle-icon ${subDef.iconClass}" style="background:linear-gradient(135deg,${subDef.color},${subDef.color}99)">${subDef.icon}</div>
+      <div class="stitle-text">
+        <h2>${subDef.name} — Class ${cls}</h2>
+        <p>Choose a game and start your challenge!</p>
+      </div>
+    `;
+
+    // Progress
+    const pct = Math.min(100, (S.correct / (cls * 20)) * 100);
+    document.getElementById('xp-fill').style.cssText = `width:${pct}%;background:${subDef.gradientFill}`;
+
+    // Games
+    const grid = document.getElementById('games-grid');
+    grid.innerHTML = clsData.games.map((g,i) => {
+      const diffClass = 'diff-'+(g.badge||g.diff);
+      return `
+        <div class="game-tile fade-in" style="animation-delay:${i*0.06}s" onclick="APP.nav.startGame('${g.id}')">
+          <div class="tile-glow" style="background:${subDef.color}"></div>
+          <span class="tile-diff ${diffClass}">${g.badge||g.diff}</span>
+          <div class="tile-icon" style="background:${g.bg};border:1px solid rgba(255,255,255,0.08)">${g.icon}</div>
+          <div class="tile-name">${g.name}</div>
+          <div class="tile-desc">${g.desc}</div>
+        </div>
+      `;
+    }).join('');
+
+    // Tip
+    const tc = document.getElementById('tip-card');
+    tc.style.display = 'flex';
+    document.getElementById('tip-title').textContent = clsData.tip.title;
+    document.getElementById('tip-body').textContent  = clsData.tip.body;
+  }
+
+  // ── HUD ─────────────────────────────────────────────────────
+  function initHUD() {
+    document.getElementById('hud-score').textContent = '0';
+    document.getElementById('hud-q').textContent     = `1/${S.maxQ}`;
+    const dots = document.getElementById('streak-dots');
+    dots.innerHTML = Array.from({length:5},(_,i)=>`<div class="s-dot" id="dot-${i}"></div>`).join('');
+  }
+
+  function updateHUD() {
+    document.getElementById('hud-score').textContent = S.score;
+    document.getElementById('hud-q').textContent     = `${S.qNum}/${S.maxQ}`;
+  }
+
+  function startTimer(secs) {
+    clearInterval(S.timerInt);
+    S.timeLeft = secs;
+    const fill = document.getElementById('arc-fill');
+    const num  = document.getElementById('arc-num');
+    const C    = 151;
+    function tick() {
+      const r = S.timeLeft/secs;
+      fill.style.strokeDashoffset = C*(1-r);
+      fill.style.stroke = S.timeLeft>8 ? SUBJECT_REGISTRY[S.selectedSubject].timerColor : '#ff4757';
+      num.textContent   = S.timeLeft;
+      if(S.timeLeft <= 0) { clearInterval(S.timerInt); onWrong(); }
+    }
+    tick();
+    S.timerInt = setInterval(()=>{ S.timeLeft--; tick(); }, 1000);
+  }
+
+  // ── QUESTION LOADER ─────────────────────────────────────────
+  function loadQ(gameId) {
+    S.qNum++;
+    updateHUD();
+    startTimer(30);
+    const pc = document.getElementById('play-content');
+    GAME_RENDERERS[gameId] ? GAME_RENDERERS[gameId](pc) : GAME_RENDERERS['quiz_add1'](pc);
+  }
+
+  // ── ANSWER HANDLERS ─────────────────────────────────────────
+  function onCorrect() {
+    S.streak++; S.correct++; S.score += 10 + (S.streak>2?5:0);
+    if(S.streak>S.bestStreak) S.bestStreak=S.streak;
+    save();
+    lightDot();
+    floatFeedback('✓', '#2ed573');
+    setTimeout(()=>nextOrFinish(), 850);
+  }
+  function onWrong() {
+    clearInterval(S.timerInt);
+    S.streak = 0;
+    resetDots();
+    floatFeedback('✗', '#ff4757');
+    save();
+    setTimeout(()=>nextOrFinish(), 1100);
+  }
+  function nextOrFinish() {
+    if(S.qNum < S.maxQ) loadQ(S.selectedGame);
+    else                showReward();
+  }
+  function lightDot() {
+    const idx = Math.min(S.streak-1,4);
+    const d   = document.getElementById('dot-'+idx);
+    if(d) d.classList.add('lit');
+    if(S.streak>=5) { resetDots(); S.score+=25; updateHUD(); floatFeedback('🔥+25','#ffd700'); }
+  }
+  function resetDots() {
+    document.querySelectorAll('.s-dot').forEach(d=>d.classList.remove('lit'));
+  }
+
+  // ── REWARD ──────────────────────────────────────────────────
+  function showReward() {
+    clearInterval(S.timerInt);
+    S.played++; S.xp += S.score; save();
+    const stars = S.score>=85?3:S.score>=50?2:1;
+    const msgs  = [
+      ['🌟 Perfect!',   'Incredible! You are a true maths champion!',          '🏆'],
+      ['👏 Well Done!', 'Great effort! Every practice makes you stronger.',     '🎊'],
+      ['💪 Good Try!',  'Keep going — every mistake is a lesson in disguise!',  '🎈'],
+    ];
+    const [title,msg,emoji] = msgs[3-stars];
+    document.getElementById('r-emoji').textContent = emoji;
+    document.getElementById('r-title').textContent = title;
+    document.getElementById('r-score').textContent = `${S.score} pts earned!`;
+    document.getElementById('r-msg').innerHTML     = msg;
+    const sr = document.getElementById('r-stars');
+    sr.innerHTML = [1,2,3].map(i=>`<span class="r-star">${i<=stars?'⭐':'☆'}</span>`).join('');
+    makeConfetti();
+    document.getElementById('reward-overlay').classList.add('show');
+    refreshStats();
+  }
+  function makeConfetti() {
+    const c = document.getElementById('reward-confetti');
+    c.innerHTML='';
+    const cols=['#ffd700','#ff6b35','#00d4aa','#a855f7','#ff6b9d','#2ed573'];
+    for(let i=0;i<70;i++){
+      const p=document.createElement('div');
+      p.className='confetti-piece';
+      p.style.cssText=`left:${Math.random()*100}%;background:${cols[Math.floor(Math.random()*cols.length)]};
+        width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;
+        animation:cFall ${1.4+Math.random()*1.8}s ${Math.random()*0.8}s linear forwards;
+        border-radius:${Math.random()>.5?'50%':'3px'};`;
+      c.appendChild(p);
+    }
+  }
+
+  function playAgain()   { document.getElementById('reward-overlay').classList.remove('show'); APP.nav.startGame(S.selectedGame); }
+  function closeReward() { document.getElementById('reward-overlay').classList.remove('show'); nav.goBack(); }
+
+  function floatFeedback(sym, col) {
+    const el=document.createElement('div');
+    el.className='float-feedback'; el.textContent=sym; el.style.color=col;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),950);
+  }
+
+  // init
+  refreshStats();
+  buildStarfield();
+
+  return { nav, state:S, playAgain, closeReward };
+})();
+
+// ================================================================
+// HELPERS
+// ================================================================
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+function genOpts(correct, range=15, count=4) {
+  const s=new Set([correct]);
+  let tries=0;
+  while(s.size<count && tries<200){
+    const d=Math.floor(Math.random()*range)+1;
+    const v=Math.random()>.5?correct+d:Math.max(0,correct-d);
+    if(v!==correct) s.add(v);
+    tries++;
+  }
+  return shuffle([...s]);
+}
+
+function buildStarfield(){
+  const sf=document.getElementById('starfield');
+  for(let i=0;i<120;i++){
+    const d=document.createElement('div');
+    d.className='star';
+    const sz=Math.random()*2.5+0.5;
+    d.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${2+Math.random()*5}s;--delay:${Math.random()*6}s;--bright:${0.4+Math.random()*0.6}`;
+    sf.appendChild(d);
+  }
+}
+
+// ================================================================
+// GAME RENDERERS
+// Each game = a function(container) that renders HTML + wires events
+// To add a new game: add an entry here
+// ================================================================
+const GAME_RENDERERS = (() => {
+
+  // ── ANSWER CHECK WIRING ───────────────────────────────────
+  function wireOpts(correctVal, selector='.opt-btn') {
+    document.querySelectorAll(selector).forEach(btn => {
+      btn.addEventListener('click', function() {
+        clearInterval(APP.state.timerInt);
+        document.querySelectorAll(selector).forEach(b=>b.style.pointerEvents='none');
+        const chosen = this.dataset.val;
+        if(chosen == String(correctVal)) {
+          this.classList.add('correct');
+          APP.nav; // call internally
+          // trigger onCorrect via exposed event
+          document.dispatchEvent(new CustomEvent('lv:correct'));
+        } else {
+          this.classList.add('wrong');
+          document.querySelectorAll(selector).forEach(b=>{ if(b.dataset.val==String(correctVal)) b.classList.add('correct'); });
+          document.dispatchEvent(new CustomEvent('lv:wrong'));
+        }
+      });
+    });
+  }
+
+  // ── QUESTION CARD BUILDER ─────────────────────────────────
+  function qCard(label, qHTML, hintHTML='') {
+    return `<div class="q-card">
+      <div class="q-label">${label}</div>
+      <div class="q-text">${qHTML}</div>
+      ${hintHTML ? `<div class="q-hint">💡 ${hintHTML}</div>` : ''}
+    </div>`;
+  }
+
+  function optsHTML(opts, cls='opts-4') {
+    return `<div class="${cls}">${opts.map(o=>`<button class="opt-btn" data-val="${o}">${o}</button>`).join('')}</div>`;
+  }
+
+  // ── INDIVIDUAL GAMES ──────────────────────────────────────
+
+  // Count objects
+  const OBJECTS = ['🍎','🍌','🥥','⭐','🌻','🐸','🦋','🎈','🍕','⚽','🐘','🌈'];
+  function count_objects(el) {
+    const count = Math.floor(Math.random()*14)+2;
+    const obj   = OBJECTS[Math.floor(Math.random()*OBJECTS.length)];
+    const opts  = genOpts(count, 8, 4);
+    let items='';
+    for(let i=0;i<count;i++) items+=`<span class="obj-item" style="animation-delay:${i*0.04}s">${obj}</span>`;
+    el.innerHTML = `
+      <div style="text-align:center;margin-bottom:12px;font-size:13px;color:rgba(255,255,255,0.4);font-weight:700;letter-spacing:1px">HOW MANY ${obj} ?</div>
+      <div class="objects-display">${items}</div>
+      ${optsHTML(opts)}
+    `;
+    wireOpts(count);
+  }
+
+  // Add 1-digit
+  function quiz_add1(el) {
+    const a=Math.floor(Math.random()*9)+1, b=Math.floor(Math.random()*(10-a))+1;
+    const ans=a+b;
+    el.innerHTML = qCard('ADDITION', `${a} + ${b} = ?`, `Imagine ${a} apples, add ${b} more`) + optsHTML(genOpts(ans,8));
+    wireOpts(ans);
+  }
+
+  // Add 2-digit
+  function quiz_add2(el) {
+    const a=Math.floor(Math.random()*40)+10, b=Math.floor(Math.random()*30)+5;
+    const ans=a+b;
+    el.innerHTML = qCard('2-DIGIT ADDITION', `${a} + ${b} = ?`, `Add tens first, then units`) + optsHTML(genOpts(ans,20));
+    wireOpts(ans);
+  }
+
+  // Add 3-digit
+  function quiz_add3(el) {
+    const a=Math.floor(Math.random()*400)+100, b=Math.floor(Math.random()*300)+100;
+    const ans=a+b;
+    el.innerHTML = qCard('BIG ADDITION', `${a} + ${b} = ?`) + optsHTML(genOpts(ans,100));
+    wireOpts(ans);
+  }
+
+  // Subtract
+  function quiz_sub(el) {
+    const b=Math.floor(Math.random()*30)+1, a=b+Math.floor(Math.random()*30)+1;
+    const ans=a-b;
+    el.innerHTML = qCard('SUBTRACTION', `${a} − ${b} = ?`, `Count back from ${a}`) + optsHTML(genOpts(ans,15));
+    wireOpts(ans);
+  }
+
+  // Multiply
+  function quiz_mul(el) {
+    const t=[2,3,4,5,6,7,8,9,10][Math.floor(Math.random()*9)];
+    const n=Math.floor(Math.random()*10)+1;
+    const ans=t*n;
+    el.innerHTML = qCard('MULTIPLICATION', `${t} × ${n} = ?`, `${t} groups of ${n}`) + optsHTML(genOpts(ans,30));
+    wireOpts(ans);
+  }
+
+  // Divide
+  function quiz_div(el) {
+    const t=Math.floor(Math.random()*8)+2, n=Math.floor(Math.random()*9)+1;
+    const ans=n;
+    el.innerHTML = qCard('DIVISION', `${t*n} ÷ ${t} = ?`, `How many groups of ${t} in ${t*n}?`) + optsHTML(genOpts(ans,10));
+    wireOpts(ans);
+  }
+
+  // Compare
+  function compare_nums(el) {
+    const a=Math.floor(Math.random()*90)+1;
+    let b=Math.floor(Math.random()*90)+1;
+    while(b===a) b=Math.floor(Math.random()*90)+1;
+    const correct = a>b?'>':'<';
+    el.innerHTML = qCard('COMPARE', `${a}  __  ${b}`, 'Use &lt;, &gt;, or =') +
+      `<div class="opts-3">${['<','>','='].map(o=>`<button class="opt-btn" data-val="${o}" style="font-size:36px">${o}</button>`).join('')}</div>`;
+    wireOpts(correct);
+  }
+
+  // Missing in sequence
+  function missing_seq(el) {
+    const start=Math.floor(Math.random()*20)+1;
+    const step=[1,2,5,10][Math.floor(Math.random()*4)];
+    const seq=[0,1,2,3,4].map(i=>start+step*i);
+    const hideIdx=Math.floor(Math.random()*5);
+    const ans=seq[hideIdx];
+    const display=seq.map((n,i)=>i===hideIdx?'?':n).join('  ,  ');
+    el.innerHTML = qCard('FIND THE MISSING NUMBER', display, `Pattern: +${step} each step`) + optsHTML(genOpts(ans,step*3+3));
+    wireOpts(ans);
+  }
+
+  // Odd / Even
+  function odd_even(el) {
+    const n=Math.floor(Math.random()*99)+1;
+    const correct=n%2===0?'Even':'Odd';
+    el.innerHTML = qCard('ODD OR EVEN?', String(n), 'Even numbers end in 0,2,4,6,8') +
+      `<div class="opts-2">
+        <button class="opt-btn" data-val="Odd"  style="font-size:22px">🌙 Odd</button>
+        <button class="opt-btn" data-val="Even" style="font-size:22px">🌟 Even</button>
+      </div>`;
+    wireOpts(correct);
+  }
+
+  // Shapes
+  const SHAPES=[
+    {name:'Circle',    sym:'⭕'},
+    {name:'Triangle',  sym:'🔺'},
+    {name:'Square',    sym:'🟦'},
+    {name:'Rectangle', sym:'▬'},
+    {name:'Star',      sym:'⭐'},
+    {name:'Diamond',   sym:'🔷'},
+  ];
+  function shape_quiz(el) {
+    const s=SHAPES[Math.floor(Math.random()*SHAPES.length)];
+    const decoys=shuffle(SHAPES.filter(x=>x.name!==s.name)).slice(0,3).map(x=>x.name);
+    const opts=shuffle([s.name,...decoys]);
+    el.innerHTML=`
+      <div class="q-card" style="font-size:80px;padding:40px 0">${s.sym}</div>
+      <div class="q-label" style="text-align:center;margin-bottom:12px">WHAT SHAPE IS THIS?</div>
+      ${optsHTML(opts,'opts-2')}
+    `;
+    wireOpts(s.name);
+  }
+
+  // Place value (tens & units)
+  function place_value(el) {
+    const n=Math.floor(Math.random()*89)+11;
+    const tens=Math.floor(n/10), units=n%10;
+    const q=[
+      {q:`In ${n}, the tens digit is?`,  ans:tens,  hint:`${n} = ${tens} tens + ${units} units`},
+      {q:`In ${n}, the units digit is?`, ans:units, hint:`${n} = ${tens} tens + ${units} units`},
+      {q:`${tens} tens + ${units} units = ?`, ans:n, hint:`Combine them to get the number`},
+    ][Math.floor(Math.random()*3)];
+    el.innerHTML = qCard('PLACE VALUE', q.q, q.hint) + optsHTML(genOpts(q.ans,8));
+    wireOpts(q.ans);
+  }
+
+  // Fractions — visual pizza slices using SVG
+  function fractions(el) {
+    const denominators=[2,3,4,6,8];
+    const den=denominators[Math.floor(Math.random()*denominators.length)];
+    const num=Math.floor(Math.random()*(den-1))+1;
+    const svgSlices=buildPizzaSVG(num,den);
+    const decoys=[
+      `${num}/${den}`,
+      `${den-num}/${den}`,
+      `${Math.min(num+1,den-1)}/${den}`,
+      `${Math.max(num-1,1)}/${den}`
+    ];
+    const opts=shuffle([...new Set(decoys)]).slice(0,4);
+    if(!opts.includes(`${num}/${den}`)){opts[0]=`${num}/${den}`;}
+    const shuffled=shuffle(opts);
+    el.innerHTML=`
+      <div class="q-card" style="padding:24px 20px">
+        <div class="q-label">PIZZA FRACTIONS 🍕</div>
+        <div style="display:flex;justify-content:center;margin:12px 0">${svgSlices}</div>
+        <div class="q-text" style="font-size:20px">What fraction is <span style="color:var(--math-1)">orange</span>?</div>
+      </div>
+      <div class="opts-2">${shuffled.map(o=>`<button class="opt-btn" data-val="${o}" style="font-size:24px">${o}</button>`).join('')}</div>
+    `;
+    wireOpts(`${num}/${den}`);
+  }
+
+  function buildPizzaSVG(num,den) {
+    const cx=80,cy=80,r=70;
+    let paths='';
+    for(let i=0;i<den;i++){
+      const a1=(i/den)*2*Math.PI - Math.PI/2;
+      const a2=((i+1)/den)*2*Math.PI - Math.PI/2;
+      const x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
+      const x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);
+      const fill=i<num?'#ff6b35':'#2d2d5a';
+      const stroke=i<num?'#ff8c5a':'#3a3a7a';
+      paths+=`<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2} Z" fill="${fill}" stroke="${stroke}" stroke-width="3"/>`;
+    }
+    return `<svg width="160" height="160" viewBox="0 0 160 160" style="filter:drop-shadow(0 8px 20px rgba(255,107,53,0.4))">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="#1a1a4a" stroke="#3a3a7a" stroke-width="3"/>
+      ${paths}
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+    </svg>`;
+  }
+
+  // ── WIRE GLOBAL EVENTS ───────────────────────────────────
+  // Bridge from renderer events to APP state handlers
+  // (avoids passing APP reference into closures)
+  document.addEventListener('lv:correct', () => {
+    APP.state.streak++; APP.state.correct++; APP.state.score += 10 + (APP.state.streak>2?5:0);
+    if(APP.state.streak>APP.state.bestStreak) APP.state.bestStreak=APP.state.streak;
+    localStorage.setItem('lv_correct',APP.state.correct);
+    localStorage.setItem('lv_streak', APP.state.bestStreak);
+    // Light dot
+    const idx=Math.min(APP.state.streak-1,4);
+    const d=document.getElementById('dot-'+idx);
+    if(d) d.classList.add('lit');
+    if(APP.state.streak>=5){
+      document.querySelectorAll('.s-dot').forEach(d=>d.classList.remove('lit'));
+      APP.state.score+=25;
+      document.getElementById('hud-score').textContent=APP.state.score;
+      const fl=document.createElement('div');fl.className='float-feedback';fl.textContent='🔥+25';fl.style.color='#ffd700';
+      document.body.appendChild(fl);setTimeout(()=>fl.remove(),950);
+    }
+    document.getElementById('hud-score').textContent=APP.state.score;
+    const fl=document.createElement('div');fl.className='float-feedback';fl.textContent='✓';fl.style.color='#2ed573';
+    document.body.appendChild(fl);setTimeout(()=>fl.remove(),950);
+    setTimeout(()=>{
+      APP.state.qNum < APP.state.maxQ ? (() => { APP.state.qNum++; document.getElementById('hud-q').textContent=`${APP.state.qNum}/${APP.state.maxQ}`; clearInterval(APP.state.timerInt); GAME_RENDERERS[APP.state.selectedGame](document.getElementById('play-content')); startTimerExt(); })()
+      : showRewardExt();
+    }, 850);
+  });
+
+  document.addEventListener('lv:wrong', () => {
+    APP.state.streak=0;
+    document.querySelectorAll('.s-dot').forEach(d=>d.classList.remove('lit'));
+    const fl=document.createElement('div');fl.className='float-feedback';fl.textContent='✗';fl.style.color='#ff4757';
+    document.body.appendChild(fl);setTimeout(()=>fl.remove(),950);
+    setTimeout(()=>{
+      APP.state.qNum < APP.state.maxQ ? (() => { APP.state.qNum++; document.getElementById('hud-q').textContent=`${APP.state.qNum}/${APP.state.maxQ}`; clearInterval(APP.state.timerInt); GAME_RENDERERS[APP.state.selectedGame](document.getElementById('play-content')); startTimerExt(); })()
+      : showRewardExt();
+    }, 1100);
+  });
+
+  function startTimerExt() {
+    clearInterval(APP.state.timerInt);
+    APP.state.timeLeft=30;
+    const fill=document.getElementById('arc-fill'), num=document.getElementById('arc-num'), C=151;
+    const subCol=SUBJECT_REGISTRY[APP.state.selectedSubject]?.timerColor||'#818cf8';
+    function tick(){
+      const r=APP.state.timeLeft/30;
+      fill.style.strokeDashoffset=C*(1-r);
+      fill.style.stroke=APP.state.timeLeft>8?subCol:'#ff4757';
+      num.textContent=APP.state.timeLeft;
+      if(APP.state.timeLeft<=0){clearInterval(APP.state.timerInt);document.dispatchEvent(new CustomEvent('lv:wrong'));}
+    }
+    tick();
+    APP.state.timerInt=setInterval(()=>{APP.state.timeLeft--;tick();},1000);
+  }
+
+  function showRewardExt() {
+    clearInterval(APP.state.timerInt);
+    APP.state.played++; APP.state.xp+=APP.state.score;
+    localStorage.setItem('lv_played',APP.state.played);
+    localStorage.setItem('lv_xp',APP.state.xp);
+    const stars=APP.state.score>=85?3:APP.state.score>=50?2:1;
+    const msgs=[['🌟 Perfect!','You are a true champion!','🏆'],['👏 Well Done!','Great effort! Keep it up!','🎊'],['💪 Good Try!','Every mistake is a lesson!','🎈']];
+    const [title,msg,emoji]=msgs[3-stars];
+    document.getElementById('r-emoji').textContent=emoji;
+    document.getElementById('r-title').textContent=title;
+    document.getElementById('r-score').textContent=`${APP.state.score} pts earned!`;
+    document.getElementById('r-msg').textContent=msg;
+    const sr=document.getElementById('r-stars');
+    sr.innerHTML=[1,2,3].map(i=>`<span class="r-star">${i<=stars?'⭐':'☆'}</span>`).join('');
+    // confetti
+    const c=document.getElementById('reward-confetti');c.innerHTML='';
+    const cols=['#ffd700','#ff6b35','#00d4aa','#a855f7','#ff6b9d','#2ed573'];
+    for(let i=0;i<70;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.cssText=`left:${Math.random()*100}%;background:${cols[i%cols.length]};width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;animation:cFall ${1.4+Math.random()*1.8}s ${Math.random()*0.8}s linear forwards;border-radius:${Math.random()>.5?'50%':'3px'}`;c.appendChild(p);}
+    document.getElementById('reward-overlay').classList.add('show');
+    document.getElementById('hdr-xp').textContent=APP.state.xp;
+    document.getElementById('st-xp').textContent=APP.state.xp;
+    document.getElementById('st-played').textContent=APP.state.played;
+    document.getElementById('st-streak').textContent=APP.state.bestStreak;
+    document.getElementById('st-correct').textContent=APP.state.correct;
+  }
+
+  // Expose startGame loader so nav can call it
+  APP.nav._loadQ = (gameId) => {
+    APP.state.qNum++;
+    document.getElementById('hud-q').textContent=`${APP.state.qNum}/${APP.state.maxQ}`;
+    startTimerExt();
+    GAME_RENDERERS[gameId](document.getElementById('play-content'));
+  };
+
+  // Override nav.startGame to use our event-based system
+  const _origStart=APP.nav.startGame.bind(APP.nav);
+  APP.nav.startGame=(gameId)=>{
+    APP.state.selectedGame=gameId;
+    APP.state.score=0; APP.state.qNum=0; APP.state.streak=0;
+    clearInterval(APP.state.timerInt);
+    document.getElementById('reward-overlay').classList.remove('show');
+    // push play screen
+    APP.nav._history_push_play();
+    document.getElementById('hud-score').textContent='0';
+    document.getElementById('hud-q').textContent=`1/${APP.state.maxQ}`;
+    document.querySelectorAll('.s-dot').forEach(d=>d.classList.remove('lit'));
+    // Init dots
+    const dots=document.getElementById('streak-dots');
+    dots.innerHTML=Array.from({length:5},(_,i)=>`<div class="s-dot" id="dot-${i}"></div>`).join('');
+    APP.state.qNum=1;
+    document.getElementById('hud-q').textContent=`1/${APP.state.maxQ}`;
+    startTimerExt();
+    GAME_RENDERERS[gameId](document.getElementById('play-content'));
+  };
+
+  APP.nav._history_push_play=()=>{
+    APP.nav.history.push('play');
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById('scr-play').classList.add('active');
+    document.getElementById('nav-back').classList.add('show');
+  };
+
+  return { count_objects, quiz_add1, quiz_add2, quiz_add3, quiz_sub, quiz_mul, quiz_div, compare_nums, missing_seq, odd_even, shape_quiz, place_value, fractions };
+})();
+
+// ── EXPOSE NAV GLOBALLY ───────────────────────────────────────
+const nav = APP.nav;
+
+// ================================================================
+//  PWA SERVICE WORKER — AUTO-UPDATE SYSTEM
+//  Flow:
+//    1. SW installs in background after deploy
+//    2. SW posts UPDATE_AVAILABLE message to this tab
+//    3. We show a non-intrusive toast at the bottom
+//    4. User taps "Update" → send SKIP_WAITING → reload
+//    5. On reload, new SW activates, old cache is deleted
+// ================================================================
+(function initSW() {
+  if (!('serviceWorker' in navigator)) return;
+
+  let newWorker = null;
+
+  // ── Register SW ──────────────────────────────────────────
+  navigator.serviceWorker.register('sw.js')
+    .then(registration => {
+      console.log('[App] SW registered, scope:', registration.scope);
+
+      // Check for updates every time the page gains focus
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          registration.update().catch(() => {});
+        }
+      });
+
+      // Also check every 60 minutes while tab is open
+      setInterval(() => registration.update().catch(() => {}), 60 * 60 * 1000);
+
+      // A new SW is waiting (already installed, pending activation)
+      registration.addEventListener('updatefound', () => {
+        newWorker = registration.installing;
+        if (!newWorker) return;
+
+        newWorker.addEventListener('statechange', () => {
+          // New SW has installed and is waiting — show toast
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            console.log('[App] New version ready');
+            showUpdateToast();
+          }
+        });
+      });
+
+      // If there's already a waiting SW on load (e.g. refreshed tab)
+      if (registration.waiting && navigator.serviceWorker.controller) {
+        newWorker = registration.waiting;
+        showUpdateToast();
+      }
+    })
+    .catch(err => console.warn('[App] SW registration failed:', err));
+
+  // ── Listen for messages from SW ──────────────────────────
+  navigator.serviceWorker.addEventListener('message', event => {
+    if (event.data?.type === 'UPDATE_AVAILABLE') {
+      console.log('[App] SW broadcast: update available, version', event.data.version);
+      // Small delay so the page finishes loading first
+      setTimeout(showUpdateToast, 2000);
+    }
+    if (event.data?.type === 'VERSION') {
+      console.log('[App] Current SW version:', event.data.version);
+    }
+  });
+
+  // ── After skipWaiting, reload all tabs ───────────────────
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloading) return;
+    reloading = true;
+    console.log('[App] New SW activated — reloading');
+    window.location.reload();
+  });
+
+  // ── Update Toast UI ──────────────────────────────────────
+  function showUpdateToast() {
+    // Don't show twice
+    if (document.getElementById('update-toast')) return;
+
+    const toast = document.createElement('div');
+    toast.id = 'update-toast';
+    toast.innerHTML = `
+      <div style="
+        position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+        z-index:9999; display:flex; align-items:center; gap:14px;
+        background:#1e0a3c; border:1px solid rgba(99,102,241,0.4);
+        border-radius:16px; padding:14px 20px;
+        box-shadow:0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.15);
+        max-width:calc(100vw - 40px);
+        animation: toastSlideUp 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+        font-family:'Nunito',sans-serif;
+      ">
+        <span style="font-size:22px">⚡</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:2px">New version ready!</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.45);">Tap update to get the latest games</div>
+        </div>
+        <button id="update-btn" style="
+          background:linear-gradient(135deg,#6366f1,#8b5cf6);
+          border:none; border-radius:10px; padding:9px 18px;
+          color:#fff; font-family:'Nunito',sans-serif; font-weight:800; font-size:13px;
+          cursor:pointer; white-space:nowrap;
+          box-shadow:0 4px 12px rgba(99,102,241,0.4);
+        ">Update ↑</button>
+        <button id="dismiss-btn" style="
+          background:transparent; border:none; color:rgba(255,255,255,0.3);
+          font-size:18px; cursor:pointer; padding:0 4px; line-height:1;
+        ">×</button>
+      </div>
+      <style>
+        @keyframes toastSlideUp {
+          from { opacity:0; transform:translateX(-50%) translateY(20px); }
+          to   { opacity:1; transform:translateX(-50%) translateY(0); }
+        }
+      </style>
+    `;
+    document.body.appendChild(toast);
+
+    // Update button — tell SW to activate
+    document.getElementById('update-btn').addEventListener('click', () => {
+      toast.remove();
+      const sw = newWorker
+        || (navigator.serviceWorker.getRegistration
+            ? null  // will be resolved below
+            : null);
+
+      // Send SKIP_WAITING to the waiting SW
+      if (newWorker) {
+        newWorker.postMessage({ type: 'SKIP_WAITING' });
+      } else {
+        navigator.serviceWorker.getRegistration().then(reg => {
+          if (reg?.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        });
+      }
+    });
+
+    // Dismiss button — hide for this session (update will still apply next reload)
+    document.getElementById('dismiss-btn').addEventListener('click', () => toast.remove());
+
+    // Auto-dismiss after 15 seconds if user doesn't interact
+    setTimeout(() => toast?.remove(), 15000);
+  }
+})();
+</script>
+</body>
+</html>

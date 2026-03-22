@@ -1,0 +1,29 @@
+# Build output (created by GitHub Actions, not committed)
+dist/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (if you ever add a build step)
+node_modules/
+npm-debug.log*
+
+# Local env files
+.env
+.env.local
