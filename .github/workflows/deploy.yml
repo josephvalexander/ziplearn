@@ -1,0 +1,110 @@
+# ============================================================
+#  Zipplearn — GitHub Actions CI/CD
+#
+#  Triggers on every push to `main`.
+#  What it does:
+#    1. Injects a unique BUILD_VERSION into sw.js
+#       (timestamp + short git SHA → cache-busts on every deploy)
+#    2. Copies all files to a `dist/` folder
+#    3. Deploys dist/ to GitHub Pages via the official action
+#
+#  No npm, no build tools — pure HTML/JS/CSS project.
+#  Deploy time: ~30 seconds end-to-end.
+# ============================================================
+
+name: Deploy Zipplearn to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Allow manual trigger from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions so the action can deploy to Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment at a time; cancel in-progress if new push arrives
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # ── 1. Checkout code ──────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Generate build version ─────────────────────────
+      #  Format: YYYY-MM-DDTHH:MM:SSZ-<7-char-sha>
+      #  This becomes the cache name in sw.js so every deploy
+      #  creates a NEW cache, busting the old one automatically.
+      - name: Generate build version
+        id: version
+        run: |
+          BUILD_VERSION="${{ github.event.head_commit.timestamp }}-$(echo ${{ github.sha }} | cut -c1-7)"
+          echo "BUILD_VERSION=${BUILD_VERSION}" >> $GITHUB_OUTPUT
+          echo "Build version: ${BUILD_VERSION}"
+
+      # ── 3. Prepare dist folder ────────────────────────────
+      - name: Prepare dist folder
+        run: |
+          mkdir -p dist
+
+          # Copy all web assets
+          cp index.html dist/
+          cp manifest.json dist/
+          cp manifest.json dist/  # redundant safety copy
+
+          # Inject BUILD_VERSION into sw.js
+          # Replaces the placeholder '__BUILD_VERSION__' with the real value
+          sed "s/__BUILD_VERSION__/${{ steps.version.outputs.BUILD_VERSION }}/g" \
+            sw.js > dist/sw.js
+
+          # Copy public/ assets if they exist (icons, screenshots, etc.)
+          if [ -d "public" ]; then
+            cp -r public/. dist/
+            echo "Copied public/ assets"
+          fi
+
+          echo "── dist/ contents ──"
+          ls -lah dist/
+
+          # Verify version was injected correctly
+          echo "── SW version check ──"
+          grep "BUILD_VERSION" dist/sw.js | head -3
+
+      # ── 4. Upload to GitHub Pages artifact ───────────────
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+
+      # ── 5. Deploy ─────────────────────────────────────────
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      # ── 6. Summary ────────────────────────────────────────
+      - name: Deployment summary
+        run: |
+          echo "## ⚡ Zipplearn Deployed!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| | |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **URL** | ${{ steps.deployment.outputs.page_url }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version** | \`${{ steps.version.outputs.BUILD_VERSION }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Triggered by** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
