@@ -1,62 +1,54 @@
 // ============================================================
 //  Zipplearn Service Worker
-//  Strategy:
-//    • HTML (index.html) → Network-first, fallback to cache
-//      (ensures updates are always picked up)
-//    • All other assets  → Cache-first, fallback to network
-//      (fast loads for fonts, icons, manifest)
-//  Auto-update flow:
-//    1. GitHub Actions injects BUILD_VERSION at deploy time
-//    2. New SW installs alongside old one
-//    3. SW broadcasts 'UPDATE_AVAILABLE' to all open tabs
-//    4. App shows an "Update ready" toast
-//    5. User taps "Update" → skipWaiting → page reloads
+//
+//  IMPORTANT — path handling:
+//  GitHub Pages serves at /REPO-NAME/ not /.
+//  The deploy.yml workflow patches the three PRECACHE_ASSETS
+//  paths below at build time using sed, replacing the root path with
+//  '/REPO-NAME/', the BASE_PATH-prefixed equivalents
+//  so the correct paths are baked into the deployed
+//  sw.js automatically. No manual editing needed.
+//
+//  Caching strategy:
+//   • index.html  → network-first  (always gets latest deploy)
+//   • everything else → cache-first (fast loads, offline works)
 // ============================================================
 
-// BUILD_VERSION is replaced by GitHub Actions on every deploy
-// e.g. "2024-12-01T10:30:00Z-a1b2c3d"
-const BUILD_VERSION = '__BUILD_VERSION__';
-const CACHE_NAME    = `zipplearn-${BUILD_VERSION}`;
+const BUILD_VERSION   = '__BUILD_VERSION__';
+const CACHE_NAME      = `zipplearn-${BUILD_VERSION}`;
 
-// Assets to pre-cache on install
+// These three paths are patched by deploy.yml at build time
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  // Google Fonts are cached at runtime (external, can't precache)
 ];
 
 // ── INSTALL ──────────────────────────────────────────────────
 self.addEventListener('install', event => {
-  // Do NOT skipWaiting here — we wait for the user to confirm
-  // the update via the in-app toast before activating.
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(PRECACHE_ASSETS))
       .then(() => {
-        // Tell all open clients a new version is waiting
-        self.clients.matchAll({ includeUncontrolled: true }).then(clients => {
-          clients.forEach(client =>
+        self.clients.matchAll({ includeUncontrolled: true })
+          .then(clients => clients.forEach(client =>
             client.postMessage({ type: 'UPDATE_AVAILABLE', version: BUILD_VERSION })
-          );
-        });
+          ));
       })
   );
+  // Don't skipWaiting — let the in-app toast handle activation
 });
 
 // ── ACTIVATE ─────────────────────────────────────────────────
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
+    caches.keys()
+      .then(keys => Promise.all(
         keys
-          .filter(key => key.startsWith('zipplearn-') && key !== CACHE_NAME)
-          .map(key => {
-            console.log('[SW] Deleting old cache:', key);
-            return caches.delete(key);
-          })
-      )
-    ).then(() => self.clients.claim())
+          .filter(k => k.startsWith('zipplearn-') && k !== CACHE_NAME)
+          .map(k => { console.log('[SW] Deleting old cache:', k); return caches.delete(k); })
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
@@ -65,17 +57,17 @@ self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET and cross-origin requests
   if (request.method !== 'GET') return;
+  // Only handle same-origin and Google Fonts
   if (url.origin !== location.origin && !url.hostname.includes('fonts.')) return;
 
-  // Network-first for HTML documents (catches deployments immediately)
+  // Network-first for HTML — catches new deploys immediately
   if (request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(networkFirst(request));
     return;
   }
 
-  // Cache-first for everything else (fonts, manifest, icons)
+  // Cache-first for everything else
   event.respondWith(cacheFirst(request));
 });
 
@@ -90,7 +82,7 @@ async function networkFirst(request) {
     return response;
   } catch {
     const cached = await caches.match(request);
-    return cached || new Response('Offline — please reconnect', {
+    return cached || new Response('Offline — please reconnect.', {
       status: 503,
       headers: { 'Content-Type': 'text/plain' }
     });
@@ -100,7 +92,6 @@ async function networkFirst(request) {
 async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
-
   try {
     const response = await fetch(request);
     if (response.ok && response.type !== 'opaque') {
@@ -113,14 +104,12 @@ async function cacheFirst(request) {
   }
 }
 
-// ── MESSAGE HANDLER ──────────────────────────────────────────
-// App sends 'SKIP_WAITING' when the user taps "Update"
+// ── MESSAGES ─────────────────────────────────────────────────
 self.addEventListener('message', event => {
   if (event.data?.type === 'SKIP_WAITING') {
-    console.log('[SW] Activating new version...');
+    console.log('[SW] User confirmed update — activating');
     self.skipWaiting();
   }
-  // App can also request the current version
   if (event.data?.type === 'GET_VERSION') {
     event.source?.postMessage({ type: 'VERSION', version: BUILD_VERSION });
   }

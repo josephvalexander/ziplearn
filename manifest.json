@@ -4,39 +4,41 @@
   "description": "Gamified learning for Classes 1–4. Maths, Science, English and more.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f0520",
+  "background_color": "#1a0533",
   "theme_color": "#1a0533",
   "orientation": "any",
   "lang": "en",
   "dir": "ltr",
   "categories": ["education", "kids", "games"],
   "icons": [
-    {
-      "src": "public/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "public/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "public/icon-48.png",  "sizes": "48x48",   "type": "image/png" },
+    { "src": "public/icon-72.png",  "sizes": "72x72",   "type": "image/png" },
+    { "src": "public/icon-96.png",  "sizes": "96x96",   "type": "image/png" },
+    { "src": "public/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "public/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "public/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "public/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
     {
-      "name": "Class 1 Maths",
-      "short_name": "Class 1",
-      "description": "Jump straight to Class 1 Maths games",
+      "name": "Class 1 Maths", "short_name": "Class 1",
       "url": "/?class=1&subject=math",
-      "icons": [{ "src": "public/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "public/icon-96.png", "sizes": "96x96" }]
     },
     {
-      "name": "Class 2 Maths",
-      "short_name": "Class 2",
+      "name": "Class 2 Maths", "short_name": "Class 2",
       "url": "/?class=2&subject=math",
-      "icons": [{ "src": "public/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "public/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Class 3 Maths", "short_name": "Class 3",
+      "url": "/?class=3&subject=math",
+      "icons": [{ "src": "public/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Class 4 Maths", "short_name": "Class 4",
+      "url": "/?class=4&subject=math",
+      "icons": [{ "src": "public/icon-96.png", "sizes": "96x96" }]
     }
   ]
 }

@@ -57,7 +57,7 @@ You can do this directly in the browser — no git knowledge needed.
 
 Every time you push a change to the `main` branch, GitHub Actions:
 
-``` 
+```
 Push to main
     │
     ▼
