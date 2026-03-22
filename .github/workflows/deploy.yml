@@ -1,15 +1,19 @@
 # ============================================================
-#  Zipplearn — GitHub Actions CI/CD
+#  Zipplearn — GitHub Actions CI/CD (fixed for GitHub Pages)
 #
-#  Triggers on every push to `main`.
-#  What it does:
-#    1. Injects a unique BUILD_VERSION into sw.js
-#       (timestamp + short git SHA → cache-busts on every deploy)
-#    2. Copies all files to a `dist/` folder
-#    3. Deploys dist/ to GitHub Pages via the official action
+#  THE ROOT CAUSE OF THE 404 ON PWA LAUNCH:
+#  GitHub Pages serves your app at:
+#    https://USERNAME.github.io/REPO-NAME/
+#  not at:
+#    https://USERNAME.github.io/
 #
-#  No npm, no build tools — pure HTML/JS/CSS project.
-#  Deploy time: ~30 seconds end-to-end.
+#  So every absolute path "/" must become "/REPO-NAME/".
+#  This workflow auto-detects the repo name and patches:
+#    • manifest.json  → start_url, shortcuts urls, icon src paths
+#    • sw.js          → PRECACHE_ASSETS paths
+#    • index.html     → manifest link, favicon hrefs, sw registration path
+#
+#  Zero manual changes needed — push and it just works.
 # ============================================================
 
 name: Deploy Zipplearn to GitHub Pages
@@ -17,16 +21,13 @@ name: Deploy Zipplearn to GitHub Pages
 on:
   push:
     branches: [main]
-  # Allow manual trigger from the Actions tab
   workflow_dispatch:
 
-# Sets permissions so the action can deploy to Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Only one deployment at a time; cancel in-progress if new push arrives
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -39,50 +40,84 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      # ── 1. Checkout code ──────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ── 2. Generate build version ─────────────────────────
-      #  Format: YYYY-MM-DDTHH:MM:SSZ-<7-char-sha>
-      #  This becomes the cache name in sw.js so every deploy
-      #  creates a NEW cache, busting the old one automatically.
+      - name: Detect base path
+        id: base
+        run: |
+          REPO="${{ github.repository }}"
+          REPO_NAME="${REPO##*/}"
+          OWNER="${{ github.repository_owner }}"
+          if [ "$REPO_NAME" = "${OWNER}.github.io" ]; then
+            BASE_PATH=""
+            echo "Serving at root (user/org pages site)"
+          else
+            BASE_PATH="/${REPO_NAME}"
+            echo "Serving at subdirectory: ${BASE_PATH}"
+          fi
+          echo "BASE_PATH=${BASE_PATH}" >> $GITHUB_OUTPUT
+          echo "REPO_NAME=${REPO_NAME}" >> $GITHUB_OUTPUT
+
       - name: Generate build version
         id: version
         run: |
-          BUILD_VERSION="${{ github.event.head_commit.timestamp }}-$(echo ${{ github.sha }} | cut -c1-7)"
+          TS="${{ github.event.head_commit.timestamp }}"
+          if [ -z "$TS" ]; then TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ"); fi
+          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          BUILD_VERSION="${TS}-${SHA}"
           echo "BUILD_VERSION=${BUILD_VERSION}" >> $GITHUB_OUTPUT
           echo "Build version: ${BUILD_VERSION}"
 
-      # ── 3. Prepare dist folder ────────────────────────────
-      - name: Prepare dist folder
+      - name: Build dist folder
+        env:
+          BASE_PATH: ${{ steps.base.outputs.BASE_PATH }}
+          BUILD_VERSION: ${{ steps.version.outputs.BUILD_VERSION }}
         run: |
-          mkdir -p dist
+          mkdir -p dist/icons
 
-          # Copy all web assets
-          cp index.html dist/
-          cp manifest.json dist/
-          cp manifest.json dist/  # redundant safety copy
+          # a) Patch index.html — fix all absolute asset references
+          sed \
+            -e "s|href=\"manifest.json\"|href=\"${BASE_PATH}/manifest.json\"|g" \
+            -e "s|href=\"public/|href=\"${BASE_PATH}/icons/|g" \
+            -e "s|register('sw.js')|register('${BASE_PATH}/sw.js')|g" \
+            index.html > dist/index.html
 
-          # Inject BUILD_VERSION into sw.js
-          # Replaces the placeholder '__BUILD_VERSION__' with the real value
-          sed "s/__BUILD_VERSION__/${{ steps.version.outputs.BUILD_VERSION }}/g" \
+          # b) Patch + version sw.js — fix precache absolute paths
+          sed \
+            -e "s|__BUILD_VERSION__|${BUILD_VERSION}|g" \
+            -e "s|'/'|'${BASE_PATH}/'|g" \
+            -e "s|'/index.html'|'${BASE_PATH}/index.html'|g" \
+            -e "s|'/manifest.json'|'${BASE_PATH}/manifest.json'|g" \
             sw.js > dist/sw.js
 
-          # Copy public/ assets if they exist (icons, screenshots, etc.)
+          # c) Patch manifest.json — fix start_url and icon paths
+          sed \
+            -e "s|\"start_url\": \"/\"|\"start_url\": \"${BASE_PATH}/\"|g" \
+            -e "s|\"url\": \"/?|\"url\": \"${BASE_PATH}/?|g" \
+            -e "s|\"src\": \"public/|\"src\": \"${BASE_PATH}/icons/|g" \
+            manifest.json > dist/manifest.json
+
+          # d) Copy icons flat into dist/icons/
           if [ -d "public" ]; then
-            cp -r public/. dist/
-            echo "Copied public/ assets"
+            cp public/*.png dist/icons/ 2>/dev/null || true
+            cp public/*.svg dist/icons/ 2>/dev/null || true
+            cp public/*.ico dist/icons/ 2>/dev/null || true
+            cp public/*.xml dist/icons/ 2>/dev/null || true
           fi
 
-          echo "── dist/ contents ──"
-          ls -lah dist/
+          echo "── dist/ tree ──"
+          find dist -type f | sort
+          echo ""
+          echo "── start_url ──"
+          grep "start_url" dist/manifest.json
+          echo ""
+          echo "── sw precache ──"
+          grep "PRECACHE_ASSETS\|BASE_PATH\|index.html\|manifest" dist/sw.js | head -6
+          echo ""
+          echo "── sw version ──"
+          grep "BUILD_VERSION\|CACHE_NAME" dist/sw.js | head -2
 
-          # Verify version was injected correctly
-          echo "── SW version check ──"
-          grep "BUILD_VERSION" dist/sw.js | head -3
-
-      # ── 4. Upload to GitHub Pages artifact ───────────────
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
@@ -91,12 +126,10 @@ jobs:
         with:
           path: dist/
 
-      # ── 5. Deploy ─────────────────────────────────────────
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
 
-      # ── 6. Summary ────────────────────────────────────────
       - name: Deployment summary
         run: |
           echo "## ⚡ Zipplearn Deployed!" >> $GITHUB_STEP_SUMMARY
@@ -104,7 +137,7 @@ jobs:
           echo "| | |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
           echo "| **URL** | ${{ steps.deployment.outputs.page_url }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Base path** | \`${{ steps.base.outputs.BASE_PATH }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| **Version** | \`${{ steps.version.outputs.BUILD_VERSION }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Branch** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Triggered by** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **By** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
