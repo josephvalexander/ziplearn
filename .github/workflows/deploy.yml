@@ -1,11 +1,7 @@
 # ============================================================
 #  Zipplearn — GitHub Actions CI/CD
-#
-#  index.html is pre-bundled (all JS inline) and works as-is.
-#  This workflow just patches the GitHub Pages subpath into it.
-#
-#  If js/*.js files exist in the repo, bundle.py re-inlines them
-#  so edits to js/ are automatically picked up on deploy.
+#  Requires in repo root: index.html, sw.js, manifest.json,
+#                         public/ (icons), bundle.py, js/
 # ============================================================
 
 name: Deploy Zipplearn to GitHub Pages
@@ -65,7 +61,6 @@ jobs:
         run: |
           mkdir -p dist/icons
 
-          # sw.js — inject version + patch paths
           sed \
             -e "s|__BUILD_VERSION__|${BUILD_VERSION}|g" \
             -e "s|'/'|'${BASE_PATH}/'|g" \
@@ -73,41 +68,28 @@ jobs:
             -e "s|'/manifest.json'|'${BASE_PATH}/manifest.json'|g" \
             sw.js > dist/sw.js
 
-          # manifest.json — patch start_url and icon paths
           sed \
             -e "s|\"start_url\": \"/\"|\"start_url\": \"${BASE_PATH}/\"|g" \
             -e "s|\"url\": \"/?|\"url\": \"${BASE_PATH}/?|g" \
             -e "s|\"src\": \"public/|\"src\": \"${BASE_PATH}/icons/|g" \
             manifest.json > dist/manifest.json
 
-          # icons
-          if [ -d "public" ]; then
-            cp public/*.png dist/icons/ 2>/dev/null || true
-            cp public/*.svg dist/icons/ 2>/dev/null || true
-            cp public/*.ico dist/icons/ 2>/dev/null || true
-            cp public/*.xml dist/icons/ 2>/dev/null || true
-          fi
+          [ -d "public" ] && cp public/* dist/icons/ 2>/dev/null || true
 
-          # Patch index.html paths
           sed \
             -e "s|href=\"manifest.json\"|href=\"${BASE_PATH}/manifest.json\"|g" \
             -e "s|href=\"public/|href=\"${BASE_PATH}/icons/|g" \
             -e "s|register('sw.js')|register('${BASE_PATH}/sw.js')|g" \
             index.html > /tmp/index_patched.html
 
-          # If js/ folder exists, re-bundle (picks up any edits to js/ files).
-          # If not, index.html is already pre-bundled and we use it as-is.
           if [ -d "js" ] && ls js/*.js > /dev/null 2>&1; then
-            echo "js/ found — re-bundling..."
             python3 bundle.py /tmp/index_patched.html dist/index.html
           else
-            echo "No js/ folder — using pre-bundled index.html"
             cp /tmp/index_patched.html dist/index.html
           fi
 
-          echo "dist/ contents:"
           find dist -type f | sort
-          echo "index.html lines: $(wc -l < dist/index.html)"
+          echo "index.html: $(wc -l < dist/index.html) lines"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -124,8 +106,6 @@ jobs:
       - name: Summary
         run: |
           echo "## Zipplearn deployed!" >> $GITHUB_STEP_SUMMARY
-          echo "| | |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
           echo "| URL | ${{ steps.deployment.outputs.page_url }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Base | ${{ steps.base.outputs.BASE_PATH }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Version | ${{ steps.version.outputs.BUILD_VERSION }} |" >> $GITHUB_STEP_SUMMARY
