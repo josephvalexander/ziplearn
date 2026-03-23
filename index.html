@@ -11,6 +11,7 @@
 
 <!-- ── PWA ── -->
 <meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Zipplearn"/>
 <meta name="application-name" content="Zipplearn"/>
@@ -23,14 +24,14 @@
      PNG fallbacks are in public/ (see icon-generation scripts).
 ──────────────────────────────────────────────────────────────── -->
 <!-- SVG favicon — works in all modern browsers, scales to any size -->
-<link rel="icon" type="image/svg+xml" href="public/favicon.svg"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%20width%3D%2232%22%20height%3D%2232%22%3E%0A%20%20%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%20fill%3D%22%231a0533%22/%3E%0A%20%20%3Cpolygon%20points%3D%2218.5%2C3%208.5%2C17.25%2014%2C17.25%2013.5%2C29%2023.5%2C14.75%2018%2C14.75%22%20fill%3D%22white%22%20opacity%3D%220.96%22/%3E%0A%3C/svg%3E"/>
 <!-- PNG fallbacks for older browsers + Android Chrome -->
-<link rel="icon" type="image/png" sizes="32x32"   href="public/favicon-32.png"/>
-<link rel="icon" type="image/png" sizes="16x16"   href="public/favicon-16.png"/>
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAA1ElEQVR4nNWXXQ6CMBCEp5to4hX0GHr/E8gx5Aom8KBPJLUR6M5Oa5wnYCHfN/wlTShyPlxf5TFlxnlI+b71hH9j2Nqgl4Sp4I/p/mQk7BfwXML2T2ubsADbXiIQhYcEFPCQgCqUgKo9JaCEUwLquATU7QEg1f4JWfjleDttzavuQCt4tUDL7Aq0bA843oEyW2K1cOAfHoE3nvZyAS9cLsBEJsC0pwXKL4CF0wLKhAUi7cMCUTgAWLlW65lxHpItG96Lo+0X5ge41/owL2xrgx5wAHgDLnpYxZHAsyYAAAAASUVORK5CYII="/>
+
 <!-- Apple Touch Icon (iOS home screen, 180×180) -->
-<link rel="apple-touch-icon" sizes="180x180" href="public/apple-touch-icon.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAEoklEQVR4nO3bXU7kRhiG0Q8UImULZBlk/yvILCNsYaRwQS4mzDAD3V22y/Xz1TnXiLbE45eiTd9FB48PT689Xpe2nl++3LV+zSYvKGAi2gR+2guImGvOirvqNxUxe9SM+77WNxIze9Vs5/CdIWRqOrrWhxZazNR2tKldd4OQaWHPWm9eaDHTyp7WNgUtZlrb2lxx0GKmly3tFQUtZnorbfBm0GJmFCUtXg1azIzmVpPVnhTCCC4GbZ0Z1bU2Pw1azOP459+/v/a+hhFdatSRY2Bi3u5D0NaZWXzW6v2tL6AP61zm12YdOQYk5v0EPRgxH/M9aMcNZvW+XQs9EOt8nKAHIeY67iMcN5jfW8MWegDWuR5Bd3Yr5j9//+uPVteSgaBJ5d75uR9HjboeH55eLXQnYj6HoDsQ83kETSqCbsw6n0vQDYn5fIImFUE3Yp3bEHQDYm5H0KQi6JNZ57YEfSIxtyfok4i5D0GTiqBPYJ37EXRlYu5L0KQi6Iqsc3+CrkTMYxB0BWIeh6AH5hPf2wn6IOs8FkEfIObxCJpUBL2TdR6ToHcQ87gETSqC3sg6j03QG4h5fIIuJOY5CJpUBF3AOs9D0DeIeS6CJhVBX2Gd5yPoC8Q8J0GTiqA/YZ3nJehfiHlugn5HzPMTNKkI+n/WOQdBx5gx+8T3PoImleWDHnGd2W/poMWcz7JBizmnZYMmpyWDts55LRe0mHNbLmhyWypo65zfMkGLeQ2/9b4APtfzBpz5sfsSC22dy80cc8QCQYt5LamDFvM2s69zRPKgKZch5ojEQVvncllijkgatJjXlTJoymVa54iEQVvnctlijkgWtJhJFTTlMq5zRKKgrXO5rDFHJAlazLyZPmgxb5N5nSMSBE257DFHTB60dS63QswRk/8/dM8fkptpTFMvNGVWWecIQae3UswRgiYZQSe22jpHCDqtFWOOEDTJCDqhVdc5QtDprBxzhKBTWT3mCEGTjKB3GPGxt3X+RtAJiPkHQZOKoCdnnX8m6ImJ+SNBT0rMnxM0qQh6Qtb5MkFPRszXCZpUBD0R63yboCch5jKCJhVBT8A6lxP04MS8jaAHJubtBE0qgh6Udd5H0AMS836CJhVBD8Y6HyPogYj5OEFvNOInvvlB0IOwznUIegBirkfQnYm5LkGTiqA7ss71CboTMZ9D0KQi6A6s83kE3ZiYzyXohsR8PkGTiqAbsc5tCLoBMbcjaFIR9Mmsc1uCPpGY2xM0qQj6JNa5D0GfQMz93D+/fLnrfRGZiLmf55cvdxaaVAS9wa1PfFvn/gRdiZjHcB/x7ezR+0LgiLeGLXQF1nkcgj5IzGP5HrRjB7N6366FPsA6j0fQO4l5TD8F7dhRRszj+LXZDwstambxWauOHBtZ57FdXOPHh6fXlhcCW1w6SVxcaEcPRnWtTUcOUrkatJVmNLeavLnQomYUJS0WHTlETW+lDRafoUVNL1va2/RHoahpbWtzm9/lEDWt7GntUJwevnCGI6N56H1oa01tR5uqFqS15oha41jtSaG1Zq+a7ZwWocXmmrMGsMmqipuINr/FuxwTBL6GHsfQ/wBCF5+0RiwVmgAAAABJRU5ErkJggg=="/>
 <!-- Legacy IE/Edge .ico -->
-<link rel="shortcut icon" href="public/favicon.ico"/>
+
 
 <!-- ── Open Graph (social sharing previews) ── -->
 <meta property="og:title"       content="Zipplearn – Fast. Fun. Smart."/>
