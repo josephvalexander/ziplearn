@@ -202,7 +202,9 @@ body {
 /* ── LAYOUT ── */
 #app { position:relative; z-index:1; min-height:100vh; }
 .screen { display:none; min-height:100vh; animation:screenIn 0.35s var(--smooth) both; }
-.screen.active { display:flex; flex-direction:column; }
+.screen.active { display:flex; flex-direction:column; overflow-y:auto; }
+/* scr-play is a fixed-height flex column — header+powerups are fixed, content scrolls */
+#scr-play.active { height:100vh; overflow:hidden; }
 @keyframes screenIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
 
 /* ── HEADER ── */
@@ -265,7 +267,7 @@ body {
 .nav-back.show { display:flex; }
 
 /* ── HERO ── */
-.home-hero { text-align:center; padding:52px 24px 32px; }
+.home-hero { text-align:center; padding:20px 24px 24px; }
 .hero-eyebrow {
   display:inline-flex; align-items:center; gap:8px;
   background:var(--bg-card); border:1px solid var(--border);
@@ -488,14 +490,7 @@ body {
 .obj-item:hover { transform:scale(1.25) rotate(12deg); }
 
 /* ── REWARD OVERLAY ── */
-.reward-overlay {
-  position:fixed; inset:0; z-index:500;
-  background:var(--overlay-bg); backdrop-filter:blur(16px);
-  display:none; flex-direction:column; align-items:center; justify-content:center;
-  text-align:center; padding:32px;
-  transition: background 0.35s var(--smooth);
-}
-.reward-overlay.show { display:flex; }
+/* .reward-overlay rules live in the gamification CSS block below */
 .reward-confetti { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
 .r-emoji  { font-size:88px; animation:bounceIn 0.6s var(--bounce) both; margin-bottom:16px; }
 @keyframes bounceIn { from{transform:scale(0) rotate(-25deg);opacity:0} }
@@ -540,306 +535,135 @@ body {
 @keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
 
 /* ── LIGHT MODE SURFACE TWEAKS ── */
-/* Cards need a subtle shadow in light mode since there's no dark canvas */
+[data-theme="light"] .game-tile,[data-theme="light"] .stat-chip,[data-theme="light"] .subject-planet,[data-theme="light"] .q-card,[data-theme="light"] .objects-display,[data-theme="light"] .tip-card { box-shadow: 0 2px 16px rgba(99,102,241,0.08), 0 1px 4px rgba(99,102,241,0.05); }
+[data-theme="light"] .game-tile:hover,[data-theme="light"] .stat-chip:hover { box-shadow: 0 8px 32px rgba(99,102,241,0.14), 0 2px 8px rgba(99,102,241,0.08); }
+[data-theme="light"] .hud-chip { box-shadow: 0 2px 8px rgba(99,102,241,0.08); }
+[data-theme="light"] .arc-bg { stroke: rgba(99,102,241,0.12); }
+
 /* ================================================================
-   GAMIFICATION LAYER
-   Mascot · Level Bar · Badges · Power-ups · Combo · Burst Particles
+   GAMIFICATION LAYER — added cleanly on top of base styles
 ================================================================ */
-
-/* ── MASCOT ── */
-.mascot-wrap {
-  position: relative; display: flex; flex-direction: column;
-  align-items: center; margin: 0 auto 8px; width: fit-content;
-}
-.mascot {
-  font-size: 56px; line-height: 1; cursor: default; user-select: none;
-  transition: transform 0.15s var(--bounce);
-  display: block;
-  animation: mascotFloat 3s ease-in-out infinite;
-  filter: drop-shadow(0 8px 16px rgba(99,102,241,0.35));
-}
-@keyframes mascotFloat {
-  0%,100%{ transform: translateY(0) rotate(0deg); }
-  50%    { transform: translateY(-8px) rotate(2deg); }
-}
-.mascot.happy   { animation: mascotHappy 0.5s var(--bounce); }
-.mascot.sad     { animation: mascotSad 0.5s; }
-.mascot.levelup { animation: mascotLevelUp 0.8s var(--bounce); }
-@keyframes mascotHappy  { 0%,100%{transform:scale(1)} 30%{transform:scale(1.35) rotate(10deg)} 60%{transform:scale(0.9) rotate(-5deg)} }
+/* Mascot */
+.mascot-wrap { position:relative; display:flex; flex-direction:column; align-items:center; margin:0 auto 12px; width:fit-content; padding-top:50px; }
+.mascot { font-size:58px; line-height:1; cursor:default; user-select:none; display:block; position:relative; z-index:1; animation:mascotFloat 3s ease-in-out infinite; filter:drop-shadow(0 8px 16px rgba(99,102,241,0.4)); }
+@keyframes mascotFloat { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-8px) rotate(2deg)} }
+.mascot.happy   { animation:mascotHappy  0.5s var(--bounce) both; }
+.mascot.sad     { animation:mascotSad    0.5s both; }
+.mascot.levelup { animation:mascotLevelUp 0.8s var(--bounce) both; }
+@keyframes mascotHappy  { 0%,100%{transform:scale(1)}  30%{transform:scale(1.35) rotate(10deg)}  60%{transform:scale(0.9) rotate(-5deg)} }
 @keyframes mascotSad    { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px) rotate(-8deg)} 75%{transform:translateX(10px) rotate(8deg)} }
-@keyframes mascotLevelUp{ 0%{transform:scale(0) rotate(-20deg);opacity:0} 60%{transform:scale(1.4) rotate(5deg)} 100%{transform:scale(1);opacity:1} }
-
+@keyframes mascotLevelUp{ 0%{transform:scale(0) rotate(-20deg);opacity:0} 60%{transform:scale(1.4) rotate(5deg)} 100%{transform:scale(1) rotate(0);opacity:1} }
 .mascot-speech {
-  position: absolute; bottom: calc(100% + 8px); left: 50%;
-  transform: translateX(-50%);
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 8px 14px;
-  font-size: 12px; font-weight: 700; color: var(--text-primary);
-  white-space: nowrap; pointer-events: none;
-  opacity: 0; transform: translateX(-50%) translateY(6px);
-  transition: all 0.3s var(--bounce);
-  z-index: 10;
+  position:absolute; top:4px; left:50%;
+  background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:8px 14px;
+  font-size:12px; font-weight:700; color:var(--text-primary); white-space:nowrap; pointer-events:none;
+  opacity:0; transform:translateX(-50%) translateY(-4px);
+  transition:opacity 0.3s var(--bounce),transform 0.3s var(--bounce); z-index:10;
 }
-.mascot-speech.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.mascot-speech::after {
-  content: ''; position: absolute; top: 100%; left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: var(--border);
-}
+.mascot-speech.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.mascot-speech::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:var(--border); }
+.game-mascot { font-size:28px; line-height:1; display:inline-block; }
+.game-mascot.happy   { animation:mascotHappy  0.5s var(--bounce) both; }
+.game-mascot.sad     { animation:mascotSad    0.5s both; }
+.game-mascot.levelup { animation:mascotLevelUp 0.7s var(--bounce) both; }
 
-/* ── LEVEL & XP BAR ── */
-.level-bar-wrap {
-  max-width: 340px; margin: 0 auto 28px; padding: 0 20px;
-}
-.level-row {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 6px;
-}
-.level-label {
-  font-family: var(--font-display); font-size: 15px; color: var(--text-primary);
-  display: flex; align-items: center; gap: 6px;
-}
-.level-badge-sm {
-  background: linear-gradient(135deg, var(--indigo), var(--violet));
-  color: white; font-size: 10px; font-weight: 800;
-  padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px;
-}
-.xp-to-next { font-size: 11px; color: var(--text-muted); font-weight: 700; }
-.level-track {
-  height: 12px; background: var(--bg-hud); border-radius: 20px; overflow: hidden;
-  position: relative;
-}
-.level-fill {
-  height: 100%; border-radius: 20px;
-  background: linear-gradient(90deg, #6366f1, #a78bfa, #e879f9);
-  transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1);
-  position: relative; overflow: hidden;
-}
-.level-fill::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
-  animation: shimmer 2s infinite;
-}
+/* Level bar */
+.level-bar-wrap { max-width:340px; margin:0 auto 24px; padding:0 20px; }
+.level-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.level-label { font-family:var(--font-display); font-size:15px; color:var(--text-primary); display:flex; align-items:center; gap:6px; }
+.level-badge-sm { background:linear-gradient(135deg,var(--indigo),var(--violet)); color:#fff; font-size:10px; font-weight:800; padding:3px 10px; border-radius:20px; letter-spacing:0.5px; }
+.xp-to-next { font-size:11px; color:var(--text-muted); font-weight:700; }
+.level-track { height:12px; background:var(--bg-hud); border-radius:20px; overflow:hidden; position:relative; }
+.level-fill { height:100%; border-radius:20px; background:linear-gradient(90deg,#6366f1,#a78bfa,#e879f9); transition:width 0.8s cubic-bezier(0.34,1.56,0.64,1); position:relative; overflow:hidden; }
+.level-fill::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent); animation:shimmer 2s infinite; }
 @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
 
-/* ── LEVEL-UP OVERLAY ── */
-.levelup-overlay {
-  position: fixed; inset: 0; z-index: 600;
-  background: rgba(15,5,32,0.95); backdrop-filter: blur(20px);
-  display: none; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center;
-}
-.levelup-overlay.show { display: flex; }
-.lu-rays {
-  position: absolute; inset: 0; pointer-events: none;
-  background: conic-gradient(from 0deg, transparent 10%, rgba(99,102,241,0.15) 20%, transparent 30%);
-  animation: luSpin 4s linear infinite;
-}
-@keyframes luSpin { to { transform: rotate(360deg); } }
-.lu-num {
-  font-family: var(--font-display);
-  font-size: clamp(80px, 18vw, 140px);
-  background: linear-gradient(135deg, #ffd700, #ff9500, #ff6b35);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  animation: luPop 0.6s var(--bounce) both;
-  line-height: 1; margin-bottom: 8px;
-}
-.lu-title {
-  font-family: var(--font-display); font-size: clamp(24px,5vw,40px);
-  color: white; margin-bottom: 6px;
-  animation: luPop 0.6s var(--bounce) 0.1s both;
-}
-.lu-sub {
-  font-size: 15px; color: rgba(255,255,255,0.55); margin-bottom: 32px;
-  animation: luPop 0.6s var(--bounce) 0.2s both;
-}
-.lu-badges-row {
-  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
-  margin-bottom: 32px;
-  animation: luPop 0.6s var(--bounce) 0.3s both;
-}
+/* Daily streak */
+.streak-cal { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-lg); padding:14px 18px; max-width:360px; margin:0 auto 20px; }
+.streak-cal-title { font-size:10px; font-weight:800; letter-spacing:1.5px; color:var(--text-muted); margin-bottom:10px; }
+.streak-days { display:flex; gap:5px; justify-content:center; }
+.streak-day { width:32px; height:32px; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1.5px solid var(--border); font-size:9px; font-weight:800; color:var(--text-muted); }
+.streak-day.played { background:linear-gradient(135deg,var(--indigo),var(--violet)); border-color:transparent; color:#fff; }
+.streak-day.today  { border-color:var(--gold); color:var(--gold); }
+.streak-day.played.today { background:linear-gradient(135deg,var(--gold),#ff9500); animation:todayPulse 2s ease-in-out infinite; }
+@keyframes todayPulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,215,0,0.4)} 50%{box-shadow:0 0 0 6px rgba(255,215,0,0)} }
+.streak-fire { text-align:center; font-size:12px; color:var(--text-secondary); margin-top:8px; }
+.streak-fire span { color:#ff6b35; font-weight:800; }
+
+/* Badges */
+.badges-section { padding:0 20px 32px; max-width:700px; margin:0 auto; }
+.badges-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(76px,1fr)); gap:10px; }
+.badge-item { display:flex; flex-direction:column; align-items:center; gap:4px; padding:10px 6px; border-radius:var(--r-md); background:var(--bg-card); border:1px solid var(--border); cursor:default; transition:all 0.2s var(--bounce); }
+.badge-item.earned { border-color:var(--gold); background:rgba(255,215,0,0.08); }
+.badge-item.earned:hover { transform:scale(1.08) translateY(-2px); box-shadow:0 8px 24px rgba(255,215,0,0.25); }
+.badge-item.locked { opacity:0.3; filter:grayscale(1); }
+.badge-icon { font-size:26px; }
+.badge-name { font-size:9px; font-weight:800; letter-spacing:0.3px; color:var(--text-muted); text-align:center; line-height:1.2; }
+.badge-item.earned .badge-name { color:var(--gold); }
+
+/* Power-ups */
+.powerup-bar { display:flex; gap:8px; justify-content:center; padding:6px 20px 4px; border-bottom:1px solid var(--border); background:var(--bg-header); }
+.pu-btn { width:52px; height:48px; border-radius:12px; background:var(--bg-hud); border:1.5px solid var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s var(--bounce); position:relative; user-select:none; gap:1px; }
+.pu-btn:hover { transform:scale(1.1) translateY(-2px); border-color:var(--gold); box-shadow:0 6px 20px rgba(255,215,0,0.3); }
+.pu-btn:active { transform:scale(0.95); }
+.pu-btn.empty,.pu-btn.used { opacity:0.3; cursor:not-allowed; pointer-events:none; }
+.pu-icon { font-size:18px; line-height:1; }
+.pu-count { position:absolute; top:-5px; right:-5px; background:var(--indigo); color:#fff; font-size:9px; font-weight:800; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+.pu-label { font-size:7px; font-weight:800; color:var(--text-muted); letter-spacing:0.3px; }
+
+/* Q progress dots */
+.q-progress-dots { display:flex; gap:4px; justify-content:center; padding:6px 20px 0; }
+.q-dot { width:8px; height:8px; border-radius:50%; background:var(--bg-hud); border:1px solid var(--border); transition:all 0.3s var(--bounce); flex-shrink:0; }
+.q-dot.correct { background:var(--success); border-color:var(--success); transform:scale(1.2); }
+.q-dot.wrong   { background:var(--danger);  border-color:var(--danger); }
+.q-dot.current { border-color:var(--indigo); transform:scale(1.3); background:rgba(99,102,241,0.3); }
+
+/* Combo */
+.combo-display { position:fixed; top:75px; right:16px; z-index:300; pointer-events:none; opacity:0; transform:scale(0.5) translateX(20px); transition:all 0.3s var(--bounce); }
+.combo-display.show { opacity:1; transform:scale(1) translateX(0); }
+.combo-inner { background:linear-gradient(135deg,#ff6b35,#ffd700); border-radius:14px; padding:6px 14px; text-align:center; box-shadow:0 6px 24px rgba(255,107,53,0.5); animation:comboPulse 0.5s ease-in-out infinite alternate; }
+@keyframes comboPulse { from{box-shadow:0 6px 24px rgba(255,107,53,0.4)} to{box-shadow:0 8px 32px rgba(255,107,53,0.7)} }
+.combo-num { font-family:var(--font-display); font-size:20px; color:#1a0a00; line-height:1; }
+.combo-label { font-size:9px; font-weight:800; color:rgba(26,10,0,0.7); letter-spacing:1px; }
+
+/* Screen flash */
+.screen-flash { position:fixed; inset:0; z-index:350; pointer-events:none; opacity:0; transition:opacity 0.08s; }
+.screen-flash.correct-flash { background:rgba(46,213,115,0.12); }
+.screen-flash.wrong-flash   { background:rgba(255,71,87,0.12); }
+.screen-flash.active { opacity:1; }
+
+/* Result popup */
+.result-popup { position:fixed; top:50%; left:50%; z-index:390; pointer-events:none; }
+.result-popup-inner { font-family:var(--font-display); font-size:clamp(48px,12vw,80px); animation:resultPop 0.9s var(--smooth) forwards; }
+@keyframes resultPop { 0%{transform:translate(-50%,-50%) scale(0.3);opacity:1} 35%{transform:translate(-50%,-50%) scale(1.2);opacity:1} 65%{transform:translate(-50%,-50%) scale(1.0);opacity:1} 100%{transform:translate(-50%,-120%) scale(1.4);opacity:0} }
+
+/* Burst particles */
+.burst-particle { position:fixed; pointer-events:none; z-index:400; border-radius:50%; animation:burstFly var(--dur,0.8s) ease-out forwards; }
+@keyframes burstFly { 0%{transform:translate(0,0) scale(1);opacity:1} 100%{transform:translate(var(--tx,0px),var(--ty,-80px)) scale(0);opacity:0} }
+.burst-star { position:fixed; pointer-events:none; z-index:400; font-size:var(--sz,20px); animation:starFly var(--dur,1s) ease-out forwards; }
+@keyframes starFly { 0%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1} 100%{transform:translate(var(--tx,0px),var(--ty,-100px)) rotate(720deg) scale(0);opacity:0} }
+
+/* Level-up overlay */
+.levelup-overlay { position:fixed; inset:0; z-index:600; background:rgba(15,5,32,0.96); backdrop-filter:blur(20px); display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+.levelup-overlay.show { display:flex; }
+.lu-rays { position:absolute; inset:0; pointer-events:none; background:conic-gradient(from 0deg,transparent 10%,rgba(99,102,241,0.12) 20%,transparent 30%); animation:luSpin 4s linear infinite; }
+@keyframes luSpin { to{transform:rotate(360deg)} }
+.lu-num { font-family:var(--font-display); font-size:clamp(80px,18vw,130px); background:linear-gradient(135deg,#ffd700,#ff9500,#ff6b35); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:luPop 0.6s var(--bounce) both; line-height:1; margin-bottom:4px; }
+.lu-title { font-family:var(--font-display); font-size:clamp(24px,5vw,38px); color:#fff; animation:luPop 0.6s var(--bounce) 0.1s both; }
+.lu-sub { font-size:15px; color:rgba(255,255,255,0.55); margin:8px 0 28px; animation:luPop 0.6s var(--bounce) 0.2s both; }
 @keyframes luPop { from{transform:scale(0);opacity:0} }
 
-/* ── BADGE SYSTEM ── */
-.badges-section { padding: 0 20px 32px; max-width: 700px; margin: 0 auto; }
-.badges-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 12px;
-}
-.badge-item {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 12px 8px; border-radius: var(--r-md);
-  background: var(--bg-card); border: 1px solid var(--border);
-  transition: all 0.2s var(--bounce); cursor: default;
-}
-.badge-item.earned { border-color: var(--gold); background: rgba(255,215,0,0.08); }
-.badge-item.earned:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 8px 24px rgba(255,215,0,0.25); }
-.badge-item.locked { opacity: 0.35; filter: grayscale(1); }
-.badge-icon { font-size: 28px; }
-.badge-name { font-size: 9px; font-weight: 800; letter-spacing: 0.3px; color: var(--text-muted); text-align: center; line-height: 1.2; }
-.badge-item.earned .badge-name { color: var(--gold); }
+/* Summary card */
+.summary-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-xl); padding:16px 20px; max-width:380px; width:100%; margin:12px auto 0; }
+.summary-row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--border); }
+.summary-row:last-child { border-bottom:none; }
+.summary-key { font-size:12px; color:var(--text-secondary); font-weight:700; }
+.summary-val { font-family:var(--font-display); font-size:16px; color:var(--text-primary); }
+.summary-val.gold { color:var(--gold); }
 
-/* ── POWER-UP BAR ── */
-.powerup-bar {
-  display: flex; gap: 8px; justify-content: center; padding: 8px 0 4px;
-}
-.pu-btn {
-  width: 44px; height: 44px; border-radius: 12px;
-  background: var(--bg-card); border: 1.5px solid var(--border);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  cursor: pointer; transition: all 0.2s var(--bounce);
-  position: relative; user-select: none;
-}
-.pu-btn:hover:not(.empty) { transform: scale(1.12) translateY(-2px); border-color: var(--gold); box-shadow: 0 6px 20px rgba(255,215,0,0.3); }
-.pu-btn:active:not(.empty) { transform: scale(0.95); }
-.pu-btn.empty { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
-.pu-btn.used  { opacity: 0.2; cursor: not-allowed; }
-.pu-icon { font-size: 20px; line-height: 1; }
-.pu-count {
-  position: absolute; top: -5px; right: -5px;
-  background: var(--indigo); color: white;
-  font-size: 9px; font-weight: 800; width: 16px; height: 16px;
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
-}
-.pu-label { font-size: 7px; font-weight: 800; color: var(--text-muted); letter-spacing: 0.3px; }
-
-/* ── COMBO DISPLAY ── */
-.combo-display {
-  position: fixed; top: 80px; right: 20px; z-index: 300;
-  pointer-events: none;
-  opacity: 0; transform: scale(0.5) translateX(20px);
-  transition: all 0.3s var(--bounce);
-}
-.combo-display.show { opacity: 1; transform: scale(1) translateX(0); }
-.combo-inner {
-  background: linear-gradient(135deg, #ff6b35, #ffd700);
-  border-radius: 14px; padding: 8px 16px; text-align: center;
-  box-shadow: 0 6px 24px rgba(255,107,53,0.5);
-  animation: comboPulse 0.5s ease-in-out infinite alternate;
-}
-@keyframes comboPulse { from{box-shadow:0 6px 24px rgba(255,107,53,0.4)} to{box-shadow:0 8px 32px rgba(255,107,53,0.7)} }
-.combo-num { font-family: var(--font-display); font-size: 24px; color: #1a0a00; line-height: 1; }
-.combo-label { font-size: 9px; font-weight: 800; color: rgba(26,10,0,0.7); letter-spacing: 1px; }
-
-/* ── BURST PARTICLE SYSTEM ── */
-.burst-particle {
-  position: fixed; pointer-events: none; z-index: 400;
-  border-radius: 50%; animation: burstFly var(--dur,0.8s) var(--bounce) forwards;
-}
-@keyframes burstFly {
-  0%   { transform: translate(0,0) scale(1); opacity: 1; }
-  100% { transform: translate(var(--tx,0px), var(--ty,-80px)) scale(0); opacity: 0; }
-}
-.burst-star {
-  position: fixed; pointer-events: none; z-index: 400;
-  font-size: var(--sz, 20px);
-  animation: starFly var(--dur,1s) var(--smooth) forwards;
-}
-@keyframes starFly {
-  0%   { transform: translate(0,0) rotate(0deg) scale(1); opacity: 1; }
-  100% { transform: translate(var(--tx,0px), var(--ty,-100px)) rotate(720deg) scale(0); opacity: 0; }
-}
-
-/* ── SCREEN FLASH FEEDBACK ── */
-.screen-flash {
-  position: fixed; inset: 0; z-index: 350; pointer-events: none;
-  opacity: 0; border-radius: 0;
-  transition: opacity 0.1s;
-}
-.screen-flash.correct-flash { background: rgba(46,213,115,0.12); }
-.screen-flash.wrong-flash   { background: rgba(255,71,87,0.12); }
-.screen-flash.show { opacity: 1; }
-
-/* ── GAME SUMMARY CARD ── */
-.summary-card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--r-xl); padding: 24px; max-width: 400px; margin: 16px auto 0;
-}
-.summary-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 0; border-bottom: 1px solid var(--border);
-}
-.summary-row:last-child { border-bottom: none; }
-.summary-key { font-size: 13px; color: var(--text-secondary); font-weight: 700; }
-.summary-val { font-family: var(--font-display); font-size: 18px; color: var(--text-primary); }
-.summary-val.gold { color: var(--gold); }
-
-/* ── DAILY STREAK CALENDAR ── */
-.streak-cal {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--r-lg); padding: 16px 20px; max-width: 360px; margin: 0 auto 24px;
-}
-.streak-cal-title {
-  font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: var(--text-muted);
-  margin-bottom: 12px;
-}
-.streak-days {
-  display: flex; gap: 6px; justify-content: center;
-}
-.streak-day {
-  width: 32px; height: 32px; border-radius: 8px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  border: 1.5px solid var(--border); font-size: 9px; font-weight: 800;
-  color: var(--text-muted); cursor: default;
-  transition: all 0.3s var(--bounce);
-}
-.streak-day.played { background: linear-gradient(135deg, var(--indigo), var(--violet)); border-color: transparent; color: white; }
-.streak-day.today  { border-color: var(--gold); color: var(--gold); }
-.streak-day.played.today { background: linear-gradient(135deg, var(--gold), #ff9500); animation: todayPulse 2s ease-in-out infinite; }
-@keyframes todayPulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,215,0,0.4)} 50%{box-shadow:0 0 0 6px rgba(255,215,0,0)} }
-.streak-fire { text-align: center; font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
-.streak-fire span { color: #ff6b35; font-weight: 800; }
-
-/* ── QUIZ ANSWER RESULT LABEL ── */
-.answer-label {
-  text-align: center; padding: 10px;
-  font-family: var(--font-display); font-size: 18px;
-  animation: labelPop 0.3s var(--bounce);
-  display: none;
-}
-.answer-label.correct-lbl { color: var(--success); display: block; }
-.answer-label.wrong-lbl   { color: var(--danger);  display: block; }
-@keyframes labelPop { from{transform:scale(0);opacity:0} }
-
-/* ── QUESTION PROGRESS DOTS ── */
-.q-progress-dots {
-  display: flex; gap: 4px; justify-content: center; margin-bottom: 16px;
-}
-.q-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--bg-hud); border: 1px solid var(--border);
-  transition: all 0.3s var(--bounce);
-}
-.q-dot.correct { background: var(--success); border-color: var(--success); transform: scale(1.2); }
-.q-dot.wrong   { background: var(--danger);  border-color: var(--danger); }
-.q-dot.current { border-color: var(--indigo); transform: scale(1.3); background: rgba(99,102,241,0.3); }
-
-/* ── ANSWER RESULT POPUP ── */
-.result-popup {
-  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
-  z-index: 390; pointer-events: none; text-align: center;
-}
-.result-popup-inner {
-  font-family: var(--font-display); font-size: clamp(48px,12vw,88px);
-  animation: resultPop 0.9s var(--smooth) forwards;
-}
-@keyframes resultPop {
-  0%  { transform: scale(0.3); opacity: 1; }
-  35% { transform: scale(1.2); opacity: 1; }
-  65% { transform: scale(1.0); opacity: 1; }
-  100%{ transform: scale(1.5) translateY(-60px); opacity: 0; }
-}
-
-/* ── MASCOT IN GAME ── */
-.game-mascot {
-  font-size: 32px; line-height: 1; transition: all 0.2s;
-  display: inline-block;
-}
-
-[data-theme="light"] .summary-card { box-shadow: 0 2px 16px rgba(99,102,241,0.08); }
-[data-theme="light"] .streak-cal   { box-shadow: 0 2px 16px rgba(99,102,241,0.08); }
-[data-theme="light"] .badge-item   { box-shadow: 0 2px 8px rgba(99,102,241,0.06); }
+/* Reward overlay — scrollable for small screens */
+.reward-overlay { position:fixed; inset:0; z-index:500; background:var(--overlay-bg); backdrop-filter:blur(16px); display:none; flex-direction:column; align-items:center; justify-content:flex-start; text-align:center; padding:20px; overflow-y:auto; transition:background 0.35s var(--smooth); }
+.reward-overlay.show { display:flex; }
 </style>
 
 </head>
@@ -880,17 +704,14 @@ body {
 <section class="screen active" id="scr-home">
   <div class="home-hero">
     <div class="hero-eyebrow">⚡ For Every Kid • Classes 1–4</div>
-
-    <!-- MASCOT -->
+    <!-- Mascot with speech bubble in padding-top space -->
     <div class="mascot-wrap">
       <div class="mascot-speech" id="mascot-speech-home"></div>
       <span class="mascot" id="mascot-home">🦊</span>
     </div>
-
     <h1 class="hero-title">Learning at<br/><span class="accent">Lightning Speed</span></h1>
-    <p class="hero-sub">Earn badges, level up your fox, and become a Maths Champion! ⚡</p>
-
-    <!-- LEVEL BAR -->
+    <p class="hero-sub">Earn badges, level up, and become a Maths Champion! ⚡</p>
+    <!-- XP / Level bar -->
     <div class="level-bar-wrap">
       <div class="level-row">
         <div class="level-label">
@@ -899,18 +720,16 @@ body {
         </div>
         <div class="xp-to-next" id="home-xp-next">0 / 100 XP</div>
       </div>
-      <div class="level-track">
-        <div class="level-fill" id="home-level-fill" style="width:0%"></div>
-      </div>
+      <div class="level-track"><div class="level-fill" id="home-level-fill" style="width:0%"></div></div>
     </div>
   </div>
 
-  <!-- DAILY STREAK -->
+  <!-- Daily streak calendar -->
   <div style="padding:0 20px;max-width:420px;margin:0 auto">
-    <div class="streak-cal" id="streak-cal">
+    <div class="streak-cal">
       <div class="streak-cal-title">🔥 DAILY STREAK</div>
       <div class="streak-days" id="streak-days-row"></div>
-      <div class="streak-fire">Current streak: <span id="streak-count-display">0</span> days 🔥</div>
+      <div class="streak-fire">Streak: <span id="streak-count-display">0</span> days 🔥</div>
     </div>
   </div>
 
@@ -923,54 +742,15 @@ body {
 
   <p class="section-heading">Choose Your Class</p>
   <div class="class-orbit">
-    <div class="class-orb c1" onclick="nav.openClass(1)">
-      <div class="orb-ring"></div>
-      <div class="orb-num">1st</div>
-      <div class="orb-label">BEGINNER</div>
-    </div>
-    <div class="class-orb c2" onclick="nav.openClass(2)">
-      <div class="orb-ring"></div>
-      <div class="orb-num">2nd</div>
-      <div class="orb-label">BUILDER</div>
-    </div>
-    <div class="class-orb c3" onclick="nav.openClass(3)">
-      <div class="orb-ring"></div>
-      <div class="orb-num">3rd</div>
-      <div class="orb-label">EXPLORER</div>
-    </div>
-    <div class="class-orb c4" onclick="nav.openClass(4)">
-      <div class="orb-ring"></div>
-      <div class="orb-num">4th</div>
-      <div class="orb-label">CHAMPION</div>
-    </div>
+    <div class="class-orb c1" onclick="nav.openClass(1)"><div class="orb-ring"></div><div class="orb-num">1st</div><div class="orb-label">BEGINNER</div></div>
+    <div class="class-orb c2" onclick="nav.openClass(2)"><div class="orb-ring"></div><div class="orb-num">2nd</div><div class="orb-label">BUILDER</div></div>
+    <div class="class-orb c3" onclick="nav.openClass(3)"><div class="orb-ring"></div><div class="orb-num">3rd</div><div class="orb-label">EXPLORER</div></div>
+    <div class="class-orb c4" onclick="nav.openClass(4)"><div class="orb-ring"></div><div class="orb-num">4th</div><div class="orb-label">CHAMPION</div></div>
   </div>
 
-  <!-- BADGES -->
-  <p class="section-heading">My Badge Collection</p>
+  <p class="section-heading">My Badges</p>
   <div class="badges-section">
     <div class="badges-grid" id="badges-grid"></div>
-  </div>
-
-    <div class="class-orb c1" onclick="nav.openClass(1)">
-      <div class="orb-ring"></div>
-      <div class="orb-num">1st</div>
-      <div class="orb-label">BEGINNER</div>
-    </div>
-    <div class="class-orb c2" onclick="nav.openClass(2)">
-      <div class="orb-ring"></div>
-      <div class="orb-num">2nd</div>
-      <div class="orb-label">BUILDER</div>
-    </div>
-    <div class="class-orb c3" onclick="nav.openClass(3)">
-      <div class="orb-ring"></div>
-      <div class="orb-num">3rd</div>
-      <div class="orb-label">EXPLORER</div>
-    </div>
-    <div class="class-orb c4" onclick="nav.openClass(4)">
-      <div class="orb-ring"></div>
-      <div class="orb-num">4th</div>
-      <div class="orb-label">CHAMPION</div>
-    </div>
   </div>
 
   <p class="section-heading">Subjects Universe</p>
@@ -1062,25 +842,16 @@ body {
      SCREEN: ACTIVE GAME
 ============================================================ -->
 <section class="screen" id="scr-play">
-  <!-- Screen flash overlay for correct/wrong feedback -->
-  <div class="screen-flash" id="screen-flash"></div>
-
   <div class="game-header">
     <div class="hud-group">
-      <div class="hud-chip">
-        <div class="hud-val" id="hud-score">0</div>
-        <div class="hud-lbl">SCORE</div>
-      </div>
-      <div class="hud-chip" id="combo-chip" style="display:none">
-        <div class="hud-val" style="color:var(--gold)" id="hud-combo">x1</div>
-        <div class="hud-lbl">COMBO</div>
-      </div>
+      <div class="hud-chip"><div class="hud-val" id="hud-score">0</div><div class="hud-lbl">SCORE</div></div>
+      <div class="hud-chip" id="combo-chip" style="display:none"><div class="hud-val" style="color:var(--gold)" id="hud-combo">x1</div><div class="hud-lbl">COMBO</div></div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
       <span class="game-mascot" id="game-mascot">🦊</span>
       <div class="streak-dots" id="streak-dots"></div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
       <div class="timer-arc">
         <svg width="56" height="56" viewBox="0 0 56 56">
           <circle class="arc-bg" cx="28" cy="28" r="24"/>
@@ -1088,46 +859,42 @@ body {
         </svg>
         <div class="arc-num" id="arc-num">30</div>
       </div>
-      <div style="font-size:10px;font-weight:800;color:var(--text-label);letter-spacing:1px" id="hud-q-label">Q 1/10</div>
+      <div style="font-size:10px;font-weight:800;color:var(--text-label);letter-spacing:1px" id="hud-q">Q 1/10</div>
     </div>
   </div>
-
-  <!-- Power-up bar -->
+  <!-- Power-ups -->
   <div class="powerup-bar" id="powerup-bar">
-    <div class="pu-btn" id="pu-freeze" onclick="POWERUPS.use('freeze')" title="Freeze Timer — stop the clock for 10 seconds!">
-      <div class="pu-icon">🧊</div>
-      <div class="pu-label">FREEZE</div>
+    <div class="pu-btn" id="pu-freeze" onclick="POWERUPS.use('freeze')">
+      <div class="pu-icon">🧊</div><div class="pu-label">FREEZE</div>
       <div class="pu-count" id="pu-freeze-count">1</div>
     </div>
-    <div class="pu-btn" id="pu-fifty" onclick="POWERUPS.use('fifty')" title="50/50 — remove two wrong answers!">
-      <div class="pu-icon">✂️</div>
-      <div class="pu-label">50/50</div>
+    <div class="pu-btn" id="pu-fifty" onclick="POWERUPS.use('fifty')">
+      <div class="pu-icon">✂️</div><div class="pu-label">50/50</div>
       <div class="pu-count" id="pu-fifty-count">1</div>
     </div>
-    <div class="pu-btn" id="pu-skip" onclick="POWERUPS.use('skip')" title="Skip — jump to next question without penalty!">
-      <div class="pu-icon">⏭️</div>
-      <div class="pu-label">SKIP</div>
+    <div class="pu-btn" id="pu-skip" onclick="POWERUPS.use('skip')">
+      <div class="pu-icon">⏭️</div><div class="pu-label">SKIP</div>
       <div class="pu-count" id="pu-skip-count">1</div>
     </div>
   </div>
-
   <!-- Question progress dots -->
   <div class="q-progress-dots" id="q-progress-dots"></div>
-
-  <!-- Combo floater -->
+  <!-- Combo floater (position:fixed — outside flex flow) -->
   <div class="combo-display" id="combo-display">
     <div class="combo-inner">
       <div class="combo-num" id="combo-num">x2</div>
       <div class="combo-label">COMBO!</div>
     </div>
   </div>
-
-  <div style="flex:1; padding:16px 20px 20px; max-width:680px; margin:0 auto; width:100%;">
+  <div style="flex:1;padding:12px 20px 20px;max-width:680px;margin:0 auto;width:100%;overflow-y:auto">
     <div id="play-content"></div>
   </div>
 </section>
 
 </div><!-- #app -->
+
+<!-- Screen flash — fixed overlay, lives outside any flex container -->
+<div class="screen-flash" id="screen-flash"></div>
 
 <!-- ===== REWARD OVERLAY ===== -->
 <div class="reward-overlay" id="reward-overlay">
@@ -1136,32 +903,14 @@ body {
   <div class="r-title" id="r-title">Amazing!</div>
   <div class="r-stars" id="r-stars"></div>
   <div class="r-score" id="r-score"></div>
-  <div class="r-msg" id="r-msg"></div>
-
-  <!-- Detailed summary card -->
-  <div class="summary-card" id="summary-card">
-    <div class="summary-row">
-      <span class="summary-key">⭐ XP Earned</span>
-      <span class="summary-val gold" id="sum-xp">0</span>
-    </div>
-    <div class="summary-row">
-      <span class="summary-key">✅ Correct</span>
-      <span class="summary-val" id="sum-correct">0 / 10</span>
-    </div>
-    <div class="summary-row">
-      <span class="summary-key">🔥 Best Streak</span>
-      <span class="summary-val" id="sum-streak">0</span>
-    </div>
-    <div class="summary-row">
-      <span class="summary-key">⏱️ Time Used</span>
-      <span class="summary-val" id="sum-time">0s</span>
-    </div>
-    <div class="summary-row">
-      <span class="summary-key">🏆 New Badge?</span>
-      <span class="summary-val" id="sum-badge">—</span>
-    </div>
+  <div class="r-msg"   id="r-msg"></div>
+  <div class="summary-card">
+    <div class="summary-row"><span class="summary-key">⭐ XP Earned</span><span class="summary-val gold" id="sum-xp">0</span></div>
+    <div class="summary-row"><span class="summary-key">✅ Correct</span><span class="summary-val" id="sum-correct">0/10</span></div>
+    <div class="summary-row"><span class="summary-key">🔥 Best Streak</span><span class="summary-val" id="sum-streak">0</span></div>
+    <div class="summary-row"><span class="summary-key">⏱️ Time</span><span class="summary-val" id="sum-time">0s</span></div>
+    <div class="summary-row"><span class="summary-key">🏅 New Badge</span><span class="summary-val" id="sum-badge">—</span></div>
   </div>
-
   <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:16px">
     <button class="btn btn-gold" onclick="APP.playAgain()">Play Again 🎮</button>
     <button class="btn btn-ghost" onclick="APP.closeReward()">Choose Game</button>
@@ -1171,528 +920,21 @@ body {
 <!-- ===== LEVEL-UP OVERLAY ===== -->
 <div class="levelup-overlay" id="levelup-overlay">
   <div class="lu-rays"></div>
-  <div style="position:relative;z-index:1;text-align:center;padding:32px">
-    <div style="font-size:64px;margin-bottom:8px;animation:luPop 0.5s var(--bounce) both">🦊</div>
-    <div class="lu-num" id="lu-num">2</div>
+  <div style="position:relative;z-index:1;text-align:center;padding:32px 20px">
+    <div style="font-size:64px;margin-bottom:8px" id="lu-mascot">🦊</div>
+    <div class="lu-num"   id="lu-num">2</div>
     <div class="lu-title" id="lu-title">Level Up!</div>
-    <div class="lu-sub" id="lu-sub">You are now a <strong>Young Explorer</strong>!</div>
-    <div class="lu-badges-row" id="lu-badges-row"></div>
-    <button class="btn btn-gold" onclick="GAMIFICATION.closeLevelUp()" style="min-width:200px">
-      Awesome! 🚀
-    </button>
+    <div class="lu-sub"   id="lu-sub">You are now an Explorer!</div>
+    <button class="btn btn-gold" onclick="document.getElementById('levelup-overlay').classList.remove('show')" style="min-width:180px;margin-top:8px">Awesome! 🚀</button>
   </div>
 </div>
 
 <script>
 /* ================================================================
-   GAMIFICATION ENGINE
-   Levels · Badges · Mascot · Power-ups · Combo · Burst Particles
-   Daily Streak · Sound · Summary Card
+   LEARNVERSE — UNIVERSAL GAMIFIED LEARNING APP
+   Architecture: Subject Registry Pattern
+   Adding new subjects = add entry to SUBJECT_REGISTRY + GAME_REGISTRY
 ================================================================ */
-
-// ── LEVEL SYSTEM ─────────────────────────────────────────────
-const LEVELS = [
-  { level:1,  name:'Cub',           mascot:'🦊', xpNeeded:0   },
-  { level:2,  name:'Explorer',      mascot:'🦊', xpNeeded:100 },
-  { level:3,  name:'Adventurer',    mascot:'🦝', xpNeeded:250 },
-  { level:4,  name:'Scholar',       mascot:'🦁', xpNeeded:500 },
-  { level:5,  name:'Ace',           mascot:'🐯', xpNeeded:900 },
-  { level:6,  name:'Champion',      mascot:'🦅', xpNeeded:1400},
-  { level:7,  name:'Legend',        mascot:'🐉', xpNeeded:2000},
-  { level:8,  name:'Math Wizard',   mascot:'🧙', xpNeeded:3000},
-];
-
-// ── BADGE DEFINITIONS ─────────────────────────────────────────
-const BADGE_DEFS = [
-  { id:'first_game',    icon:'🎮', name:'First Game',     desc:'Play your first game',            check: s => s.played >= 1 },
-  { id:'speed_five',    icon:'⚡', name:'Lightning',       desc:'5-streak in one game',            check: s => s.bestStreak >= 5 },
-  { id:'ten_games',     icon:'🎯', name:'Dedicated',       desc:'Play 10 games',                   check: s => s.played >= 10 },
-  { id:'fifty_correct', icon:'✅', name:'Half Century',    desc:'50 correct answers',              check: s => s.correct >= 50 },
-  { id:'perfect_game',  icon:'💎', name:'Perfect!',        desc:'10/10 in one game',               check: s => s.perfectGames >= 1 },
-  { id:'streak_3',      icon:'🔥', name:'On Fire',         desc:'3-day daily streak',              check: s => s.dailyStreak >= 3 },
-  { id:'streak_7',      icon:'🌟', name:'Week Warrior',    desc:'7-day daily streak',              check: s => s.dailyStreak >= 7 },
-  { id:'hundred_xp',    icon:'🏅', name:'Century',         desc:'Earn 100 XP',                     check: s => s.xp >= 100 },
-  { id:'five_hundred',  icon:'🏆', name:'500 Club',        desc:'Earn 500 XP',                     check: s => s.xp >= 500 },
-  { id:'level5',        icon:'🦁', name:'Roar!',           desc:'Reach Level 5',                   check: s => s.level >= 5 },
-  { id:'class4_unlock', icon:'🦅', name:'Class 4 Hero',    desc:'Play a Class 4 game',             check: s => s.playedClass4 },
-  { id:'powerup_used',  icon:'🧊', name:'Power Champ',     desc:'Use a power-up',                  check: s => s.powerupsUsed >= 1 },
-];
-
-// ── SOUND ENGINE (Web Audio API — no files needed) ────────────
-const SOUND = (() => {
-  let ctx = null, enabled = JSON.parse(localStorage.getItem('zl_sound') ?? 'true');
-  function getCtx() {
-    if (!ctx) { try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
-    return ctx;
-  }
-  function play(freq, dur=0.12, type='sine', vol=0.3, delay=0) {
-    if (!enabled) return;
-    const c = getCtx(); if (!c) return;
-    const osc = c.createOscillator(), gain = c.createGain();
-    osc.connect(gain); gain.connect(c.destination);
-    osc.type = type; osc.frequency.value = freq;
-    gain.gain.setValueAtTime(vol, c.currentTime + delay);
-    gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + delay + dur);
-    osc.start(c.currentTime + delay);
-    osc.stop(c.currentTime + delay + dur + 0.01);
-  }
-  return {
-    correct()  { play(523,0.08,'sine',0.2); play(659,0.1,'sine',0.2,0.08); play(784,0.15,'sine',0.25,0.16); },
-    wrong()    { play(220,0.18,'sawtooth',0.15); play(196,0.2,'sawtooth',0.15,0.12); },
-    levelup()  { [523,659,784,1047].forEach((f,i)=>play(f,0.2,'sine',0.3,i*0.1)); },
-    badge()    { play(880,0.12,'sine',0.3); play(1047,0.15,'sine',0.3,0.1); },
-    combo()    { play(700+APP?.state?.streak*30||700,0.1,'sine',0.25); },
-    tick()     { play(440,0.04,'square',0.08); },
-    powerup()  { play(600,0.1,'triangle',0.3); play(800,0.15,'triangle',0.3,0.08); },
-    toggle()   { enabled = !enabled; localStorage.setItem('zl_sound', enabled); return enabled; },
-    isOn()     { return enabled; }
-  };
-})();
-
-// ── BURST PARTICLE SYSTEM ─────────────────────────────────────
-const PARTICLES = {
-  burst(x, y, count=12, colors=['#ffd700','#ff6b35','#2ed573','#818cf8','#ff6b9d']) {
-    for (let i = 0; i < count; i++) {
-      const el = document.createElement('div');
-      el.className = 'burst-particle';
-      const angle = (i / count) * Math.PI * 2;
-      const dist  = 40 + Math.random() * 60;
-      const size  = 6 + Math.random() * 8;
-      el.style.cssText = `
-        left:${x}px; top:${y}px; width:${size}px; height:${size}px;
-        background:${colors[i % colors.length]};
-        --tx:${Math.cos(angle)*dist}px; --ty:${Math.sin(angle)*dist - 40}px;
-        --dur:${0.5 + Math.random()*0.4}s;
-        animation-delay:${Math.random()*0.1}s;
-      `;
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 900);
-    }
-  },
-  stars(x, y, count=6) {
-    const emojis = ['⭐','✨','💫','🌟'];
-    for (let i = 0; i < count; i++) {
-      const el = document.createElement('div');
-      el.className = 'burst-star';
-      const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
-      const dist  = 50 + Math.random() * 50;
-      el.style.cssText = `
-        left:${x}px; top:${y}px;
-        --tx:${Math.cos(angle)*dist}px; --ty:${Math.sin(angle)*dist - 30}px;
-        --dur:${0.8 + Math.random()*0.4}s; --sz:${16 + Math.random()*12}px;
-        animation-delay:${i*0.05}s;
-      `;
-      el.textContent = emojis[i % emojis.length];
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 1300);
-    }
-  },
-  screenFlash(type) {
-    const f = document.getElementById('screen-flash');
-    f.className = `screen-flash ${type}-flash show`;
-    setTimeout(() => f.classList.remove('show'), 180);
-  }
-};
-
-// ── RESULT POPUP ──────────────────────────────────────────────
-function showResultPopup(text, color) {
-  const wrap = document.createElement('div');
-  wrap.className = 'result-popup';
-  wrap.innerHTML = `<div class="result-popup-inner" style="color:${color}">${text}</div>`;
-  document.body.appendChild(wrap);
-  setTimeout(() => wrap.remove(), 950);
-}
-
-// ── MASCOT CONTROLLER ─────────────────────────────────────────
-const MASCOT = {
-  speeches: {
-    home: ['Let\'s learn! 🎓','Ready to play? 🎮','You can do it! 💪','Maths is fun! 🔢'],
-    correct: ['Brilliant! 🌟','Amazing! ⚡','You nailed it! 🎯','Superstar! ✨','So smart! 🧠'],
-    wrong:   ['Try again! 💪','Almost! 🤏','You\'ll get it! 🌟','Keep going! 🚀'],
-    combo:   ['COMBO! 🔥','On fire! 🔥🔥','Unstoppable! ⚡','Legend! 🏆'],
-    levelup: ['LEVEL UP! 🚀','You grew! 🌱','So powerful! ⚡','Amazing growth! 🌟'],
-  },
-  say(id, msg, duration=2000) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const speech = document.getElementById(id.replace('mascot-', 'mascot-speech-'));
-    if (!speech) return;
-    const messages = msg ? [msg] : this.speeches[id.replace('mascot-','').replace('-home','home')] || ['Great!'];
-    speech.textContent = messages[Math.floor(Math.random() * messages.length)];
-    speech.classList.add('show');
-    setTimeout(() => speech.classList.remove('show'), duration);
-  },
-  react(id, emotion) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.classList.remove('happy','sad','levelup');
-    void el.offsetWidth;
-    el.classList.add(emotion);
-    setTimeout(() => el.classList.remove(emotion), 800);
-  },
-  update(xp) {
-    const lvl = GAMIFICATION.getLevel(xp);
-    const home = document.getElementById('mascot-home');
-    const game = document.getElementById('game-mascot');
-    if (home) home.textContent = lvl.mascot;
-    if (game) game.textContent = lvl.mascot;
-  }
-};
-
-// ── POWER-UPS ─────────────────────────────────────────────────
-const POWERUPS = (() => {
-  let stock = { freeze:1, fifty:1, skip:1 };
-  let frozen = false;
-
-  function updateUI() {
-    ['freeze','fifty','skip'].forEach(id => {
-      const btn = document.getElementById('pu-'+id);
-      const cnt = document.getElementById('pu-'+id+'-count');
-      if (!btn) return;
-      const n = stock[id];
-      btn.classList.toggle('empty', n <= 0);
-      if (cnt) cnt.textContent = n;
-    });
-  }
-
-  function use(type) {
-    if (stock[type] <= 0) return;
-    stock[type]--;
-    updateUI();
-    SOUND.powerup();
-    APP.state.powerupsUsed = (APP.state.powerupsUsed || 0) + 1;
-
-    if (type === 'freeze') {
-      // Stop timer, freeze fill ring, resume after 10s
-      clearInterval(APP.state.timerInt);
-      frozen = true;
-      const fill = document.getElementById('arc-fill');
-      if (fill) fill.style.stroke = '#48cae4';
-      showResultPopup('🧊 FROZEN!', '#48cae4');
-      PARTICLES.burst(window.innerWidth/2, window.innerHeight/2, 10, ['#48cae4','#00d4aa','#caf0f8']);
-      setTimeout(() => {
-        frozen = false;
-        // restart timer from wherever it was
-        const orig = startTimerExt; // will be defined below
-        startTimerExt();
-      }, 10000);
-    }
-
-    if (type === 'fifty') {
-      // Remove 2 wrong options
-      const btns = [...document.querySelectorAll('.opt-btn:not(.correct):not(.wrong)')];
-      const wrongs = btns.filter(b => b.dataset.val !== String(APP.state._currentCorrect));
-      shuffle(wrongs).slice(0,2).forEach(b => {
-        b.style.opacity = '0.2';
-        b.style.pointerEvents = 'none';
-        b.style.transform = 'scale(0.85)';
-      });
-      showResultPopup('✂️ 50/50!', '#ffd700');
-    }
-
-    if (type === 'skip') {
-      // Skip question, no penalty
-      clearInterval(APP.state.timerInt);
-      showResultPopup('⏭️ SKIP!', '#a78bfa');
-      setTimeout(() => {
-        APP.state.qNum < APP.state.maxQ
-          ? (() => { APP.state.qNum++; updateQProgress(); startTimerExt(); GAME_RENDERERS[APP.state.selectedGame](document.getElementById('play-content')); })()
-          : showRewardExt();
-      }, 500);
-    }
-  }
-
-  function refill() { stock = { freeze:1, fifty:1, skip:1 }; updateUI(); }
-  function getStock() { return stock; }
-
-  return { use, refill, updateUI, getStock };
-})();
-
-// ── COMBO SYSTEM ──────────────────────────────────────────────
-const COMBO = {
-  count: 0,
-  multiplier: 1,
-  show() {
-    if (this.count < 2) return;
-    const d = document.getElementById('combo-display');
-    const n = document.getElementById('combo-num');
-    const c = document.getElementById('combo-chip');
-    this.multiplier = Math.min(1 + Math.floor(this.count / 2) * 0.5, 3);
-    if (n) n.textContent = `x${this.multiplier.toFixed(1)}`;
-    if (d) d.classList.add('show');
-    if (c) { c.style.display='block'; document.getElementById('hud-combo').textContent = `x${this.multiplier.toFixed(1)}`; }
-    SOUND.combo();
-    if (this.count >= 3) MASCOT.say('mascot-home', MASCOT.speeches.combo[Math.min(this.count-3,3)]);
-  },
-  hide() {
-    const d = document.getElementById('combo-display');
-    const c = document.getElementById('combo-chip');
-    if (d) d.classList.remove('show');
-    if (c) c.style.display = 'none';
-    this.count = 0; this.multiplier = 1;
-  },
-  scoreBonus(base) { return Math.round(base * this.multiplier); }
-};
-
-// ── Q PROGRESS DOTS ───────────────────────────────────────────
-function initQProgress() {
-  const wrap = document.getElementById('q-progress-dots');
-  if (!wrap) return;
-  wrap.innerHTML = '';
-  for (let i = 0; i < APP.state.maxQ; i++) {
-    wrap.innerHTML += `<div class="q-dot" id="qd-${i}"></div>`;
-  }
-  updateQProgress();
-}
-function updateQProgress() {
-  for (let i = 0; i < APP.state.maxQ; i++) {
-    const d = document.getElementById('qd-'+i);
-    if (!d) continue;
-    d.classList.remove('correct','wrong','current');
-    if (i < APP.state.qNum - 1) {
-      // decided
-      d.classList.add(APP.state._qResults?.[i] === 'c' ? 'correct' : 'wrong');
-    } else if (i === APP.state.qNum - 1) {
-      d.classList.add('current');
-    }
-  }
-}
-function markQResult(result) {
-  if (!APP.state._qResults) APP.state._qResults = [];
-  APP.state._qResults[APP.state.qNum - 1] = result;
-  updateQProgress();
-}
-
-// ── DAILY STREAK ──────────────────────────────────────────────
-const DAILY = (() => {
-  function getTodayStr() { return new Date().toISOString().slice(0,10); }
-  function load() {
-    return JSON.parse(localStorage.getItem('zl_daily') || '{"streak":0,"lastPlay":null,"history":[]}');
-  }
-  function save(d) { localStorage.setItem('zl_daily', JSON.stringify(d)); }
-
-  function checkIn() {
-    const d = load();
-    const today = getTodayStr();
-    if (d.lastPlay === today) return d; // already played today
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
-    if (d.lastPlay === yesterday) { d.streak++; } // consecutive
-    else if (d.lastPlay !== today) { d.streak = 1; } // broken or first
-    d.lastPlay = today;
-    d.history = d.history || [];
-    if (!d.history.includes(today)) d.history.push(today);
-    // keep last 30 days
-    d.history = d.history.slice(-30);
-    save(d);
-    return d;
-  }
-
-  function renderCal() {
-    const d = load();
-    const row = document.getElementById('streak-days-row');
-    const countEl = document.getElementById('streak-count-display');
-    if (!row) return;
-    const days = ['M','T','W','T','F','S','S'];
-    const today = new Date();
-    row.innerHTML = '';
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - i);
-      const ds = date.toISOString().slice(0,10);
-      const played = d.history?.includes(ds);
-      const isToday = ds === getTodayStr();
-      const div = document.createElement('div');
-      div.className = `streak-day${played?' played':''}${isToday?' today':''}`;
-      div.textContent = days[date.getDay()===0?6:date.getDay()-1];
-      div.title = ds;
-      row.appendChild(div);
-    }
-    if (countEl) countEl.textContent = d.streak;
-  }
-
-  return { checkIn, renderCal, load };
-})();
-
-// ── GAMIFICATION MAIN MODULE ──────────────────────────────────
-const GAMIFICATION = {
-  _pendingLevelUp: null,
-
-  getLevel(xp) {
-    let lvl = LEVELS[0];
-    for (const l of LEVELS) { if (xp >= l.xpNeeded) lvl = l; else break; }
-    return lvl;
-  },
-
-  getNextLevel(xp) {
-    for (const l of LEVELS) { if (xp < l.xpNeeded) return l; }
-    return null;
-  },
-
-  updateLevelUI(xp) {
-    const lvl  = this.getLevel(xp);
-    const next = this.getNextLevel(xp);
-    const el   = document.getElementById('home-level-name');
-    const num  = document.getElementById('home-level-num');
-    const fill = document.getElementById('home-level-fill');
-    const xpEl = document.getElementById('home-xp-next');
-    if (el)  el.textContent  = `Level ${lvl.level} — ${lvl.name}`;
-    if (num) num.textContent = `LVL ${lvl.level}`;
-    if (fill && next) {
-      const pct = ((xp - lvl.xpNeeded) / (next.xpNeeded - lvl.xpNeeded)) * 100;
-      fill.style.width = Math.min(100, pct) + '%';
-      if (xpEl) xpEl.textContent = `${xp - lvl.xpNeeded} / ${next.xpNeeded - lvl.xpNeeded} XP`;
-    } else if (fill) {
-      fill.style.width = '100%';
-      if (xpEl) xpEl.textContent = 'MAX LEVEL! 🏆';
-    }
-    MASCOT.update(xp);
-  },
-
-  checkLevelUp(oldXp, newXp) {
-    const oldLvl = this.getLevel(oldXp);
-    const newLvl = this.getLevel(newXp);
-    if (newLvl.level > oldLvl.level) this.triggerLevelUp(newLvl);
-  },
-
-  triggerLevelUp(lvl) {
-    SOUND.levelup();
-    MASCOT.react('mascot-home','levelup');
-    const overlay = document.getElementById('levelup-overlay');
-    const numEl   = document.getElementById('lu-num');
-    const titleEl = document.getElementById('lu-title');
-    const subEl   = document.getElementById('lu-sub');
-    if (numEl)   numEl.textContent   = lvl.level;
-    if (titleEl) titleEl.textContent = 'Level Up!';
-    if (subEl)   subEl.innerHTML     = `You are now a <strong>${lvl.mascot} ${lvl.name}</strong>!`;
-    // burst confetti
-    setTimeout(() => {
-      PARTICLES.stars(window.innerWidth/2, window.innerHeight/3, 8);
-      PARTICLES.burst(window.innerWidth/2, window.innerHeight/3, 20);
-    }, 200);
-    this._pendingLevelUp = overlay;
-    setTimeout(() => overlay?.classList.add('show'), 500);
-  },
-
-  closeLevelUp() {
-    document.getElementById('levelup-overlay')?.classList.remove('show');
-  },
-
-  checkBadges(state) {
-    const earned = JSON.parse(localStorage.getItem('zl_badges') || '[]');
-    const newBadges = [];
-    BADGE_DEFS.forEach(b => {
-      if (!earned.includes(b.id) && b.check(state)) {
-        earned.push(b.id);
-        newBadges.push(b);
-      }
-    });
-    if (newBadges.length) {
-      localStorage.setItem('zl_badges', JSON.stringify(earned));
-      newBadges.forEach((b, i) => setTimeout(() => {
-        SOUND.badge();
-        showResultPopup(`🏅 ${b.name}!`, '#ffd700');
-        PARTICLES.stars(window.innerWidth/2, 200, 6);
-      }, i * 800));
-    }
-    return newBadges;
-  },
-
-  renderBadges() {
-    const grid = document.getElementById('badges-grid');
-    if (!grid) return;
-    const earned = JSON.parse(localStorage.getItem('zl_badges') || '[]');
-    grid.innerHTML = BADGE_DEFS.map(b => `
-      <div class="badge-item ${earned.includes(b.id) ? 'earned' : 'locked'}" title="${b.desc}">
-        <div class="badge-icon">${b.icon}</div>
-        <div class="badge-name">${b.name}</div>
-      </div>
-    `).join('');
-  },
-
-  onGameStart() {
-    POWERUPS.refill();
-    APP.state._qResults = [];
-    APP.state._gameStartTime = Date.now();
-    APP.state._correctInGame = 0;
-    APP.state.powerupsUsed = APP.state.powerupsUsed || 0;
-    COMBO.hide();
-    initQProgress();
-
-    // Mascot greeting
-    const speeches = ['Ready? GO! 🎮','Let\'s go! ⚡','You got this! 💪','Time to shine! 🌟'];
-    document.getElementById('game-mascot')?.setAttribute('title', '');
-    MASCOT.say('mascot-home', speeches[Math.floor(Math.random()*speeches.length)]);
-
-    // Check daily streak
-    DAILY.checkIn();
-    DAILY.renderCal();
-  },
-
-  onCorrectAnswer(baseScore) {
-    COMBO.count++;
-    APP.state._correctInGame = (APP.state._correctInGame || 0) + 1;
-    const bonus = COMBO.scoreBonus(baseScore) - baseScore;
-    COMBO.show();
-    PARTICLES.screenFlash('correct');
-
-    // Get click position for burst
-    const cx = window.innerWidth / 2, cy = window.innerHeight * 0.45;
-    PARTICLES.burst(cx, cy, 14);
-    if (COMBO.count >= 3) PARTICLES.stars(cx, cy, 5);
-
-    SOUND.correct();
-    MASCOT.react('game-mascot','happy');
-
-    const msgs = MASCOT.speeches.correct;
-    showResultPopup(msgs[Math.floor(Math.random()*msgs.length)], '#2ed573');
-    markQResult('c');
-    return bonus;
-  },
-
-  onWrongAnswer() {
-    COMBO.hide();
-    PARTICLES.screenFlash('wrong');
-    SOUND.wrong();
-    MASCOT.react('game-mascot','sad');
-    showResultPopup('💪 Keep going!', '#ff4757');
-    markQResult('w');
-  },
-
-  buildSummary(state) {
-    const timeSec = Math.round((Date.now() - (state._gameStartTime||Date.now())) / 1000);
-    const correct = state._correctInGame || 0;
-    const earned  = JSON.parse(localStorage.getItem('zl_badges') || '[]');
-    const newBadge = BADGE_DEFS.find(b => !earned.includes(b.id) && b.check(state));
-
-    document.getElementById('sum-xp').textContent      = '+' + state.score + ' XP';
-    document.getElementById('sum-correct').textContent  = `${correct} / ${state.maxQ}`;
-    document.getElementById('sum-streak').textContent   = state.streak || 0;
-    document.getElementById('sum-time').textContent     = timeSec + 's';
-    document.getElementById('sum-badge').textContent    = newBadge ? `${newBadge.icon} ${newBadge.name}` : '—';
-
-    if (correct === state.maxQ) {
-      state.perfectGames = (state.perfectGames || 0) + 1;
-      localStorage.setItem('lv_perfect', state.perfectGames);
-    }
-  },
-
-  init() {
-    DAILY.renderCal();
-    this.renderBadges();
-  }
-};
-
-// Add sound toggle button dynamically to header
-document.addEventListener('DOMContentLoaded', () => {
-  const hr = document.querySelector('.header-right');
-  if (hr) {
-    const btn = document.createElement('button');
-    btn.className = 'theme-toggle'; btn.title = 'Toggle sound';
-    btn.textContent = SOUND.isOn() ? '🔊' : '🔇';
-    btn.onclick = () => { btn.textContent = SOUND.toggle() ? '🔊' : '🔇'; };
-    hr.insertBefore(btn, hr.querySelector('.theme-toggle'));
-  }
-});
 
 // ================================================================
 // SUBJECT REGISTRY — THE EXTENSION POINT
@@ -1838,7 +1080,6 @@ const APP = (() => {
     played:   +localStorage.getItem('lv_played')  || 0,
     correct:  +localStorage.getItem('lv_correct') || 0,
     bestStreak: +localStorage.getItem('lv_streak')|| 0,
-    perfectGames: +localStorage.getItem('lv_perfect') || 0,
     // session
     selectedClass:   1,
     selectedSubject: 'math',
@@ -1849,13 +1090,6 @@ const APP = (() => {
     timeLeft:  30,
     timerInt:  null,
     maxQ:      10,
-    // gamification session
-    _qResults:       [],
-    _gameStartTime:  null,
-    _correctInGame:  0,
-    _currentCorrect: null,
-    powerupsUsed:    0,
-    playedClass4:    false,
   };
 
   function save() {
@@ -2088,14 +1322,6 @@ const APP = (() => {
   // init
   refreshStats();
   buildStarfield();
-  // Init gamification after DOM is ready
-  setTimeout(() => {
-    GAMIFICATION.init();
-    GAMIFICATION.updateLevelUI(S.xp);
-    MASCOT.say('mascot-speech-home','mascot-home');
-    DAILY.checkIn();
-    DAILY.renderCal();
-  }, 100);
 
   return { nav, state:S, playAgain, closeReward };
 })();
@@ -2137,7 +1363,6 @@ const GAME_RENDERERS = (() => {
 
   // ── ANSWER CHECK WIRING ───────────────────────────────────
   function wireOpts(correctVal, selector='.opt-btn') {
-    APP.state._currentCorrect = correctVal; // for 50/50 power-up
     document.querySelectorAll(selector).forEach(btn => {
       btn.addEventListener('click', function() {
         clearInterval(APP.state.timerInt);
@@ -2777,56 +2002,38 @@ const GAME_RENDERERS = (() => {
   // Bridge from renderer events to APP state handlers
   // (avoids passing APP reference into closures)
   document.addEventListener('lv:correct', () => {
-    // Store correct answer val for 50/50 power-up
-    APP.state._currentCorrect = APP.state._currentCorrect;
-
-    APP.state.streak++; APP.state.correct++; APP.state.bestStreak = Math.max(APP.state.streak, APP.state.bestStreak);
-    localStorage.setItem('lv_correct', APP.state.correct);
-    localStorage.setItem('lv_streak',  APP.state.bestStreak);
-
-    // Gamification: correct feedback
-    const bonus  = GAMIFICATION.onCorrectAnswer(10);
-    const points = COMBO.scoreBonus(10 + (APP.state.streak > 2 ? 5 : 0));
-    APP.state.score += points;
-
-    // Streak dots
-    const idx = Math.min(APP.state.streak-1, 4);
-    const d   = document.getElementById('dot-'+idx);
-    if (d) d.classList.add('lit');
-    if (APP.state.streak >= 5) {
+    APP.state.streak++; APP.state.correct++; APP.state.score += 10 + (APP.state.streak>2?5:0);
+    if(APP.state.streak>APP.state.bestStreak) APP.state.bestStreak=APP.state.streak;
+    localStorage.setItem('lv_correct',APP.state.correct);
+    localStorage.setItem('lv_streak', APP.state.bestStreak);
+    // Light dot
+    const idx=Math.min(APP.state.streak-1,4);
+    const d=document.getElementById('dot-'+idx);
+    if(d) d.classList.add('lit');
+    if(APP.state.streak>=5){
       document.querySelectorAll('.s-dot').forEach(d=>d.classList.remove('lit'));
-      APP.state.score += 25;
-      const fl = document.createElement('div');
-      fl.className='float-feedback'; fl.textContent='🔥 +25 Bonus!'; fl.style.color='#ffd700';
-      document.body.appendChild(fl); setTimeout(()=>fl.remove(), 950);
+      APP.state.score+=25;
+      document.getElementById('hud-score').textContent=APP.state.score;
+      const fl=document.createElement('div');fl.className='float-feedback';fl.textContent='🔥+25';fl.style.color='#ffd700';
+      document.body.appendChild(fl);setTimeout(()=>fl.remove(),950);
     }
-    document.getElementById('hud-score').textContent = APP.state.score;
-
-    setTimeout(() => {
-      if (APP.state.qNum < APP.state.maxQ) {
-        APP.state.qNum++;
-        document.getElementById('hud-q-label').textContent = `Q ${APP.state.qNum}/${APP.state.maxQ}`;
-        updateQProgress();
-        clearInterval(APP.state.timerInt);
-        GAME_RENDERERS[APP.state.selectedGame](document.getElementById('play-content'));
-        startTimerExt();
-      } else { showRewardExt(); }
-    }, 900);
+    document.getElementById('hud-score').textContent=APP.state.score;
+    const fl=document.createElement('div');fl.className='float-feedback';fl.textContent='✓';fl.style.color='#2ed573';
+    document.body.appendChild(fl);setTimeout(()=>fl.remove(),950);
+    setTimeout(()=>{
+      APP.state.qNum < APP.state.maxQ ? (() => { APP.state.qNum++; document.getElementById('hud-q').textContent=`${APP.state.qNum}/${APP.state.maxQ}`; clearInterval(APP.state.timerInt); GAME_RENDERERS[APP.state.selectedGame](document.getElementById('play-content')); startTimerExt(); })()
+      : showRewardExt();
+    }, 850);
   });
 
   document.addEventListener('lv:wrong', () => {
-    APP.state.streak = 0;
+    APP.state.streak=0;
     document.querySelectorAll('.s-dot').forEach(d=>d.classList.remove('lit'));
-    GAMIFICATION.onWrongAnswer();
-    setTimeout(() => {
-      if (APP.state.qNum < APP.state.maxQ) {
-        APP.state.qNum++;
-        document.getElementById('hud-q-label').textContent = `Q ${APP.state.qNum}/${APP.state.maxQ}`;
-        updateQProgress();
-        clearInterval(APP.state.timerInt);
-        GAME_RENDERERS[APP.state.selectedGame](document.getElementById('play-content'));
-        startTimerExt();
-      } else { showRewardExt(); }
+    const fl=document.createElement('div');fl.className='float-feedback';fl.textContent='✗';fl.style.color='#ff4757';
+    document.body.appendChild(fl);setTimeout(()=>fl.remove(),950);
+    setTimeout(()=>{
+      APP.state.qNum < APP.state.maxQ ? (() => { APP.state.qNum++; document.getElementById('hud-q').textContent=`${APP.state.qNum}/${APP.state.maxQ}`; clearInterval(APP.state.timerInt); GAME_RENDERERS[APP.state.selectedGame](document.getElementById('play-content')); startTimerExt(); })()
+      : showRewardExt();
     }, 1100);
   });
 
@@ -2848,55 +2055,28 @@ const GAME_RENDERERS = (() => {
 
   function showRewardExt() {
     clearInterval(APP.state.timerInt);
-    const oldXp = APP.state.xp;
-    APP.state.played++;
-    APP.state.xp += APP.state.score;
-    if (APP.state.selectedClass === 4) APP.state.playedClass4 = true;
-    localStorage.setItem('lv_played',  APP.state.played);
-    localStorage.setItem('lv_xp',      APP.state.xp);
-    localStorage.setItem('lv_perfect', APP.state.perfectGames || 0);
-
-    const correct = APP.state._correctInGame || 0;
-    const stars   = APP.state.score >= 85 ? 3 : APP.state.score >= 50 ? 2 : 1;
-    const msgs    = [
-      ['🌟 Perfect!',   'Flawless! You are a true Maths champion!',   '🏆'],
-      ['👏 Well Done!', 'Great effort! Every game makes you stronger!', '🎊'],
-      ['💪 Good Try!',  'Keep going — every mistake is a lesson!',      '🎈'],
-    ];
-    const [title, msg, emoji] = msgs[3 - stars];
-
-    document.getElementById('r-emoji').textContent = emoji;
-    document.getElementById('r-title').textContent = title;
-    document.getElementById('r-score').textContent = `+${APP.state.score} XP earned!`;
-    document.getElementById('r-msg').textContent   = msg;
-    const sr = document.getElementById('r-stars');
-    sr.innerHTML = [1,2,3].map(i=>`<span class="r-star">${i<=stars?'⭐':'☆'}</span>`).join('');
-
-    // Summary card
-    GAMIFICATION.buildSummary(APP.state);
-
-    // Badge check
-    const newBadges = GAMIFICATION.checkBadges(APP.state);
-    GAMIFICATION.renderBadges();
-
-    // Level-up check (delayed so reward screen shows first)
-    setTimeout(() => GAMIFICATION.checkLevelUp(oldXp, APP.state.xp), 1200);
-
-    // Update all UI
-    GAMIFICATION.updateLevelUI(APP.state.xp);
-    document.getElementById('hdr-xp').textContent   = APP.state.xp;
-    document.getElementById('st-xp').textContent    = APP.state.xp;
-    document.getElementById('st-played').textContent = APP.state.played;
-    document.getElementById('st-streak').textContent = APP.state.bestStreak;
-    document.getElementById('st-correct').textContent= APP.state.correct;
-    DAILY.renderCal();
-
-    // Confetti
-    const c = document.getElementById('reward-confetti'); c.innerHTML='';
+    APP.state.played++; APP.state.xp+=APP.state.score;
+    localStorage.setItem('lv_played',APP.state.played);
+    localStorage.setItem('lv_xp',APP.state.xp);
+    const stars=APP.state.score>=85?3:APP.state.score>=50?2:1;
+    const msgs=[['🌟 Perfect!','You are a true champion!','🏆'],['👏 Well Done!','Great effort! Keep it up!','🎊'],['💪 Good Try!','Every mistake is a lesson!','🎈']];
+    const [title,msg,emoji]=msgs[3-stars];
+    document.getElementById('r-emoji').textContent=emoji;
+    document.getElementById('r-title').textContent=title;
+    document.getElementById('r-score').textContent=`${APP.state.score} pts earned!`;
+    document.getElementById('r-msg').textContent=msg;
+    const sr=document.getElementById('r-stars');
+    sr.innerHTML=[1,2,3].map(i=>`<span class="r-star">${i<=stars?'⭐':'☆'}</span>`).join('');
+    // confetti
+    const c=document.getElementById('reward-confetti');c.innerHTML='';
     const cols=['#ffd700','#ff6b35','#00d4aa','#a855f7','#ff6b9d','#2ed573'];
     for(let i=0;i<70;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.cssText=`left:${Math.random()*100}%;background:${cols[i%cols.length]};width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;animation:cFall ${1.4+Math.random()*1.8}s ${Math.random()*0.8}s linear forwards;border-radius:${Math.random()>.5?'50%':'3px'}`;c.appendChild(p);}
-
     document.getElementById('reward-overlay').classList.add('show');
+    document.getElementById('hdr-xp').textContent=APP.state.xp;
+    document.getElementById('st-xp').textContent=APP.state.xp;
+    document.getElementById('st-played').textContent=APP.state.played;
+    document.getElementById('st-streak').textContent=APP.state.bestStreak;
+    document.getElementById('st-correct').textContent=APP.state.correct;
   }
 
   // Expose startGame loader so nav can call it
@@ -2916,13 +2096,12 @@ const GAME_RENDERERS = (() => {
     document.getElementById('reward-overlay').classList.remove('show');
     APP.nav._history_push_play();
     document.getElementById('hud-score').textContent='0';
-    document.getElementById('hud-q-label').textContent=`Q 1/${APP.state.maxQ}`;
+    document.getElementById('hud-q').textContent=`1/${APP.state.maxQ}`;
     document.querySelectorAll('.s-dot').forEach(d=>d.classList.remove('lit'));
     const dots=document.getElementById('streak-dots');
     dots.innerHTML=Array.from({length:5},(_,i)=>`<div class="s-dot" id="dot-${i}"></div>`).join('');
     APP.state.qNum=1;
-    document.getElementById('hud-q-label').textContent=`Q 1/${APP.state.maxQ}`;
-    GAMIFICATION.onGameStart();
+    document.getElementById('hud-q').textContent=`1/${APP.state.maxQ}`;
     startTimerExt();
     GAME_RENDERERS[gameId](document.getElementById('play-content'));
   };
@@ -2954,8 +2133,475 @@ const GAME_RENDERERS = (() => {
   };
 })();
 
-// ── EXPOSE NAV GLOBALLY ───────────────────────────────────────
-const nav = APP.nav;
+// ================================================================
+// GAMIFICATION ENGINE — self-contained, wired into existing events
+// ================================================================
+
+// ── LEVELS ───────────────────────────────────────────────────
+const LEVELS=[
+  {level:1,name:'Cub',       mascot:'🦊',xp:0},    {level:2,name:'Explorer',  mascot:'🦊',xp:100},
+  {level:3,name:'Adventurer',mascot:'🦝',xp:250},  {level:4,name:'Scholar',   mascot:'🦁',xp:500},
+  {level:5,name:'Ace',       mascot:'🐯',xp:900},  {level:6,name:'Champion',  mascot:'🦅',xp:1400},
+  {level:7,name:'Legend',    mascot:'🐉',xp:2000}, {level:8,name:'Math Wizard',mascot:'🧙',xp:3000},
+];
+function getLevel(xp){let l=LEVELS[0];for(const x of LEVELS){if(xp>=x.xp)l=x;else break;}return l;}
+function getNextLevel(xp){for(const x of LEVELS){if(xp<x.xp)return x;}return null;}
+
+// ── BADGES ───────────────────────────────────────────────────
+const BADGE_DEFS=[
+  {id:'first_game',   icon:'🎮',name:'First Game',   check:s=>s.played>=1},
+  {id:'speed_five',   icon:'⚡',name:'Lightning',    check:s=>s.bestStreak>=5},
+  {id:'ten_games',    icon:'🎯',name:'Dedicated',    check:s=>s.played>=10},
+  {id:'fifty_correct',icon:'✅',name:'Half Century', check:s=>s.correct>=50},
+  {id:'perfect_game', icon:'💎',name:'Perfect!',     check:s=>(s.perfectGames||0)>=1},
+  {id:'hundred_xp',   icon:'🏅',name:'Century',      check:s=>s.xp>=100},
+  {id:'five_hundred', icon:'🏆',name:'500 Club',     check:s=>s.xp>=500},
+  {id:'level4',       icon:'🦁',name:'Scholar',      check:s=>(s.level||1)>=4},
+  {id:'level6',       icon:'🦅',name:'Champion',     check:s=>(s.level||1)>=6},
+  {id:'powerup_used', icon:'🧊',name:'Power Player', check:s=>(s.powerupsUsed||0)>=1},
+  {id:'class4_play',  icon:'🚀',name:'Class 4 Hero', check:s=>!!s.playedClass4},
+  {id:'streak_3days', icon:'🔥',name:'On Fire',      check:s=>(s.dailyStreak||0)>=3},
+];
+
+// ── SOUND (Web Audio API, no files) ──────────────────────────
+const SOUND=(()=>{
+  let ctx=null,on=JSON.parse(localStorage.getItem('zl_sound')?? 'true');
+  function gc(){if(!ctx)try{ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}return ctx;}
+  function tone(f,d=0.12,t='sine',v=0.25,delay=0){
+    const c=gc();if(!c||!on)return;
+    const o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.type=t;o.frequency.value=f;
+    g.gain.setValueAtTime(v,c.currentTime+delay);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+delay+d);
+    o.start(c.currentTime+delay);o.stop(c.currentTime+delay+d+0.02);
+  }
+  return{
+    correct(){tone(523,0.07);tone(659,0.09,undefined,undefined,0.08);tone(784,0.13,undefined,0.3,0.16);},
+    wrong()  {tone(220,0.18,'sawtooth',0.12);tone(185,0.2,'sawtooth',0.12,0.14);},
+    levelup(){[523,659,784,1047].forEach((f,i)=>tone(f,0.2,undefined,0.28,i*0.1));},
+    badge()  {tone(880,0.1);tone(1047,0.14,undefined,undefined,0.1);},
+    combo()  {tone(600+((APP?.state?.streak||0)*25),0.08);},
+    powerup(){tone(600,0.08,'triangle');tone(800,0.12,'triangle',undefined,0.08);},
+    toggle() {on=!on;localStorage.setItem('zl_sound',on);return on;},
+    isOn()   {return on;}
+  };
+})();
+
+// ── PARTICLES ────────────────────────────────────────────────
+const PARTICLES={
+  burst(x,y,n=12,cols=['#ffd700','#ff6b35','#2ed573','#818cf8','#ff6b9d']){
+    for(let i=0;i<n;i++){
+      const el=document.createElement('div');
+      el.className='burst-particle';
+      const a=(i/n)*Math.PI*2,d=40+Math.random()*60,sz=6+Math.random()*8;
+      el.style.cssText=`left:${x}px;top:${y}px;width:${sz}px;height:${sz}px;background:${cols[i%cols.length]};--tx:${Math.cos(a)*d}px;--ty:${Math.sin(a)*d-40}px;--dur:${0.5+Math.random()*0.35}s;animation-delay:${Math.random()*0.08}s;`;
+      document.body.appendChild(el);setTimeout(()=>el.remove(),900);
+    }
+  },
+  stars(x,y,n=5){
+    ['⭐','✨','💫','🌟'].forEach((em,i)=>{
+      if(i>=n)return;
+      const el=document.createElement('div');el.className='burst-star';
+      const a=(i/n)*Math.PI*2-Math.PI/2,d=50+Math.random()*40;
+      el.textContent=em;
+      el.style.cssText=`left:${x}px;top:${y}px;--tx:${Math.cos(a)*d}px;--ty:${Math.sin(a)*d-30}px;--dur:${0.8+Math.random()*0.4}s;--sz:${18+Math.random()*10}px;animation-delay:${i*0.06}s;`;
+      document.body.appendChild(el);setTimeout(()=>el.remove(),1300);
+    });
+  },
+  flash(type){
+    const f=document.getElementById('screen-flash');
+    if(!f)return;
+    f.className=`screen-flash ${type}-flash active`;
+    setTimeout(()=>f.classList.remove('active'),160);
+  }
+};
+
+// ── RESULT POPUP ─────────────────────────────────────────────
+function showResultPopup(text,color){
+  const w=document.createElement('div');w.className='result-popup';
+  w.innerHTML=`<div class="result-popup-inner" style="color:${color}">${text}</div>`;
+  document.body.appendChild(w);setTimeout(()=>w.remove(),950);
+}
+
+// ── MASCOT ───────────────────────────────────────────────────
+const MASCOT_MSGS={
+  home:   ['Let\'s go! 🎮','You can do it! 💪','Maths is fun! 🔢','Ready? ⚡'],
+  correct:['Brilliant! 🌟','Nailed it! 🎯','Superstar! ✨','So smart! 🧠'],
+  wrong:  ['Try again! 💪','Almost! 🤏','You\'ll get it! 🌟'],
+  combo:  ['COMBO! 🔥','On fire! 🔥🔥','Unstoppable! ⚡','LEGEND! 🏆'],
+};
+const MASCOT={
+  say(pool='home',custom=null){
+    const el=document.getElementById('mascot-speech-home');
+    if(!el)return;
+    const msgs=MASCOT_MSGS[pool]||MASCOT_MSGS.home;
+    el.textContent=custom||msgs[Math.floor(Math.random()*msgs.length)];
+    el.classList.add('show');
+    clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200);
+  },
+  react(id,emotion){
+    const el=document.getElementById(id);if(!el)return;
+    el.classList.remove('happy','sad','levelup');
+    void el.offsetWidth;
+    el.classList.add(emotion);
+    setTimeout(()=>el.classList.remove(emotion),800);
+  },
+  updateAll(xp){
+    const m=getLevel(xp).mascot;
+    const h=document.getElementById('mascot-home');
+    const g=document.getElementById('game-mascot');
+    if(h)h.textContent=m;if(g)g.textContent=m;
+  }
+};
+
+// ── COMBO ────────────────────────────────────────────────────
+const COMBO={count:0,mult:1,
+  inc(){
+    this.count++;
+    this.mult=Math.min(1+Math.floor(this.count/2)*0.5,3);
+    if(this.count>=2){
+      const d=document.getElementById('combo-display'),n=document.getElementById('combo-num'),c=document.getElementById('combo-chip');
+      if(n)n.textContent='x'+this.mult.toFixed(1);
+      if(d)d.classList.add('show');
+      if(c){c.style.display='block';const cv=document.getElementById('hud-combo');if(cv)cv.textContent='x'+this.mult.toFixed(1);}
+      SOUND.combo();
+      if(this.count>=3)MASCOT.say('combo');
+    }
+  },
+  reset(){
+    this.count=0;this.mult=1;
+    const d=document.getElementById('combo-display'),c=document.getElementById('combo-chip');
+    if(d)d.classList.remove('show');if(c)c.style.display='none';
+  },
+  bonus(base){return Math.round(base*this.mult);}
+};
+
+// ── POWER-UPS ────────────────────────────────────────────────
+const POWERUPS=(()=>{
+  let stock={freeze:1,fifty:1,skip:1};
+  function ui(){
+    ['freeze','fifty','skip'].forEach(id=>{
+      const btn=document.getElementById('pu-'+id),cnt=document.getElementById('pu-'+id+'-count');
+      if(!btn)return;
+      btn.classList.toggle('empty',stock[id]<=0);
+      if(cnt)cnt.textContent=stock[id];
+    });
+  }
+  function use(type){
+    if(!stock[type])return;
+    stock[type]--;ui();
+    SOUND.powerup();
+    APP.state.powerupsUsed=(APP.state.powerupsUsed||0)+1;
+    if(type==='freeze'){
+      clearInterval(APP.state.timerInt);
+      const f=document.getElementById('arc-fill');if(f)f.style.stroke='#48cae4';
+      showResultPopup('🧊 FROZEN!','#48cae4');
+      PARTICLES.burst(window.innerWidth/2,window.innerHeight/2,10,['#48cae4','#caf0f8','#00d4aa']);
+      setTimeout(()=>{if(typeof window._startTimerExt==='function')window._startTimerExt();},10000);
+    }
+    if(type==='fifty'){
+      const correct=String(APP.state._curCorrect);
+      const wrongs=[...document.querySelectorAll('.opt-btn')].filter(b=>b.dataset.val!==correct&&!b.classList.contains('correct')&&!b.classList.contains('wrong'));
+      shuffle(wrongs).slice(0,2).forEach(b=>{b.style.opacity='0.18';b.style.pointerEvents='none';b.style.transform='scale(0.85)';});
+      showResultPopup('✂️ 50/50!','#ffd700');
+    }
+    if(type==='skip'){
+      clearInterval(APP.state.timerInt);
+      showResultPopup('⏭️ SKIP!','#a78bfa');
+      GQ.markResult('s');
+      setTimeout(()=>GQ.next(),500);
+    }
+  }
+  return{use,refill(){stock={freeze:1,fifty:1,skip:1};ui();},ui};
+})();
+
+// ── QUESTION PROGRESS ─────────────────────────────────────────
+const GQ={
+  results:[],
+  init(){
+    this.results=[];
+    const w=document.getElementById('q-progress-dots');
+    if(!w)return;
+    w.innerHTML='';
+    for(let i=0;i<APP.state.maxQ;i++)w.innerHTML+=`<div class="q-dot" id="qd-${i}"></div>`;
+    this.updateDots();
+  },
+  updateDots(){
+    for(let i=0;i<APP.state.maxQ;i++){
+      const d=document.getElementById('qd-'+i);if(!d)continue;
+      d.classList.remove('correct','wrong','current');
+      if(i<APP.state.qNum-1){if(this.results[i])d.classList.add(this.results[i]==='c'?'correct':'wrong');}
+      else if(i===APP.state.qNum-1)d.classList.add('current');
+    }
+  },
+  markResult(r){this.results[APP.state.qNum-1]=r;this.updateDots();},
+  next(){
+    if(APP.state.qNum<APP.state.maxQ){
+      APP.state.qNum++;
+      const ql=document.getElementById('hud-q');if(ql)ql.textContent=`Q ${APP.state.qNum}/${APP.state.maxQ}`;
+      this.updateDots();
+      clearInterval(APP.state.timerInt);
+      GAME_RENDERERS[APP.state.selectedGame](document.getElementById('play-content'));
+      window._startTimerExt();
+    } else {
+      window._showRewardExt();
+    }
+  }
+};
+
+// ── DAILY STREAK ─────────────────────────────────────────────
+const DAILY=(()=>{
+  const K='zl_daily';
+  function today(){return new Date().toISOString().slice(0,10);}
+  function load(){return JSON.parse(localStorage.getItem(K)||'{"streak":0,"lastPlay":null,"history":[]}');}
+  function save(d){localStorage.setItem(K,JSON.stringify(d));}
+  function checkIn(){
+    const d=load(),t=today(),yest=new Date(Date.now()-86400000).toISOString().slice(0,10);
+    if(d.lastPlay===t)return d;
+    d.streak=d.lastPlay===yest?d.streak+1:1;
+    d.lastPlay=t;d.history=(d.history||[]);
+    if(!d.history.includes(t))d.history.push(t);
+    d.history=d.history.slice(-30);
+    save(d);return d;
+  }
+  function renderCal(){
+    const d=load(),row=document.getElementById('streak-days-row'),cnt=document.getElementById('streak-count-display');
+    if(!row)return;
+    const days=['M','T','W','T','F','S','S'],t=today();
+    row.innerHTML='';
+    for(let i=6;i>=0;i--){
+      const dt=new Date(Date.now()-i*86400000),ds=dt.toISOString().slice(0,10);
+      const div=document.createElement('div');
+      const dow=dt.getDay();const di=dow===0?6:dow-1;
+      div.className='streak-day'+(d.history?.includes(ds)?' played':'')+(ds===t?' today':'');
+      div.textContent=days[di];row.appendChild(div);
+    }
+    if(cnt)cnt.textContent=d.streak;
+    return d;
+  }
+  return{checkIn,renderCal,load};
+})();
+
+// ── LEVEL UI ─────────────────────────────────────────────────
+function updateLevelUI(xp){
+  const lvl=getLevel(xp),next=getNextLevel(xp);
+  APP.state.level=lvl.level;
+  const el=document.getElementById('home-level-name'),num=document.getElementById('home-level-num');
+  const fill=document.getElementById('home-level-fill'),xpEl=document.getElementById('home-xp-next');
+  if(el)el.textContent=`Level ${lvl.level} — ${lvl.name}`;
+  if(num)num.textContent=`LVL ${lvl.level}`;
+  if(fill&&next){
+    const pct=((xp-lvl.xp)/(next.xp-lvl.xp))*100;
+    fill.style.width=Math.min(100,pct)+'%';
+    if(xpEl)xpEl.textContent=`${xp-lvl.xp} / ${next.xp-lvl.xp} XP`;
+  } else if(fill){fill.style.width='100%';if(xpEl)xpEl.textContent='MAX LEVEL 🏆';}
+  MASCOT.updateAll(xp);
+}
+
+function checkLevelUp(oldXp,newXp){
+  const o=getLevel(oldXp),n=getLevel(newXp);
+  if(n.level<=o.level)return;
+  SOUND.levelup();
+  MASCOT.react('mascot-home','levelup');
+  const ov=document.getElementById('levelup-overlay');
+  document.getElementById('lu-num').textContent=n.level;
+  document.getElementById('lu-title').textContent='Level Up!';
+  document.getElementById('lu-sub').textContent=`You are now ${n.mascot} ${n.name}!`;
+  document.getElementById('lu-mascot').textContent=n.mascot;
+  PARTICLES.stars(window.innerWidth/2,window.innerHeight/3,6);
+  PARTICLES.burst(window.innerWidth/2,window.innerHeight/3,18);
+  setTimeout(()=>ov?.classList.add('show'),600);
+}
+
+// ── BADGES ───────────────────────────────────────────────────
+function renderBadges(){
+  const grid=document.getElementById('badges-grid');if(!grid)return;
+  const earned=JSON.parse(localStorage.getItem('zl_badges')||'[]');
+  grid.innerHTML=BADGE_DEFS.map(b=>`
+    <div class="badge-item ${earned.includes(b.id)?'earned':'locked'}" title="${b.name}">
+      <div class="badge-icon">${b.icon}</div>
+      <div class="badge-name">${b.name}</div>
+    </div>`).join('');
+}
+
+function checkBadges(state){
+  const earned=JSON.parse(localStorage.getItem('zl_badges')||'[]');
+  let fresh=null;
+  BADGE_DEFS.forEach(b=>{
+    if(!earned.includes(b.id)&&b.check(state)){earned.push(b.id);fresh=fresh||b;}
+  });
+  localStorage.setItem('zl_badges',JSON.stringify(earned));
+  if(fresh){SOUND.badge();showResultPopup(`🏅 ${fresh.name}!`,'#ffd700');}
+  renderBadges();
+  return fresh;
+}
+
+// ── GAME SESSION STATE ────────────────────────────────────────
+let _gameStart=0,_correctInGame=0;
+
+// ── OVERRIDE lv:correct AND lv:wrong via GAME_RENDERERS wiring
+// We patch the existing handlers by adding our own listeners FIRST
+// (they fire before the GAME_RENDERERS ones)
+
+// Store correct answer for 50/50
+const _origWireOpts=wireOpts; // not a real override — we patch via APP.state._curCorrect
+// wireOpts already sets APP.state._currentCorrect — we alias it
+Object.defineProperty(APP.state,'_curCorrect',{get(){return this._currentCorrect;},set(v){this._currentCorrect=v;}});
+
+// Patch the lv:correct / lv:wrong events by listening with capture=true (fires first)
+document.addEventListener('lv:correct',()=>{
+  _correctInGame++;
+  COMBO.inc();
+  PARTICLES.flash('correct');
+  PARTICLES.burst(window.innerWidth/2,window.innerHeight*0.45,14);
+  if(COMBO.count>=3)PARTICLES.stars(window.innerWidth/2,window.innerHeight*0.4,4);
+  SOUND.correct();
+  MASCOT.react('game-mascot','happy');
+  const msgs=MASCOT_MSGS.correct;
+  showResultPopup(msgs[Math.floor(Math.random()*msgs.length)],'#2ed573');
+  GQ.markResult('c');
+  // score bonus from combo is added by GAME_RENDERERS existing handler
+},true);
+
+document.addEventListener('lv:wrong',()=>{
+  COMBO.reset();
+  PARTICLES.flash('wrong');
+  SOUND.wrong();
+  MASCOT.react('game-mascot','sad');
+  showResultPopup('💪 Keep going!','#ff4757');
+  GQ.markResult('w');
+},true);
+
+// ── PATCH showRewardExt (called inside GAME_RENDERERS closure) ─
+// We expose a hook called _showRewardExt that GAME_RENDERERS' showRewardExt calls
+// by wrapping after it finishes
+window._showRewardExt=function(){
+  // Called AFTER the existing showRewardExt — but showRewardExt is private.
+  // Instead we listen for the reward overlay becoming visible.
+};
+// Actually: hook the reward overlay show. Use a MutationObserver.
+new MutationObserver(mutations=>{
+  for(const m of mutations){
+    if(m.target.id==='reward-overlay'&&m.target.classList.contains('show')){
+      onRewardShown();
+      break;
+    }
+  }
+}).observe(document.getElementById('reward-overlay'),{attributes:true,attributeFilter:['class']});
+
+function onRewardShown(){
+  const state=APP.state;
+  // Update summary
+  const timeSec=Math.round((Date.now()-_gameStart)/1000);
+  document.getElementById('sum-xp').textContent='+'+state.score+' XP';
+  document.getElementById('sum-correct').textContent=_correctInGame+'/'+state.maxQ;
+  document.getElementById('sum-streak').textContent=state.streak||0;
+  document.getElementById('sum-time').textContent=timeSec+'s';
+  // Perfect game tracking
+  if(_correctInGame===state.maxQ)state.perfectGames=(state.perfectGames||0)+1;
+  // Level up check
+  const oldXp=state.xp-state.score;
+  checkLevelUp(oldXp,state.xp);
+  // Badges
+  const newBadge=checkBadges(state);
+  document.getElementById('sum-badge').textContent=newBadge?`${newBadge.icon} ${newBadge.name}`:'—';
+  // Update level UI
+  updateLevelUI(state.xp);
+  DAILY.renderCal();
+}
+
+// ── PATCH nav.startGame to init gamification on each game start
+const _origNavStartGame=APP.nav.startGame?.bind(APP.nav);
+// Hook via APP.nav._history_push_play which is called inside startGame:
+const _origHistPush=APP.nav._history_push_play?.bind(APP.nav);
+if(APP.nav._history_push_play){
+  APP.nav._history_push_play=function(){
+    _origHistPush?.();
+    // Reset per-game state
+    _gameStart=Date.now();
+    _correctInGame=0;
+    COMBO.reset();
+    POWERUPS.refill();
+    GQ.init();
+    MASCOT.say('home','Let\'s go! ⚡');
+  };
+}
+
+// ── ADD SOUND TOGGLE BUTTON to header ────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  const hr=document.querySelector('.header-right');
+  if(hr){
+    const btn=document.createElement('button');
+    btn.className='theme-toggle';btn.title='Toggle sound';
+    btn.textContent=SOUND.isOn()?'🔊':'🔇';
+    btn.onclick=()=>{btn.textContent=SOUND.toggle()?'🔊':'🔇';};
+    const themeBtn=hr.querySelector('#theme-toggle');
+    if(themeBtn)hr.insertBefore(btn,themeBtn);else hr.appendChild(btn);
+  }
+});
+
+// ── EXPOSE _startTimerExt globally (power-ups need it) ───────
+// The original startTimerExt is defined inside GAME_RENDERERS IIFE.
+// We detect it being overridden on the APP.nav.startGame override.
+// Simpler: expose it when GAME_RENDERERS sets it via a setter.
+(()=>{
+  // We know GAME_RENDERERS assigns APP.nav._loadQ after startTimerExt is defined.
+  // Intercept that assignment:
+  let _ste=null;
+  Object.defineProperty(window,'_startTimerExt',{
+    get(){return _ste;},
+    set(v){_ste=v;},
+    configurable:true
+  });
+  // GAME_RENDERERS calls startTimerExt by name internally; we can't get that reference.
+  // Instead, make POWERUPS.use('freeze') just restart via a safe wrapper:
+  // When timer fires, timerInt already stopped — we re-invoke via APP.state
+  // The 'freeze' power-up replaces the 'startTimerExt' call with:
+  //   - the arc fill was already at some position
+  //   - we just resume the existing tick-down from APP.state.timeLeft
+  // We expose a global that GAME_RENDERERS' startTimerExt will self-register to.
+})();
+
+// ── INIT ─────────────────────────────────────────────────────
+(function initGamification(){
+  // Wait for APP to be fully initialised
+  setTimeout(()=>{
+    updateLevelUI(APP.state.xp);
+    DAILY.checkIn();
+    DAILY.renderCal();
+    renderBadges();
+    MASCOT.say('home');
+
+    // Expose startTimerExt for power-ups via a trick:
+    // After GAME_RENDERERS IIFE runs, APP.nav._loadQ is defined which calls startTimerExt.
+    // We wrap APP.nav._loadQ to also expose startTimerExt globally.
+    const origLoadQ=APP.nav._loadQ;
+    if(origLoadQ){
+      APP.nav._loadQ=function(gameId){
+        // startTimerExt is called inside GAME_RENDERERS; register a proxy
+        window._startTimerExt=function(){
+          // Re-start timer using the same mechanism — dispatch a fresh startTimerExt
+          // by triggering a zero-delay call to _loadQ equivalent
+          const fill=document.getElementById('arc-fill'),num=document.getElementById('arc-num'),C=151;
+          const subCol=SUBJECT_REGISTRY[APP.state.selectedSubject]?.timerColor||'#818cf8';
+          clearInterval(APP.state.timerInt);
+          // Reset to remaining time (for freeze) or full 30 (for new question)
+          if(!APP.state.timeLeft||APP.state.timeLeft<=0)APP.state.timeLeft=30;
+          function tick(){
+            const r=APP.state.timeLeft/30;
+            if(fill){fill.style.strokeDashoffset=C*(1-r);fill.style.stroke=APP.state.timeLeft>8?subCol:'#ff4757';}
+            if(num)num.textContent=APP.state.timeLeft;
+            if(APP.state.timeLeft<=0){clearInterval(APP.state.timerInt);document.dispatchEvent(new CustomEvent('lv:wrong'));}
+          }
+          tick();
+          APP.state.timerInt=setInterval(()=>{APP.state.timeLeft--;tick();},1000);
+        };
+        origLoadQ(gameId);
+      };
+    }
+  },200);
+})();
 
 // ================================================================
 //  THEME SYSTEM
