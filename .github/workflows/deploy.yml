@@ -1,20 +1,172 @@
 # ============================================================
-#  Zipplearn — GitHub Actions CI/CD (fixed for GitHub Pages)
+#  Zipplearn — GitHub Actions CI/CD
 #
-#  THE ROOT CAUSE OF THE 404 ON PWA LAUNCH:
-#  GitHub Pages serves your app at:
-#    https://USERNAME.github.io/REPO-NAME/
-#  not at:
-#    https://USERNAME.github.io/
+#  Development: split into js/*.js files for maintainability
+#  Production:  workflow inlines all JS into index.html so
+#               GitHub Pages serves a single self-contained file
+#               with no extra HTTP requests.
 #
-#  So every absolute path "/" must become "/REPO-NAME/".
-#  This workflow auto-detects the repo name and patches:
-#    • manifest.json  → start_url, shortcuts urls, icon src paths
-#    • sw.js          → PRECACHE_ASSETS paths
-#    • index.html     → manifest link, favicon hrefs, sw registration path
-#
-#  Zero manual changes needed — push and it just works.
+#  The workflow also auto-detects the repo name and patches:
+#    • manifest.json  → start_url, icon src paths
+#    • sw.js          → PRECACHE_ASSETS paths + BUILD_VERSION
+#    • index.html     → manifest link, favicon hrefs, sw path,
+#                       <script src> tags → inlined <script> blocks
 # ============================================================
+
+name: Deploy Zipplearn to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect base path
+        id: base
+        run: |
+          REPO="${{ github.repository }}"
+          REPO_NAME="${REPO##*/}"
+          OWNER="${{ github.repository_owner }}"
+          if [ "$REPO_NAME" = "${OWNER}.github.io" ]; then
+            BASE_PATH=""
+            echo "Serving at root (user/org pages site)"
+          else
+            BASE_PATH="/${REPO_NAME}"
+            echo "Serving at subdirectory: ${BASE_PATH}"
+          fi
+          echo "BASE_PATH=${BASE_PATH}" >> $GITHUB_OUTPUT
+          echo "REPO_NAME=${REPO_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Generate build version
+        id: version
+        run: |
+          TS="${{ github.event.head_commit.timestamp }}"
+          if [ -z "$TS" ]; then TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ"); fi
+          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          BUILD_VERSION="${TS}-${SHA}"
+          echo "BUILD_VERSION=${BUILD_VERSION}" >> $GITHUB_OUTPUT
+          echo "Build version: ${BUILD_VERSION}"
+
+      - name: Build dist folder
+        env:
+          BASE_PATH: ${{ steps.base.outputs.BASE_PATH }}
+          BUILD_VERSION: ${{ steps.version.outputs.BUILD_VERSION }}
+        run: |
+          mkdir -p dist/icons
+
+          # ── Patch + version sw.js ────────────────────────────────
+          sed \
+            -e "s|__BUILD_VERSION__|${BUILD_VERSION}|g" \
+            -e "s|'/'|'${BASE_PATH}/'|g" \
+            -e "s|'/index.html'|'${BASE_PATH}/index.html'|g" \
+            -e "s|'/manifest.json'|'${BASE_PATH}/manifest.json'|g" \
+            sw.js > dist/sw.js
+
+          # ── Patch manifest.json ──────────────────────────────────
+          sed \
+            -e "s|\"start_url\": \"/\"|\"start_url\": \"${BASE_PATH}/\"|g" \
+            -e "s|\"url\": \"/?|\"url\": \"${BASE_PATH}/?|g" \
+            -e "s|\"src\": \"public/|\"src\": \"${BASE_PATH}/icons/|g" \
+            manifest.json > dist/manifest.json
+
+          # ── Icons ────────────────────────────────────────────────
+          if [ -d "public" ]; then
+            cp public/*.png dist/icons/ 2>/dev/null || true
+            cp public/*.svg dist/icons/ 2>/dev/null || true
+            cp public/*.ico dist/icons/ 2>/dev/null || true
+            cp public/*.xml dist/icons/ 2>/dev/null || true
+          fi
+
+          # ── Bundle: inline all js/*.js into index.html ───────────
+          # Start with patched index.html (fix manifest/favicon/sw paths)
+          sed \
+            -e "s|href=\"manifest.json\"|href=\"${BASE_PATH}/manifest.json\"|g" \
+            -e "s|href=\"public/|href=\"${BASE_PATH}/icons/|g" \
+            -e "s|register('sw.js')|register('${BASE_PATH}/sw.js')|g" \
+            index.html > /tmp/index_patched.html
+
+          # Replace the 5 <script src="js/X.js"> lines with inlined content
+          python3 - <<'PYEOF'
+          import re, os
+
+          with open('/tmp/index_patched.html') as f:
+              html = f.read()
+
+          # Find and replace each <script src="js/X.js"></script>
+          def inline_script(m):
+              src = m.group(1)          # e.g.  js/data.js
+              path = src               # relative to repo root
+              if os.path.exists(path):
+                  content = open(path).read()
+                  return f'<script>\n{content}\n</script>'
+              else:
+                  # file missing — emit a console warning but don't break build
+                  return f'<script>console.warn("Build: {src} not found");</script>'
+
+          html = re.sub(
+              r'<script src="(js/[^"]+)"></script>',
+              inline_script,
+              html
+          )
+
+          with open('dist/index.html', 'w') as f:
+              f.write(html)
+
+          print("Bundled index.html written.")
+          PYEOF
+
+          echo "── dist/ tree ──"
+          find dist -type f | sort
+          echo ""
+          echo "── index.html size ──"
+          wc -l dist/index.html
+          echo ""
+          echo "── start_url ──"
+          grep "start_url" dist/manifest.json
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Deployment summary
+        run: |
+          echo "## ⚡ Zipplearn Deployed!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| | |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **URL** | ${{ steps.deployment.outputs.page_url }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Base path** | \`${{ steps.base.outputs.BASE_PATH }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version** | \`${{ steps.version.outputs.BUILD_VERSION }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **By** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+
 
 name: Deploy Zipplearn to GitHub Pages
 
