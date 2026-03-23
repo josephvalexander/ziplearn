@@ -58,6 +58,23 @@ function wireOpts(container, correctLabel) {
   });
 }
 
+
+// ── Question tracker — prevents repeats within a game session ──
+const QTracker = (() => {
+  const _seen = {};
+  function reset(gameId) { _seen[gameId] = new Set(); }
+  function pick(gameId, pool) {
+    if (!_seen[gameId]) _seen[gameId] = new Set();
+    const seen = _seen[gameId];
+    if (seen.size >= pool.length) seen.clear();
+    const unseen = pool.filter((_, i) => !seen.has(i));
+    const chosen = unseen[Math.floor(Math.random() * unseen.length)];
+    seen.add(pool.indexOf(chosen));
+    return chosen;
+  }
+  return { reset, pick };
+})();
+
 const GAME_RENDERERS = (() => {
 
   // ── ANSWER CHECK WIRING ───────────────────────────────────
@@ -791,6 +808,7 @@ const GAME_RENDERERS = (() => {
   APP.nav.startGame=(gameId)=>{
     APP.state.selectedGame=gameId;
     APP.state.score=0; APP.state.qNum=0; APP.state.streak=0;
+    QTracker.reset(gameId);
     clearInterval(APP.state.timerInt);
     document.getElementById('reward-overlay').classList.remove('show');
     APP.nav._history_push_play();
@@ -1073,7 +1091,7 @@ const SCI_RENDERERS = (() => {
     return function(pc) {
       const pool = POOLS[gameId];
       if (!pool) { pc.innerHTML='<div class="q-text">🔬 Coming soon!</div>'; return; }
-      const q = pool[Math.floor(Math.random() * pool.length)];
+      const q = QTracker.pick(gameId, pool);
       mcq(pc, q.q, q.opts, q.correct, q.emoji);
     };
   }
@@ -1231,7 +1249,7 @@ const ENG_RENDERERS = (() => {
     return function(pc) {
       const pool = POOLS[gameId];
       if (!pool) { pc.innerHTML='<div class="q-text">📖 Coming soon!</div>'; return; }
-      const q = pool[Math.floor(Math.random() * pool.length)];
+      const q = QTracker.pick(gameId, pool);
       mcq(pc, q.q, q.opts, q.correct, q.emoji);
     };
   }
@@ -1629,7 +1647,7 @@ Object.assign(GAME_RENDERERS, SCI_RENDERERS, ENG_RENDERERS);
   Object.entries(EXTRA_POOLS).forEach(([id, pool]) => {
     if (!GAME_RENDERERS[id]) {
       GAME_RENDERERS[id] = function(pc) {
-        const q = pool[Math.floor(Math.random() * pool.length)];
+        const q = QTracker.pick(id, pool);
         mcq(pc, q.q, q.opts, q.correct, q.emoji);
       };
     }
@@ -1993,7 +2011,7 @@ Object.assign(GAME_RENDERERS, SCI_RENDERERS, ENG_RENDERERS);
 
   Object.entries(EVS_POOLS).forEach(([id, pool]) => {
     GAME_RENDERERS[id] = function(pc) {
-      const q = pool[Math.floor(Math.random() * pool.length)];
+      const q = QTracker.pick(id, pool);
       const opts = [...q.opts].sort(() => Math.random() - 0.5);
       pc.innerHTML = `
         <div class="q-emoji">${q.emoji || '🌿'}</div>

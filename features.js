@@ -973,3 +973,54 @@ const GARDEN = (() => {
 
   return { render, plantSeed, onEvsXP, gardenSpeak, getStage, load };
 })();
+
+
+// ── Refresh subject companion cards on home screen ────────────
+function refreshCompanionCards() {
+  // Math / Pet
+  const petData = (typeof PET !== 'undefined') ? PET.load() : null;
+  if (petData) {
+    const petEvo = PET.getEvo(petData.xp);
+    const el = document.getElementById('scc-pet-mini');
+    if (el) el.textContent = petEvo.icon;
+    const petEvos = [{xp:0},{xp:50},{xp:150},{xp:350},{xp:700},{xp:1200},{xp:2000}];
+    const curIdx = petEvos.findLastIndex(e => petData.xp >= e.xp);
+    const nextXp = petEvos[curIdx+1]?.xp || 2000;
+    const prevXp = petEvos[curIdx]?.xp || 0;
+    const pct = Math.min(100, ((petData.xp - prevXp) / (nextXp - prevXp)) * 100);
+    const bar = document.getElementById('scc-pet-bar');
+    if (bar) { bar.style.background = petEvo.color; bar.style.width = pct + '%'; }
+    const xpEl = document.getElementById('scc-pet-xp');
+    if (xpEl) xpEl.textContent = petData.xp + ' XP';
+  }
+  // Science / Lab
+  const sciXp = APP.state.sciXp || 0;
+  const sciStages = [{xp:0,icon:'🧪'},{xp:40,icon:'⚗️'},{xp:100,icon:'🔬'},{xp:200,icon:'⚡'},{xp:380,icon:'🌱'},{xp:600,icon:'🔭'},{xp:900,icon:'🤖'},{xp:1300,icon:'🚀'}];
+  const sciStage = sciStages.filter(s=>sciXp>=s.xp).pop()||sciStages[0];
+  const sciNext = sciStages.find(s=>sciXp<s.xp);
+  const sciEl = document.getElementById('scc-lab-mini'); if(sciEl) sciEl.textContent = sciStage.icon;
+  const sciBar = document.getElementById('scc-lab-bar');
+  if(sciBar&&sciNext){ const p=((sciXp-(sciStages[sciStages.indexOf(sciStage)]?.xp||0))/(sciNext.xp-(sciStages[sciStages.indexOf(sciStage)]?.xp||0)))*100; sciBar.style.width=Math.min(100,p)+'%'; }
+  const sciXpEl = document.getElementById('scc-lab-xp'); if(sciXpEl) sciXpEl.textContent = sciXp+' XP';
+  // English / Castle
+  const engXp = APP.state.engXp || 0;
+  const engStages = [{xp:0,icon:'🏗️'},{xp:40,icon:'🧱'},{xp:100,icon:'🗼'},{xp:200,icon:'🏛️'},{xp:380,icon:'🏰'},{xp:600,icon:'🚪'},{xp:900,icon:'🏴'},{xp:1300,icon:'👑'}];
+  const engStage = engStages.filter(s=>engXp>=s.xp).pop()||engStages[0];
+  const engNext = engStages.find(s=>engXp<s.xp);
+  const engEl = document.getElementById('scc-castle-mini'); if(engEl) engEl.textContent = engStage.icon;
+  const engBar = document.getElementById('scc-castle-bar');
+  if(engBar&&engNext){ const p=((engXp-(engStages[engStages.indexOf(engStage)]?.xp||0))/(engNext.xp-(engStages[engStages.indexOf(engStage)]?.xp||0)))*100; engBar.style.width=Math.min(100,p)+'%'; }
+  const engXpEl = document.getElementById('scc-castle-xp'); if(engXpEl) engXpEl.textContent = engXp+' XP';
+  // EVS / Garden
+  const evsXp = APP.state.evsXp || 0;
+  const evsStages = [{xp:0,icon:'🌱'},{xp:40,icon:'🌿'},{xp:100,icon:'🌼'},{xp:200,icon:'🥦'},{xp:380,icon:'🌳'},{xp:600,icon:'🦋'},{xp:900,icon:'🌺'},{xp:1300,icon:'🌍'}];
+  const evsStage = evsStages.filter(s=>evsXp>=s.xp).pop()||evsStages[0];
+  const evsNext = evsStages.find(s=>evsXp<s.xp);
+  const evsEl = document.getElementById('scc-garden-mini'); if(evsEl) evsEl.textContent = evsStage.icon;
+  const evsBar = document.getElementById('scc-garden-bar');
+  if(evsBar&&evsNext){ const p=((evsXp-(evsStages[evsStages.indexOf(evsStage)]?.xp||0))/(evsNext.xp-(evsStages[evsStages.indexOf(evsStage)]?.xp||0)))*100; evsBar.style.width=Math.min(100,p)+'%'; }
+  const evsXpEl = document.getElementById('scc-garden-xp'); if(evsXpEl) evsXpEl.textContent = evsXp+' XP';
+}
+
+// Call on first load
+setTimeout(refreshCompanionCards, 500);

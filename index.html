@@ -57,14 +57,15 @@
 [data-theme="dark"] {
   /* Backgrounds */
   --bg-void:    #0f0520;
+  --bg-base:    #0f0520;
   --bg-surface: #160830;
-  --bg-card:    rgba(255,255,255,0.04);
-  --bg-card-hover: rgba(255,255,255,0.07);
-  --bg-header:  rgba(15,5,32,0.82);
-  --bg-game-header: rgba(15,5,32,0.65);
-  --bg-overlay: rgba(15,5,32,0.96);
-  --bg-hud:     rgba(255,255,255,0.06);
-  --bg-input:   rgba(255,255,255,0.05);
+  --bg-card:    rgba(255,255,255,0.05);
+  --bg-card-hover: rgba(255,255,255,0.09);
+  --bg-header:  rgba(15,5,32,0.92);
+  --bg-game-header: rgba(15,5,32,0.75);
+  --bg-overlay: rgba(15,5,32,0.97);
+  --bg-hud:     rgba(255,255,255,0.07);
+  --bg-input:   rgba(255,255,255,0.06);
 
   /* Borders */
   --border:       rgba(255,255,255,0.07);
@@ -99,15 +100,16 @@
 /* ── LIGHT THEME ── */
 [data-theme="light"] {
   /* Backgrounds */
-  --bg-void:    #f0edff;
-  --bg-surface: #e8e2ff;
-  --bg-card:    rgba(255,255,255,0.72);
-  --bg-card-hover: rgba(255,255,255,0.92);
-  --bg-header:  rgba(240,237,255,0.88);
-  --bg-game-header: rgba(232,226,255,0.88);
-  --bg-overlay: rgba(240,237,255,0.97);
+  --bg-void:    #f4f0ff;
+  --bg-base:    #f4f0ff;
+  --bg-surface: #ebe5ff;
+  --bg-card:    rgba(255,255,255,0.85);
+  --bg-card-hover: rgba(255,255,255,0.98);
+  --bg-header:  rgba(244,240,255,0.95);
+  --bg-game-header: rgba(235,229,255,0.95);
+  --bg-overlay: rgba(244,240,255,0.98);
   --bg-hud:     rgba(99,102,241,0.08);
-  --bg-input:   rgba(99,102,241,0.06);
+  --bg-input:   rgba(99,102,241,0.07);
 
   /* Borders */
   --border:       rgba(99,102,241,0.14);
@@ -209,7 +211,7 @@ body {
   top:0; left:0; right:0; bottom:0;  /* occupy full viewport, block all clicks behind */
   padding-top:57px;                   /* clear the fixed app-header */
   z-index:10;
-  background:var(--bg-base);          /* opaque — nothing bleeds through */
+  background:var(--bg-void);          /* opaque — nothing bleeds through */
   flex-direction:column;
   overflow:hidden;
   animation:screenIn 0.35s var(--smooth) both;
@@ -837,6 +839,248 @@ body {
 .companion-tip { background:var(--bg-hud); border-radius:12px; padding:12px; font-size:13px; color:var(--text-secondary); }
 .companion-tip strong { color:var(--text-primary); display:block; margin-bottom:4px; font-size:13px; }
 
+
+/* ════════════════════════════════════════════════════════
+   RESPONSIVE — Mobile-first improvements
+   ════════════════════════════════════════════════════════ */
+
+/* Global box-sizing */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Screen layout: header is 57px fixed; bottom-nav ~65px; content fills between */
+.screen {
+  top: 57px !important;        /* start below fixed header */
+  padding-top: 0 !important;   /* remove old padding-top hack */
+}
+
+/* Scrollable screen content fills height between header and bottom-nav */
+.screen-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#scr-home .home-scroll { padding-bottom: 8px; }
+
+/* Back button — mobile: bottom-left floating pill */
+.nav-back {
+  display: none !important; /* hidden in header */
+}
+.nav-back.show {
+  display: inline-flex !important;
+  position: fixed;
+  bottom: 80px;           /* above bottom-nav */
+  left: 16px;
+  z-index: 600;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-hover);
+  border-radius: 24px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  align-items: center;
+  gap: 6px;
+  animation: backBtnIn 0.25s var(--bounce) both;
+}
+@keyframes backBtnIn {
+  from { opacity:0; transform:translateY(12px) scale(0.9); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+/* Bottom nav — compact on very small screens */
+.bottom-nav {
+  padding: 6px 4px max(6px, env(safe-area-inset-bottom));
+}
+.bnav-btn {
+  padding: 7px 2px 5px;
+  font-size: 8px;
+  min-width: 0;
+}
+.bnav-btn-icon { font-size: 17px; }
+
+/* App header — tighter on mobile */
+.app-header {
+  padding: 10px 14px;
+  height: 54px;
+}
+.screen { top: 54px !important; }
+
+/* Home hero — stack on tiny screens */
+@media (max-width: 380px) {
+  .home-hero { padding: 12px 12px 6px; }
+  .class-orbit { gap: 8px; padding: 0 10px 36px; }
+  .class-orb { width: 72px; height: 72px; }
+  .orb-num { font-size: 20px; }
+  .subject-shelf { padding: 0 10px; gap: 10px; }
+  .subject-planet { padding: 10px 12px; }
+  .sp-icon { width: 46px; height: 46px; font-size: 22px; }
+}
+
+/* Games grid — 2 columns on phone */
+@media (max-width: 480px) {
+  .games-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+  .game-tile { padding: 12px 10px; }
+  .tile-icon { font-size: 28px !important; }
+  .tile-name { font-size: 12px; }
+  .tile-desc { font-size: 10px; }
+}
+
+/* Companion screens — compact */
+@media (max-width: 480px) {
+  .companion-header { gap: 10px; }
+  .companion-svg-wrap { width: 120px; height: 120px; }
+  .companion-svg-wrap svg { width: 120px; height: 120px; }
+  .companion-name { font-size: 18px; }
+  .companion-xp-hdr { font-size: 22px; }
+  .companion-action-btn { font-size: 13px; padding: 12px; }
+  .companion-screen { padding: 12px 12px 70px; gap: 10px; }
+}
+
+/* Play screen — game content */
+@media (max-width: 480px) {
+  .q-text { font-size: 16px !important; }
+  .opt-btn { font-size: 13px !important; padding: 12px 8px !important; }
+  .q-emoji { font-size: 36px !important; }
+  .opts-2 { gap: 8px !important; }
+}
+
+/* Power-ups row */
+@media (max-width: 380px) {
+  .pu-row { gap: 6px; }
+  .pu-btn { font-size: 18px; padding: 8px; }
+}
+
+/* World card — tight */
+@media (max-width: 380px) {
+  .world-card { padding: 12px; gap: 10px; }
+  .world-name { font-size: 14px; }
+}
+
+/* Subject tab row — scroll horizontally */
+.subject-tab-row, .map-tab-row {
+  overflow-x: auto;
+  flex-wrap: nowrap !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+.subject-tab-row::-webkit-scrollbar, .map-tab-row::-webkit-scrollbar { display: none; }
+
+/* Stat chips — 2x2 grid */
+.stats-row {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+
+/* ── Subject Companion Cards (home screen) ─────────────────── */
+.subj-companion-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 16px 8px;
+}
+.scc-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 14px;
+  cursor: pointer;
+  transition: all 0.2s var(--smooth);
+  position: relative;
+  overflow: hidden;
+}
+.scc-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+  border-radius: 16px;
+}
+.scc-card:hover { transform: translateY(-2px); border-color: var(--border-hover); }
+.scc-card:hover::before { opacity: 0.06; }
+.scc-card:active { transform: scale(0.98); }
+.scc-math::before { background: var(--math-1); }
+.scc-sci::before  { background: var(--sci-1);  }
+.scc-eng::before  { background: var(--eng-1);  }
+.scc-evs::before  { background: var(--evs-1);  }
+
+/* Left section */
+.scc-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.scc-icon {
+  font-size: 26px;
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.scc-math .scc-icon { background: rgba(255,107,53,0.15); }
+.scc-sci .scc-icon  { background: rgba(0,212,170,0.15);  }
+.scc-eng .scc-icon  { background: rgba(168,85,247,0.15); }
+.scc-evs .scc-icon  { background: rgba(34,197,94,0.15);  }
+
+.scc-info { flex: 1; min-width: 0; }
+.scc-name { font-size: 15px; font-weight: 800; color: var(--text-primary); }
+.scc-sub  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* Right section — companion + progress bar */
+.scc-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 72px;
+  flex-shrink: 0;
+}
+.scc-companion-mini {
+  font-size: 28px;
+  line-height: 1;
+  animation: sccFloat 3s ease-in-out infinite;
+}
+@keyframes sccFloat {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+.scc-pbar-wrap {
+  width: 100%;
+  height: 5px;
+  background: var(--bg-hud);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.scc-pbar {
+  height: 100%;
+  background: var(--math-1);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.8s var(--smooth);
+}
+.scc-xp {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.scc-arrow {
+  font-size: 18px;
+  color: var(--text-muted);
+  margin-left: 4px;
+  transition: transform 0.2s;
+}
+.scc-card:hover .scc-arrow { transform: translateX(4px); color: var(--text-secondary); }
+
+/* Animate progress bar fill on load */
+@keyframes sccBarFill {
+  from { width: 0%; }
+}
+
 </style>
 
 <body>
@@ -923,61 +1167,99 @@ body {
     <div class="badges-grid" id="badges-grid"></div>
   </div>
 
-  <p class="section-heading">Subjects Universe</p>
-  <div class="subject-shelf">
-    <div class="subject-planet math" onclick="nav.openSubject('math', APP.state.selectedClass || 1)">
-      <div class="sp-icon math">🔢</div>
-      <div class="sp-info">
-        <div class="sp-name">Mathematics</div>
-        <div class="sp-desc">Numbers, shapes, patterns, and puzzles that make you think!</div>
-        <div class="sp-tags"><span class="sp-tag math-tag">Counting</span><span class="sp-tag math-tag">Arithmetic</span><span class="sp-tag math-tag">Fractions</span><span class="sp-tag math-tag">Geometry</span></div>
+  <p class="section-heading" style="margin-top:8px">Subjects &amp; Companions</p>
+  <div class="subj-companion-grid" id="subj-companion-grid">
+
+    <!-- MATHS — Pet -->
+    <div class="scc-card scc-math" onclick="nav.openSubject('math', APP.state.selectedClass||1)">
+      <div class="scc-left">
+        <div class="scc-icon">🔢</div>
+        <div class="scc-info">
+          <div class="scc-name">Mathematics</div>
+          <div class="scc-sub">Zippy the Pet</div>
+        </div>
       </div>
-      <div class="sp-meta"><span class="sp-badge live">● LIVE</span><span class="sp-arrow">→</span></div>
+      <div class="scc-right">
+        <div class="scc-companion-mini" id="scc-pet-mini">🥚</div>
+        <div class="scc-pbar-wrap">
+          <div class="scc-pbar" id="scc-pet-bar"></div>
+        </div>
+        <div class="scc-xp" id="scc-pet-xp">0 XP</div>
+      </div>
+      <div class="scc-arrow">→</div>
     </div>
-    <div class="subject-planet sci" onclick="nav.openSubject('sci', APP.state.selectedClass || 1)">
-      <div class="sp-icon sci">🔬</div>
-      <div class="sp-info"><div class="sp-name">Science</div><div class="sp-desc">Discover how the world works through fun experiments!</div><div class="sp-tags"><span class="sp-tag sci-tag">Living Things</span><span class="sp-tag sci-tag">Matter</span><span class="sp-tag sci-tag">Forces</span></div></div>
-      <div class="sp-meta"><span class="sp-badge live">&#x25CF; LIVE</span><span class="sp-arrow">→</span></div>
+
+    <!-- SCIENCE — Lab -->
+    <div class="scc-card scc-sci" onclick="nav.openSubject('sci', APP.state.selectedClass||1)">
+      <div class="scc-left">
+        <div class="scc-icon">🔬</div>
+        <div class="scc-info">
+          <div class="scc-name">Science</div>
+          <div class="scc-sub">Science Lab</div>
+        </div>
+      </div>
+      <div class="scc-right">
+        <div class="scc-companion-mini" id="scc-lab-mini">🧪</div>
+        <div class="scc-pbar-wrap">
+          <div class="scc-pbar" id="scc-lab-bar" style="background:var(--sci-1)"></div>
+        </div>
+        <div class="scc-xp" id="scc-lab-xp">0 XP</div>
+      </div>
+      <div class="scc-arrow">→</div>
     </div>
-    <div class="subject-planet eng" onclick="nav.openSubject('eng', APP.state.selectedClass || 1)">
-      <div class="sp-icon eng">📖</div>
-      <div class="sp-info"><div class="sp-name">English</div><div class="sp-desc">Read, write, spell and tell amazing stories!</div><div class="sp-tags"><span class="sp-tag eng-tag">Vocabulary</span><span class="sp-tag eng-tag">Grammar</span><span class="sp-tag eng-tag">Reading</span></div></div>
-      <div class="sp-meta"><span class="sp-badge live">&#x25CF; LIVE</span><span class="sp-arrow">→</span></div>
+
+    <!-- ENGLISH — Castle -->
+    <div class="scc-card scc-eng" onclick="nav.openSubject('eng', APP.state.selectedClass||1)">
+      <div class="scc-left">
+        <div class="scc-icon">📖</div>
+        <div class="scc-info">
+          <div class="scc-name">English</div>
+          <div class="scc-sub">Castle Builder</div>
+        </div>
+      </div>
+      <div class="scc-right">
+        <div class="scc-companion-mini" id="scc-castle-mini">🏗️</div>
+        <div class="scc-pbar-wrap">
+          <div class="scc-pbar" id="scc-castle-bar" style="background:var(--eng-1)"></div>
+        </div>
+        <div class="scc-xp" id="scc-castle-xp">0 XP</div>
+      </div>
+      <div class="scc-arrow">→</div>
     </div>
-    <div class="subject-planet evs" onclick="nav.openSubject('evs', APP.state.selectedClass || 1)">
-      <div class="sp-icon evs">🌿</div>
-      <div class="sp-info"><div class="sp-name">EVS / GK</div><div class="sp-desc">Our planet, our community, our amazing world!</div><div class="sp-tags"><span class="sp-tag evs-tag">Environment</span><span class="sp-tag evs-tag">Body</span><span class="sp-tag evs-tag">Community</span></div></div>
-      <div class="sp-meta"><span class="sp-badge live">&#x25CF; LIVE</span><span class="sp-arrow">→</span></div>
+
+    <!-- EVS/GK — Garden -->
+    <div class="scc-card scc-evs" onclick="nav.openSubject('evs', APP.state.selectedClass||1)">
+      <div class="scc-left">
+        <div class="scc-icon">🌿</div>
+        <div class="scc-info">
+          <div class="scc-name">EVS / GK</div>
+          <div class="scc-sub">Growing Garden</div>
+        </div>
+      </div>
+      <div class="scc-right">
+        <div class="scc-companion-mini" id="scc-garden-mini">🌱</div>
+        <div class="scc-pbar-wrap">
+          <div class="scc-pbar" id="scc-garden-bar" style="background:var(--evs-1)"></div>
+        </div>
+        <div class="scc-xp" id="scc-garden-xp">0 XP</div>
+      </div>
+      <div class="scc-arrow">→</div>
     </div>
+
   </div>
 
   </div><!-- /.home-scroll -->
 
   <!-- Bottom nav -->
-  <div class="bottom-nav">
-    <button class="bnav-btn bnav-active" data-tab="home" id="bnav-home" onclick="TABS.show('home')">
-      <span class="bnav-btn-icon">🏠</span>HOME
-    </button>
-    <button class="bnav-btn" data-tab="map" id="bnav-map" onclick="TABS.show('map')">
-      <span class="bnav-btn-icon">🗺️</span>MAP
-    </button>
-    <button class="bnav-btn" data-tab="pet" id="bnav-pet" onclick="TABS.show('pet')">
-      <span class="bnav-btn-icon" id="bnav-pet-icon">🥚</span>PET
-      <span class="bnav-alert" id="pet-hunger-dot" style="display:none">!</span>
-    </button>
-    <button class="bnav-btn" data-tab="castle" onclick="TABS.show('castle')">
-      <span class="bnav-btn-icon">🏰</span>CASTLE
-      <span class="bnav-alert" id="castle-brick-dot" style="display:none">!</span>
-    </button>
-    <button class="bnav-btn" data-tab="lab" onclick="TABS.show('lab')">
-      <span class="bnav-btn-icon">🔬</span>LAB
-      <span class="bnav-alert" id="lab-flask-dot" style="display:none">!</span>
-    </button>
-    <button class="bnav-btn" data-tab="garden" onclick="TABS.show('garden')">
-      <span class="bnav-btn-icon">&#x1F33F;</span>GK
-      <span class="bnav-alert" id="garden-seed-dot" style="display:none">!</span>
-    </button>
-  </div>
+    <nav class="bottom-nav">
+    <button class="bnav-btn bnav-active" data-tab="home" onclick="TABS.show('home')"><span class="bnav-btn-icon">🏠</span>HOME</button>
+    <button class="bnav-btn" data-tab="map" onclick="TABS.show('map')"><span class="bnav-btn-icon">🗺️</span>MAP</button>
+    <button class="bnav-btn" data-tab="pet" onclick="TABS.show('pet')"><span class="bnav-btn-icon">🥚</span>PET
+      <span class="bnav-alert" id="pet-hunger-dot" style="display:none">!</span></button>
+    <button class="bnav-btn" data-tab="castle" onclick="TABS.show('castle')"><span class="bnav-btn-icon">🏰</span>ENG</button>
+    <button class="bnav-btn" data-tab="lab" onclick="TABS.show('lab')"><span class="bnav-btn-icon">🔬</span>SCI</button>
+    <button class="bnav-btn" data-tab="garden" onclick="TABS.show('garden')"><span class="bnav-btn-icon">🌿</span>GK</button>
+  </nav>
 </section>
 
 <!-- ============================================================
@@ -989,13 +1271,15 @@ body {
     <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px">Complete each world to unlock the next!</p>
     <div class="world-map-wrap" id="world-map-wrap"></div>
   </div>
-  <div class="bottom-nav">
+    <nav class="bottom-nav">
     <button class="bnav-btn" data-tab="home" onclick="TABS.show('home')"><span class="bnav-btn-icon">🏠</span>HOME</button>
     <button class="bnav-btn bnav-active" data-tab="map" onclick="TABS.show('map')"><span class="bnav-btn-icon">🗺️</span>MAP</button>
-    <button class="bnav-btn" data-tab="pet" onclick="TABS.show('pet')"><span class="bnav-btn-icon" id="map-pet-icon">🥚</span>PET</button>
-    <button class="bnav-btn" data-tab="castle" onclick="TABS.show('castle')"><span class="bnav-btn-icon">🏰</span>CASTLE</button>
-    <button class="bnav-btn" data-tab="lab" onclick="TABS.show('lab')"><span class="bnav-btn-icon">🔬</span>LAB</button>
-  </div>
+    <button class="bnav-btn" data-tab="pet" onclick="TABS.show('pet')"><span class="bnav-btn-icon">🥚</span>PET
+      <span class="bnav-alert" id="pet-hunger-dot" style="display:none">!</span></button>
+    <button class="bnav-btn" data-tab="castle" onclick="TABS.show('castle')"><span class="bnav-btn-icon">🏰</span>ENG</button>
+    <button class="bnav-btn" data-tab="lab" onclick="TABS.show('lab')"><span class="bnav-btn-icon">🔬</span>SCI</button>
+    <button class="bnav-btn" data-tab="garden" onclick="TABS.show('garden')"><span class="bnav-btn-icon">🌿</span>GK</button>
+  </nav>
 </section>
 
 <!-- ============================================================
@@ -1050,11 +1334,15 @@ body {
       </div>
     </div>
   </div>
-  <div class="bottom-nav">
+    <nav class="bottom-nav">
     <button class="bnav-btn" data-tab="home" onclick="TABS.show('home')"><span class="bnav-btn-icon">🏠</span>HOME</button>
     <button class="bnav-btn" data-tab="map" onclick="TABS.show('map')"><span class="bnav-btn-icon">🗺️</span>MAP</button>
-    <button class="bnav-btn bnav-active" data-tab="pet" onclick="TABS.show('pet')"><span class="bnav-btn-icon" id="pet-pet-icon">🥚</span>PET</button>
-  </div>
+    <button class="bnav-btn bnav-active" data-tab="pet" onclick="TABS.show('pet')"><span class="bnav-btn-icon">🥚</span>PET
+      <span class="bnav-alert" id="pet-hunger-dot" style="display:none">!</span></button>
+    <button class="bnav-btn" data-tab="castle" onclick="TABS.show('castle')"><span class="bnav-btn-icon">🏰</span>ENG</button>
+    <button class="bnav-btn" data-tab="lab" onclick="TABS.show('lab')"><span class="bnav-btn-icon">🔬</span>SCI</button>
+    <button class="bnav-btn" data-tab="garden" onclick="TABS.show('garden')"><span class="bnav-btn-icon">🌿</span>GK</button>
+  </nav>
 </section>
 
 
@@ -1101,13 +1389,15 @@ body {
     </div>
   </div>
 
-  <div class="bottom-nav">
+    <nav class="bottom-nav">
     <button class="bnav-btn" data-tab="home" onclick="TABS.show('home')"><span class="bnav-btn-icon">🏠</span>HOME</button>
-    <button class="bnav-btn" data-tab="map"  onclick="TABS.show('map')"><span class="bnav-btn-icon">🗺️</span>MAP</button>
-    <button class="bnav-btn" data-tab="pet"  onclick="TABS.show('pet')"><span class="bnav-btn-icon" id="castle-pet-icon">🥚</span>PET</button>
-    <button class="bnav-btn bnav-active" data-tab="castle" onclick="TABS.show('castle')"><span class="bnav-btn-icon">🏰</span>CASTLE</button>
-    <button class="bnav-btn" data-tab="lab"  onclick="TABS.show('lab')"><span class="bnav-btn-icon">🔬</span>LAB</button>
-  </div>
+    <button class="bnav-btn" data-tab="map" onclick="TABS.show('map')"><span class="bnav-btn-icon">🗺️</span>MAP</button>
+    <button class="bnav-btn" data-tab="pet" onclick="TABS.show('pet')"><span class="bnav-btn-icon">🥚</span>PET
+      <span class="bnav-alert" id="pet-hunger-dot" style="display:none">!</span></button>
+    <button class="bnav-btn bnav-active" data-tab="castle" onclick="TABS.show('castle')"><span class="bnav-btn-icon">🏰</span>ENG</button>
+    <button class="bnav-btn" data-tab="lab" onclick="TABS.show('lab')"><span class="bnav-btn-icon">🔬</span>SCI</button>
+    <button class="bnav-btn" data-tab="garden" onclick="TABS.show('garden')"><span class="bnav-btn-icon">🌿</span>GK</button>
+  </nav>
 </section>
 
 <!-- ================================================================
@@ -1149,13 +1439,15 @@ body {
     </div>
   </div>
 
-  <div class="bottom-nav">
-    <button class="bnav-btn" data-tab="home"   onclick="TABS.show('home')"><span class="bnav-btn-icon">🏠</span>HOME</button>
-    <button class="bnav-btn" data-tab="map"    onclick="TABS.show('map')"><span class="bnav-btn-icon">🗺️</span>MAP</button>
-    <button class="bnav-btn" data-tab="pet"    onclick="TABS.show('pet')"><span class="bnav-btn-icon">🥚</span>PET</button>
-    <button class="bnav-btn" data-tab="castle" onclick="TABS.show('castle')"><span class="bnav-btn-icon">🏰</span>CASTLE</button>
-    <button class="bnav-btn bnav-active" data-tab="lab" onclick="TABS.show('lab')"><span class="bnav-btn-icon">🔬</span>LAB</button>
-  </div>
+    <nav class="bottom-nav">
+    <button class="bnav-btn" data-tab="home" onclick="TABS.show('home')"><span class="bnav-btn-icon">🏠</span>HOME</button>
+    <button class="bnav-btn" data-tab="map" onclick="TABS.show('map')"><span class="bnav-btn-icon">🗺️</span>MAP</button>
+    <button class="bnav-btn" data-tab="pet" onclick="TABS.show('pet')"><span class="bnav-btn-icon">🥚</span>PET
+      <span class="bnav-alert" id="pet-hunger-dot" style="display:none">!</span></button>
+    <button class="bnav-btn" data-tab="castle" onclick="TABS.show('castle')"><span class="bnav-btn-icon">🏰</span>ENG</button>
+    <button class="bnav-btn bnav-active" data-tab="lab" onclick="TABS.show('lab')"><span class="bnav-btn-icon">🔬</span>SCI</button>
+    <button class="bnav-btn" data-tab="garden" onclick="TABS.show('garden')"><span class="bnav-btn-icon">🌿</span>GK</button>
+  </nav>
 </section>
 
 
@@ -1189,14 +1481,15 @@ body {
       <span id="garden-tip-body">Every EVS/GK game earns seeds. Plant seeds to grow your garden!</span>
     </div>
   </div>
-  <div class="bottom-nav">
-    <button class="bnav-btn" data-tab="home"    onclick="TABS.show('home')"><span class="bnav-btn-icon">&#x1F3E0;</span>HOME</button>
-    <button class="bnav-btn" data-tab="map"     onclick="TABS.show('map')"><span class="bnav-btn-icon">&#x1F5FA;&#xFE0F;</span>MAP</button>
-    <button class="bnav-btn" data-tab="pet"     onclick="TABS.show('pet')"><span class="bnav-btn-icon" id="garden-pet-icon">&#x1F95A;</span>PET</button>
-    <button class="bnav-btn" data-tab="castle"  onclick="TABS.show('castle')"><span class="bnav-btn-icon">&#x1F3F0;</span>CASTLE</button>
-    <button class="bnav-btn" data-tab="lab"     onclick="TABS.show('lab')"><span class="bnav-btn-icon">&#x1F52C;</span>LAB</button>
-    <button class="bnav-btn bnav-active" data-tab="garden" onclick="TABS.show('garden')"><span class="bnav-btn-icon">&#x1F33F;</span>GK</button>
-  </div>
+    <nav class="bottom-nav">
+    <button class="bnav-btn" data-tab="home" onclick="TABS.show('home')"><span class="bnav-btn-icon">🏠</span>HOME</button>
+    <button class="bnav-btn" data-tab="map" onclick="TABS.show('map')"><span class="bnav-btn-icon">🗺️</span>MAP</button>
+    <button class="bnav-btn" data-tab="pet" onclick="TABS.show('pet')"><span class="bnav-btn-icon">🥚</span>PET
+      <span class="bnav-alert" id="pet-hunger-dot" style="display:none">!</span></button>
+    <button class="bnav-btn" data-tab="castle" onclick="TABS.show('castle')"><span class="bnav-btn-icon">🏰</span>ENG</button>
+    <button class="bnav-btn" data-tab="lab" onclick="TABS.show('lab')"><span class="bnav-btn-icon">🔬</span>SCI</button>
+    <button class="bnav-btn bnav-active" data-tab="garden" onclick="TABS.show('garden')"><span class="bnav-btn-icon">🌿</span>GK</button>
+  </nav>
 </section>
 
 <section class="screen" id="scr-games">
@@ -1310,7 +1603,7 @@ body {
 
 </script>
 <script>
-// ── js/data.js ──
+// ── data.js ──
 
 // data.js — SUBJECT_REGISTRY and GAME_REGISTRY (pure data, no DOM)
 /* jshint esversion:6 */
@@ -1652,7 +1945,7 @@ GAME_REGISTRY.evs = {
 };
 
 
-// ── js/app.js ──
+// ── app.js ──
 
 // app.js — APP module, nav, buildStarfield, THEME, Service Worker
 /* jshint esversion:6 */
@@ -1930,7 +2223,7 @@ const THEME = (() => {
 })();
 
 
-// ── js/renderers.js ──
+// ── renderers.js ──
 
 // renderers.js — helpers, GAME_RENDERERS, answer event bridge
 /* jshint esversion:6 */
@@ -1991,6 +2284,23 @@ function wireOpts(container, correctLabel) {
     });
   });
 }
+
+
+// ── Question tracker — prevents repeats within a game session ──
+const QTracker = (() => {
+  const _seen = {};
+  function reset(gameId) { _seen[gameId] = new Set(); }
+  function pick(gameId, pool) {
+    if (!_seen[gameId]) _seen[gameId] = new Set();
+    const seen = _seen[gameId];
+    if (seen.size >= pool.length) seen.clear();
+    const unseen = pool.filter((_, i) => !seen.has(i));
+    const chosen = unseen[Math.floor(Math.random() * unseen.length)];
+    seen.add(pool.indexOf(chosen));
+    return chosen;
+  }
+  return { reset, pick };
+})();
 
 const GAME_RENDERERS = (() => {
 
@@ -2725,6 +3035,7 @@ const GAME_RENDERERS = (() => {
   APP.nav.startGame=(gameId)=>{
     APP.state.selectedGame=gameId;
     APP.state.score=0; APP.state.qNum=0; APP.state.streak=0;
+    QTracker.reset(gameId);
     clearInterval(APP.state.timerInt);
     document.getElementById('reward-overlay').classList.remove('show');
     APP.nav._history_push_play();
@@ -3007,7 +3318,7 @@ const SCI_RENDERERS = (() => {
     return function(pc) {
       const pool = POOLS[gameId];
       if (!pool) { pc.innerHTML='<div class="q-text">🔬 Coming soon!</div>'; return; }
-      const q = pool[Math.floor(Math.random() * pool.length)];
+      const q = QTracker.pick(gameId, pool);
       mcq(pc, q.q, q.opts, q.correct, q.emoji);
     };
   }
@@ -3165,7 +3476,7 @@ const ENG_RENDERERS = (() => {
     return function(pc) {
       const pool = POOLS[gameId];
       if (!pool) { pc.innerHTML='<div class="q-text">📖 Coming soon!</div>'; return; }
-      const q = pool[Math.floor(Math.random() * pool.length)];
+      const q = QTracker.pick(gameId, pool);
       mcq(pc, q.q, q.opts, q.correct, q.emoji);
     };
   }
@@ -3563,7 +3874,7 @@ Object.assign(GAME_RENDERERS, SCI_RENDERERS, ENG_RENDERERS);
   Object.entries(EXTRA_POOLS).forEach(([id, pool]) => {
     if (!GAME_RENDERERS[id]) {
       GAME_RENDERERS[id] = function(pc) {
-        const q = pool[Math.floor(Math.random() * pool.length)];
+        const q = QTracker.pick(id, pool);
         mcq(pc, q.q, q.opts, q.correct, q.emoji);
       };
     }
@@ -3927,7 +4238,7 @@ Object.assign(GAME_RENDERERS, SCI_RENDERERS, ENG_RENDERERS);
 
   Object.entries(EVS_POOLS).forEach(([id, pool]) => {
     GAME_RENDERERS[id] = function(pc) {
-      const q = pool[Math.floor(Math.random() * pool.length)];
+      const q = QTracker.pick(id, pool);
       const opts = [...q.opts].sort(() => Math.random() - 0.5);
       pc.innerHTML = `
         <div class="q-emoji">${q.emoji || '🌿'}</div>
@@ -3942,7 +4253,7 @@ Object.assign(GAME_RENDERERS, SCI_RENDERERS, ENG_RENDERERS);
 })();
 
 
-// ── js/gamification.js ──
+// ── gamification.js ──
 
 // gamification.js — LEVELS, BADGE_DEFS, SOUND, PARTICLES, MASCOT,
 //                    COMBO, POWERUPS, GQ, DAILY, level/badge helpers, init
@@ -4421,7 +4732,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 // ================================================================
 
 
-// ── js/features.js ──
+// ── features.js ──
 
 // features.js — TABS, ADVENTURE_MAP, PET (Maths), CASTLE (English), LAB (Science)
 /* jshint esversion:6 */
@@ -5398,6 +5709,57 @@ const GARDEN = (() => {
 
   return { render, plantSeed, onEvsXP, gardenSpeak, getStage, load };
 })();
+
+
+// ── Refresh subject companion cards on home screen ────────────
+function refreshCompanionCards() {
+  // Math / Pet
+  const petData = (typeof PET !== 'undefined') ? PET.load() : null;
+  if (petData) {
+    const petEvo = PET.getEvo(petData.xp);
+    const el = document.getElementById('scc-pet-mini');
+    if (el) el.textContent = petEvo.icon;
+    const petEvos = [{xp:0},{xp:50},{xp:150},{xp:350},{xp:700},{xp:1200},{xp:2000}];
+    const curIdx = petEvos.findLastIndex(e => petData.xp >= e.xp);
+    const nextXp = petEvos[curIdx+1]?.xp || 2000;
+    const prevXp = petEvos[curIdx]?.xp || 0;
+    const pct = Math.min(100, ((petData.xp - prevXp) / (nextXp - prevXp)) * 100);
+    const bar = document.getElementById('scc-pet-bar');
+    if (bar) { bar.style.background = petEvo.color; bar.style.width = pct + '%'; }
+    const xpEl = document.getElementById('scc-pet-xp');
+    if (xpEl) xpEl.textContent = petData.xp + ' XP';
+  }
+  // Science / Lab
+  const sciXp = APP.state.sciXp || 0;
+  const sciStages = [{xp:0,icon:'🧪'},{xp:40,icon:'⚗️'},{xp:100,icon:'🔬'},{xp:200,icon:'⚡'},{xp:380,icon:'🌱'},{xp:600,icon:'🔭'},{xp:900,icon:'🤖'},{xp:1300,icon:'🚀'}];
+  const sciStage = sciStages.filter(s=>sciXp>=s.xp).pop()||sciStages[0];
+  const sciNext = sciStages.find(s=>sciXp<s.xp);
+  const sciEl = document.getElementById('scc-lab-mini'); if(sciEl) sciEl.textContent = sciStage.icon;
+  const sciBar = document.getElementById('scc-lab-bar');
+  if(sciBar&&sciNext){ const p=((sciXp-(sciStages[sciStages.indexOf(sciStage)]?.xp||0))/(sciNext.xp-(sciStages[sciStages.indexOf(sciStage)]?.xp||0)))*100; sciBar.style.width=Math.min(100,p)+'%'; }
+  const sciXpEl = document.getElementById('scc-lab-xp'); if(sciXpEl) sciXpEl.textContent = sciXp+' XP';
+  // English / Castle
+  const engXp = APP.state.engXp || 0;
+  const engStages = [{xp:0,icon:'🏗️'},{xp:40,icon:'🧱'},{xp:100,icon:'🗼'},{xp:200,icon:'🏛️'},{xp:380,icon:'🏰'},{xp:600,icon:'🚪'},{xp:900,icon:'🏴'},{xp:1300,icon:'👑'}];
+  const engStage = engStages.filter(s=>engXp>=s.xp).pop()||engStages[0];
+  const engNext = engStages.find(s=>engXp<s.xp);
+  const engEl = document.getElementById('scc-castle-mini'); if(engEl) engEl.textContent = engStage.icon;
+  const engBar = document.getElementById('scc-castle-bar');
+  if(engBar&&engNext){ const p=((engXp-(engStages[engStages.indexOf(engStage)]?.xp||0))/(engNext.xp-(engStages[engStages.indexOf(engStage)]?.xp||0)))*100; engBar.style.width=Math.min(100,p)+'%'; }
+  const engXpEl = document.getElementById('scc-castle-xp'); if(engXpEl) engXpEl.textContent = engXp+' XP';
+  // EVS / Garden
+  const evsXp = APP.state.evsXp || 0;
+  const evsStages = [{xp:0,icon:'🌱'},{xp:40,icon:'🌿'},{xp:100,icon:'🌼'},{xp:200,icon:'🥦'},{xp:380,icon:'🌳'},{xp:600,icon:'🦋'},{xp:900,icon:'🌺'},{xp:1300,icon:'🌍'}];
+  const evsStage = evsStages.filter(s=>evsXp>=s.xp).pop()||evsStages[0];
+  const evsNext = evsStages.find(s=>evsXp<s.xp);
+  const evsEl = document.getElementById('scc-garden-mini'); if(evsEl) evsEl.textContent = evsStage.icon;
+  const evsBar = document.getElementById('scc-garden-bar');
+  if(evsBar&&evsNext){ const p=((evsXp-(evsStages[evsStages.indexOf(evsStage)]?.xp||0))/(evsNext.xp-(evsStages[evsStages.indexOf(evsStage)]?.xp||0)))*100; evsBar.style.width=Math.min(100,p)+'%'; }
+  const evsXpEl = document.getElementById('scc-garden-xp'); if(evsXpEl) evsXpEl.textContent = evsXp+' XP';
+}
+
+// Call on first load
+setTimeout(refreshCompanionCards, 500);
 
 </script>
 </body>
