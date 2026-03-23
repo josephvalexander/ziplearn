@@ -1198,6 +1198,62 @@ body {
   padding: 12px !important;
 }
 
+
+/* ── Subject card with inline class selector ───────────────── */
+.scc-top-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.scc-class-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  width: 100%;
+}
+.scc-cls {
+  flex: 1;
+  padding: 7px 4px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255,107,53,0.3);
+  background: rgba(255,107,53,0.08);
+  color: var(--math-1);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+.scc-cls:hover, .scc-cls:active {
+  transform: scale(1.06);
+  background: rgba(255,107,53,0.18);
+}
+.scc-cls-sci {
+  border-color: rgba(0,212,170,0.3);
+  background: rgba(0,212,170,0.08);
+  color: var(--sci-1);
+}
+.scc-cls-sci:hover { background: rgba(0,212,170,0.18); }
+.scc-cls-eng {
+  border-color: rgba(168,85,247,0.3);
+  background: rgba(168,85,247,0.08);
+  color: var(--eng-2);
+}
+.scc-cls-eng:hover { background: rgba(168,85,247,0.18); }
+.scc-cls-evs {
+  border-color: rgba(34,197,94,0.3);
+  background: rgba(34,197,94,0.08);
+  color: var(--evs-1);
+}
+.scc-cls-evs:hover { background: rgba(34,197,94,0.18); }
+
+/* ── Card no longer needs scc-arrow since class buttons are there ── */
+.scc-arrow { display: none; }
+/* ── scc-left is now scc-top-row child ── */
+.scc-left { display: contents; }
+
 </style>
 
 <body>
@@ -1227,9 +1283,11 @@ body {
   <div class="header-right">
     <div class="xp-badge" title="Your total XP">⭐ <span id="hdr-xp">0</span></div>
     <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode" onclick="THEME.toggle()">🌙</button>
-    <button class="nav-back" id="nav-back" onclick="nav.goBack()">← Back</button>
   </div>
 </header>
+
+<!-- Floating back button - position:fixed works here outside header -->
+<button class="nav-back" id="nav-back" onclick="nav.goBack()">← Back</button>
 
 <!-- ============================================================
      SCREEN: HOME
@@ -1257,93 +1315,103 @@ body {
         </div>
       </div>
 
-      <!-- Stats mini row -->
-      <div class="home-stats-mini">
-        <div class="hsm-chip">⭐ <span id="st-xp">0</span></div>
-        <div class="hsm-chip">🎮 <span id="st-played">0</span></div>
-        <div class="hsm-chip">✅ <span id="st-correct">0</span></div>
-        <div class="hsm-chip">🏆 <span id="st-streak">0</span></div>
-      </div>
+      <!-- hidden stat elements needed by JS -->
+      <span id="st-xp" style="display:none">0</span>
+      <span id="st-played" style="display:none">0</span>
+      <span id="st-correct" style="display:none">0</span>
+      <span id="st-streak" style="display:none">0</span>
     </div>
 
     <!-- Subject + companion cards — THE MAIN CONTENT -->
     <p class="section-heading" style="margin-top:4px;margin-bottom:8px">Choose Your Subject</p>
   <div class="subj-companion-grid" id="subj-companion-grid">
 
-    <!-- MATHS — Pet -->
-    <div class="scc-card scc-math" onclick="nav.openSubject('math', APP.state.selectedClass||1)">
-      <div class="scc-left">
+    <!-- MATHS -->
+    <div class="scc-card scc-math">
+      <div class="scc-top-row">
         <div class="scc-icon">🔢</div>
         <div class="scc-info">
           <div class="scc-name">Mathematics</div>
           <div class="scc-sub">Zippy the Pet</div>
         </div>
-      </div>
-      <div class="scc-right">
-        <div class="scc-companion-mini" id="scc-pet-mini">🥚</div>
-        <div class="scc-pbar-wrap">
-          <div class="scc-pbar" id="scc-pet-bar"></div>
+        <div class="scc-right">
+          <div class="scc-companion-mini" id="scc-pet-mini">🥚</div>
+          <div class="scc-pbar-wrap"><div class="scc-pbar" id="scc-pet-bar"></div></div>
+          <div class="scc-xp" id="scc-pet-xp">0 XP</div>
         </div>
-        <div class="scc-xp" id="scc-pet-xp">0 XP</div>
       </div>
-      <div class="scc-arrow">→</div>
+      <div class="scc-class-row">
+        <button class="scc-cls" onclick="nav.openSubject('math',1)">Class 1</button>
+        <button class="scc-cls" onclick="nav.openSubject('math',2)">Class 2</button>
+        <button class="scc-cls" onclick="nav.openSubject('math',3)">Class 3</button>
+        <button class="scc-cls" onclick="nav.openSubject('math',4)">Class 4</button>
+      </div>
     </div>
 
-    <!-- SCIENCE — Lab -->
-    <div class="scc-card scc-sci" onclick="nav.openSubject('sci', APP.state.selectedClass||1)">
-      <div class="scc-left">
+    <!-- SCIENCE -->
+    <div class="scc-card scc-sci">
+      <div class="scc-top-row">
         <div class="scc-icon">🔬</div>
         <div class="scc-info">
           <div class="scc-name">Science</div>
           <div class="scc-sub">Science Lab</div>
         </div>
-      </div>
-      <div class="scc-right">
-        <div class="scc-companion-mini" id="scc-lab-mini">🧪</div>
-        <div class="scc-pbar-wrap">
-          <div class="scc-pbar" id="scc-lab-bar" style="background:var(--sci-1)"></div>
+        <div class="scc-right">
+          <div class="scc-companion-mini" id="scc-lab-mini">🧪</div>
+          <div class="scc-pbar-wrap"><div class="scc-pbar" id="scc-lab-bar" style="background:var(--sci-1)"></div></div>
+          <div class="scc-xp" id="scc-lab-xp">0 XP</div>
         </div>
-        <div class="scc-xp" id="scc-lab-xp">0 XP</div>
       </div>
-      <div class="scc-arrow">→</div>
+      <div class="scc-class-row">
+        <button class="scc-cls scc-cls-sci" onclick="nav.openSubject('sci',1)">Class 1</button>
+        <button class="scc-cls scc-cls-sci" onclick="nav.openSubject('sci',2)">Class 2</button>
+        <button class="scc-cls scc-cls-sci" onclick="nav.openSubject('sci',3)">Class 3</button>
+        <button class="scc-cls scc-cls-sci" onclick="nav.openSubject('sci',4)">Class 4</button>
+      </div>
     </div>
 
-    <!-- ENGLISH — Castle -->
-    <div class="scc-card scc-eng" onclick="nav.openSubject('eng', APP.state.selectedClass||1)">
-      <div class="scc-left">
+    <!-- ENGLISH -->
+    <div class="scc-card scc-eng">
+      <div class="scc-top-row">
         <div class="scc-icon">📖</div>
         <div class="scc-info">
           <div class="scc-name">English</div>
           <div class="scc-sub">Castle Builder</div>
         </div>
-      </div>
-      <div class="scc-right">
-        <div class="scc-companion-mini" id="scc-castle-mini">🏗️</div>
-        <div class="scc-pbar-wrap">
-          <div class="scc-pbar" id="scc-castle-bar" style="background:var(--eng-1)"></div>
+        <div class="scc-right">
+          <div class="scc-companion-mini" id="scc-castle-mini">🏗️</div>
+          <div class="scc-pbar-wrap"><div class="scc-pbar" id="scc-castle-bar" style="background:var(--eng-1)"></div></div>
+          <div class="scc-xp" id="scc-castle-xp">0 XP</div>
         </div>
-        <div class="scc-xp" id="scc-castle-xp">0 XP</div>
       </div>
-      <div class="scc-arrow">→</div>
+      <div class="scc-class-row">
+        <button class="scc-cls scc-cls-eng" onclick="nav.openSubject('eng',1)">Class 1</button>
+        <button class="scc-cls scc-cls-eng" onclick="nav.openSubject('eng',2)">Class 2</button>
+        <button class="scc-cls scc-cls-eng" onclick="nav.openSubject('eng',3)">Class 3</button>
+        <button class="scc-cls scc-cls-eng" onclick="nav.openSubject('eng',4)">Class 4</button>
+      </div>
     </div>
 
-    <!-- EVS/GK — Garden -->
-    <div class="scc-card scc-evs" onclick="nav.openSubject('evs', APP.state.selectedClass||1)">
-      <div class="scc-left">
+    <!-- EVS / GK -->
+    <div class="scc-card scc-evs">
+      <div class="scc-top-row">
         <div class="scc-icon">🌿</div>
         <div class="scc-info">
           <div class="scc-name">EVS / GK</div>
           <div class="scc-sub">Growing Garden</div>
         </div>
-      </div>
-      <div class="scc-right">
-        <div class="scc-companion-mini" id="scc-garden-mini">🌱</div>
-        <div class="scc-pbar-wrap">
-          <div class="scc-pbar" id="scc-garden-bar" style="background:var(--evs-1)"></div>
+        <div class="scc-right">
+          <div class="scc-companion-mini" id="scc-garden-mini">🌱</div>
+          <div class="scc-pbar-wrap"><div class="scc-pbar" id="scc-garden-bar" style="background:var(--evs-1)"></div></div>
+          <div class="scc-xp" id="scc-garden-xp">0 XP</div>
         </div>
-        <div class="scc-xp" id="scc-garden-xp">0 XP</div>
       </div>
-      <div class="scc-arrow">→</div>
+      <div class="scc-class-row">
+        <button class="scc-cls scc-cls-evs" onclick="nav.openSubject('evs',1)">Class 1</button>
+        <button class="scc-cls scc-cls-evs" onclick="nav.openSubject('evs',2)">Class 2</button>
+        <button class="scc-cls scc-cls-evs" onclick="nav.openSubject('evs',3)">Class 3</button>
+        <button class="scc-cls scc-cls-evs" onclick="nav.openSubject('evs',4)">Class 4</button>
+      </div>
     </div>
 
   </div>
