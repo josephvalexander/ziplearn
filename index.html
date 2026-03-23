@@ -1343,6 +1343,67 @@ body {
   to   { opacity:1; transform: scale(1); }
 }
 
+
+/* ── Demo strip on home screen ──────────────────────────────── */
+.demo-strip {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 16px 10px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+.demo-strip::-webkit-scrollbar { display: none; }
+
+.dstrip-card {
+  flex-shrink: 0;
+  width: 80px;
+  background: var(--bg-card);
+  border: 1.5px solid color-mix(in srgb, var(--dc) 30%, transparent);
+  border-radius: 16px;
+  padding: 12px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.18s var(--bounce);
+  scroll-snap-align: start;
+  position: relative;
+  overflow: hidden;
+}
+.dstrip-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--dc);
+  opacity: 0.07;
+  pointer-events: none;
+  border-radius: 16px;
+}
+.dstrip-card:hover  { transform: translateY(-4px) scale(1.05); border-color: var(--dc); }
+.dstrip-card:active { transform: scale(0.95); }
+
+.dstrip-emoji {
+  font-size: 28px;
+  line-height: 1;
+  animation: sccFloat 3s ease-in-out infinite;
+  animation-delay: var(--di, 0s);
+}
+.dstrip-name {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--dc);
+  text-align: center;
+  line-height: 1.2;
+}
+.dstrip-sub {
+  font-size: 9px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
 </style>
 
 <body>
@@ -1409,6 +1470,79 @@ body {
       <span id="st-played" style="display:none">0</span>
       <span id="st-correct" style="display:none">0</span>
       <span id="st-streak" style="display:none">0</span>
+    </div>
+
+
+    <!-- FUN LAB — quick-access demo strip -->
+    <p class="section-heading" style="margin-top:12px;margin-bottom:6px">⚗️ Fun Lab — Learn by Doing</p>
+    <div class="demo-strip" id="demo-strip">
+
+      <div class="dstrip-card" onclick="APP.nav.startGame('demo_volcano')" style="--dc:#ff6b35">
+        <div class="dstrip-emoji">🌋</div>
+        <div class="dstrip-name">Volcano!</div>
+        <div class="dstrip-sub">Science</div>
+      </div>
+
+      <div class="dstrip-card" onclick="APP.nav.startGame('demo_prism')" style="--dc:#818cf8">
+        <div class="dstrip-emoji">🌈</div>
+        <div class="dstrip-name">Rainbow</div>
+        <div class="dstrip-sub">Light</div>
+      </div>
+
+      <div class="dstrip-card" onclick="APP.nav.startGame('demo_times9')" style="--dc:#ffd700">
+        <div class="dstrip-emoji">🪄</div>
+        <div class="dstrip-name">9× Magic</div>
+        <div class="dstrip-sub">Maths</div>
+      </div>
+
+      <div class="dstrip-card" onclick="APP.nav.startGame('demo_fibonacci')" style="--dc:#a78bfa">
+        <div class="dstrip-emoji">🌻</div>
+        <div class="dstrip-name">Fibonacci</div>
+        <div class="dstrip-sub">Patterns</div>
+      </div>
+
+      <div class="dstrip-card" onclick="APP.nav.startGame('demo_watercycle')" style="--dc:#3b82f6">
+        <div class="dstrip-emoji">💧</div>
+        <div class="dstrip-name">Water Cycle</div>
+        <div class="dstrip-sub">EVS</div>
+      </div>
+
+      <div class="dstrip-card" onclick="APP.nav.startGame('demo_foodchain')" style="--dc:#22c55e">
+        <div class="dstrip-emoji">🦁</div>
+        <div class="dstrip-name">Food Chain</div>
+        <div class="dstrip-sub">Science</div>
+      </div>
+
+      <div class="dstrip-card" onclick="APP.nav.startGame('demo_plant')" style="--dc:#4ade80">
+        <div class="dstrip-emoji">🌱</div>
+        <div class="dstrip-name">Plants Drink</div>
+        <div class="dstrip-sub">Biology</div>
+      </div>
+
+      <div class="dstrip-card" onclick="APP.nav.startGame('demo_magic_num')" style="--dc:#e879f9">
+        <div class="dstrip-emoji">🧠</div>
+        <div class="dstrip-name">Mind Reader</div>
+        <div class="dstrip-sub">Maths</div>
+      </div>
+
+      <div class="dstrip-card" onclick="APP.nav.startGame('demo_symmetry')" style="--dc:#00d4aa">
+        <div class="dstrip-emoji">🔮</div>
+        <div class="dstrip-name">Symmetry</div>
+        <div class="dstrip-sub">Geometry</div>
+      </div>
+
+      <div class="dstrip-card" onclick="APP.nav.startGame('demo_india')" style="--dc:#ff9500">
+        <div class="dstrip-emoji">🇮🇳</div>
+        <div class="dstrip-name">Amazing India</div>
+        <div class="dstrip-sub">EVS/GK</div>
+      </div>
+
+      <div class="dstrip-card" onclick="APP.nav.startGame('demo_wordbuilder')" style="--dc:#c084fc">
+        <div class="dstrip-emoji">🔤</div>
+        <div class="dstrip-name">Prefix Builder</div>
+        <div class="dstrip-sub">English</div>
+      </div>
+
     </div>
 
     <!-- Subject + companion cards — THE MAIN CONTENT -->
@@ -1814,6 +1948,10 @@ body {
   </div>
   <div style="flex:1;padding:12px 20px 20px;max-width:680px;margin:0 auto;width:100%;overflow-y:auto">
     <div id="play-content"></div>
+  </div>
+  <!-- Demo done button (shown only for demo_ games) -->
+  <div id="demo-done-wrap" style="display:none;justify-content:center;padding:12px 20px 24px">
+    <button class="demo-btn" style="max-width:280px" onclick="APP.nav.goBack()">✅ Got it! Go Back</button>
   </div>
 </section>
 
@@ -2294,6 +2432,42 @@ const APP = (() => {
       clearInterval(S.timerInt);
       nav.history.push('play');
       showScreen('play');
+
+      if (gameId.startsWith('demo_')) {
+        // Demo mode — no timer, no scoring, just show the interactive content
+        // Set subject based on demo type for theme colouring
+        const demoSubjectMap = {
+          demo_volcano:'sci', demo_prism:'sci', demo_plant:'sci', demo_foodchain:'sci',
+          demo_times9:'math', demo_magic_num:'math', demo_fibonacci:'math', demo_symmetry:'math',
+          demo_watercycle:'evs', demo_india:'evs',
+          demo_wordbuilder:'eng',
+        };
+        S.selectedSubject = demoSubjectMap[gameId] || 'sci';
+        // Hide normal HUD, show demo UI
+        const hud = document.querySelector('.game-header');
+        if (hud) hud.style.display = 'none';
+        const pbar = document.querySelector('.powerup-bar');
+        if (pbar) pbar.style.display = 'none';
+        const dots = document.getElementById('q-progress-dots');
+        if (dots) dots.style.display = 'none';
+        const pc = document.getElementById('play-content');
+        if (GAME_RENDERERS[gameId]) GAME_RENDERERS[gameId](pc);
+        // Show a Done button
+        const doneWrap = document.getElementById('demo-done-wrap');
+        if (doneWrap) doneWrap.style.display = 'flex';
+        return;
+      }
+
+      // Normal game mode — restore HUD visibility
+      const hud = document.querySelector('.game-header');
+      if (hud) hud.style.display = '';
+      const pbar = document.querySelector('.powerup-bar');
+      if (pbar) pbar.style.display = '';
+      const dots = document.getElementById('q-progress-dots');
+      if (dots) dots.style.display = '';
+      const doneWrap = document.getElementById('demo-done-wrap');
+      if (doneWrap) doneWrap.style.display = 'none';
+
       initHUD();
       loadQ(gameId);
     },
