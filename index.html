@@ -791,6 +791,43 @@ body {
   min-width:14px; height:14px; border-radius:7px;
   display:flex; align-items:center; justify-content:center; padding:0 3px;
 }
+
+/* ── Subject tab row (games screen) ─────────────────── */
+.subject-tab-row { display:flex; gap:8px; padding:0 16px 4px; flex-wrap:wrap; }
+.subj-tab-btn { padding:7px 14px; border-radius:20px; border:1.5px solid var(--border); background:var(--bg-hud); color:var(--text-secondary); font-family:var(--font-body); font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s var(--smooth); white-space:nowrap; }
+.subj-tab-btn:hover { border-color:var(--border-hover); color:var(--text-primary); }
+.stb-active { font-weight:800; }
+
+/* ── Map subject pills & tabs ────────────────────────── */
+.map-tab-row { display:flex; gap:8px; padding:0 16px 12px; flex-wrap:wrap; }
+.map-tab-btn { padding:8px 16px; border-radius:20px; border:1.5px solid var(--border); background:var(--bg-hud); color:var(--text-secondary); font-family:var(--font-body); font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s var(--smooth); }
+.map-tab-btn:hover { border-color:var(--border-hover); color:var(--text-primary); }
+.mta-active { font-weight:800; }
+.map-subject-pill { display:flex; align-items:center; gap:8px; margin:0 16px 12px; padding:10px 16px; border-radius:12px; }
+
+/* ── Castle & Lab screens ────────────────────────────── */
+#scr-castle.active, #scr-lab.active { height:100vh; overflow:hidden; }
+.companion-screen { flex:1; overflow-y:auto; padding:16px 16px 80px; display:flex; flex-direction:column; gap:14px; }
+.companion-header { display:flex; align-items:center; gap:12px; }
+.companion-stage-lbl { font-size:10px; font-weight:800; letter-spacing:0.1em; color:var(--text-muted); }
+.companion-name { font-size:22px; font-weight:800; font-family:var(--font-display); color:var(--text-primary); }
+.companion-evo-txt { font-size:13px; color:var(--text-secondary); font-weight:600; }
+.companion-xp-hdr { font-size:28px; font-weight:900; font-family:var(--font-display); color:var(--eng-1); }
+.castle-xp-hdr { color:var(--eng-1) !important; }
+.lab-xp-hdr { color:var(--sci-1) !important; }
+.companion-svg-wrap { width:150px; height:150px; flex-shrink:0; position:relative; }
+.companion-svg-wrap svg { width:150px; height:150px; }
+.companion-speech { position:absolute; top:-8px; right:-60px; background:var(--bg-card); border:1.5px solid var(--border); border-radius:12px 12px 12px 4px; padding:6px 10px; font-size:12px; font-weight:700; color:var(--text-primary); white-space:nowrap; opacity:0; transform:translateY(4px); transition:all 0.3s var(--smooth); pointer-events:none; max-width:130px; white-space:normal; line-height:1.3; z-index:10; }
+.companion-speech.show { opacity:1; transform:translateY(0); }
+.companion-pbar-section { display:flex; flex-direction:column; gap:8px; }
+.companion-action-btn { width:100%; padding:14px; border-radius:14px; border:none; font-family:var(--font-body); font-size:15px; font-weight:800; cursor:pointer; transition:all 0.2s var(--bounce); }
+.castle-action-btn { background:linear-gradient(135deg,var(--eng-1),var(--eng-2)); color:white; box-shadow:0 4px 20px rgba(168,85,247,0.4); }
+.lab-action-btn { background:linear-gradient(135deg,var(--sci-1),var(--sci-2)); color:white; box-shadow:0 4px 20px rgba(0,212,170,0.4); }
+.companion-action-btn:hover:not(:disabled) { transform:translateY(-2px) scale(1.02); }
+.companion-action-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none !important; }
+.companion-tip { background:var(--bg-hud); border-radius:12px; padding:12px; font-size:13px; color:var(--text-secondary); }
+.companion-tip strong { color:var(--text-primary); display:block; margin-bottom:4px; font-size:13px; }
+
 </style>
 
 <body>
@@ -888,12 +925,12 @@ body {
       </div>
       <div class="sp-meta"><span class="sp-badge live">● LIVE</span><span class="sp-arrow">→</span></div>
     </div>
-    <div class="subject-planet sci" style="pointer-events:none;opacity:0.5">
+    <div class="subject-planet sci" onclick="nav.openSubject('sci', APP.state.selectedClass || 1)">
       <div class="sp-icon sci">🔬</div>
       <div class="sp-info"><div class="sp-name">Science</div><div class="sp-desc">Discover how the world works through fun experiments!</div><div class="sp-tags"><span class="sp-tag sci-tag">Living Things</span><span class="sp-tag sci-tag">Matter</span><span class="sp-tag sci-tag">Forces</span></div></div>
       <div class="sp-meta"><span class="sp-badge soon">COMING SOON</span><span class="sp-arrow">→</span></div>
     </div>
-    <div class="subject-planet eng" style="pointer-events:none;opacity:0.5">
+    <div class="subject-planet eng" onclick="nav.openSubject('eng', APP.state.selectedClass || 1)">
       <div class="sp-icon eng">📖</div>
       <div class="sp-info"><div class="sp-name">English</div><div class="sp-desc">Read, write, spell and tell amazing stories!</div><div class="sp-tags"><span class="sp-tag eng-tag">Vocabulary</span><span class="sp-tag eng-tag">Grammar</span><span class="sp-tag eng-tag">Reading</span></div></div>
       <div class="sp-meta"><span class="sp-badge soon">COMING SOON</span><span class="sp-arrow">→</span></div>
@@ -919,6 +956,14 @@ body {
       <span class="bnav-btn-icon" id="bnav-pet-icon">🥚</span>PET
       <span class="bnav-alert" id="pet-hunger-dot" style="display:none">!</span>
     </button>
+    <button class="bnav-btn" data-tab="castle" onclick="TABS.show('castle')">
+      <span class="bnav-btn-icon">🏰</span>CASTLE
+      <span class="bnav-alert" id="castle-brick-dot" style="display:none">!</span>
+    </button>
+    <button class="bnav-btn" data-tab="lab" onclick="TABS.show('lab')">
+      <span class="bnav-btn-icon">🔬</span>LAB
+      <span class="bnav-alert" id="lab-flask-dot" style="display:none">!</span>
+    </button>
   </div>
 </section>
 
@@ -935,6 +980,8 @@ body {
     <button class="bnav-btn" data-tab="home" onclick="TABS.show('home')"><span class="bnav-btn-icon">🏠</span>HOME</button>
     <button class="bnav-btn bnav-active" data-tab="map" onclick="TABS.show('map')"><span class="bnav-btn-icon">🗺️</span>MAP</button>
     <button class="bnav-btn" data-tab="pet" onclick="TABS.show('pet')"><span class="bnav-btn-icon" id="map-pet-icon">🥚</span>PET</button>
+    <button class="bnav-btn" data-tab="castle" onclick="TABS.show('castle')"><span class="bnav-btn-icon">🏰</span>CASTLE</button>
+    <button class="bnav-btn" data-tab="lab" onclick="TABS.show('lab')"><span class="bnav-btn-icon">🔬</span>LAB</button>
   </div>
 </section>
 
@@ -1001,9 +1048,107 @@ body {
 <!-- ============================================================
      SCREEN: CLASS → SUBJECT GAMES
 ============================================================ -->
+
+<!-- ================================================================
+     CASTLE — English companion screen
+================================================================ -->
+<section class="screen" id="scr-castle">
+  <div class="companion-screen">
+    <div class="companion-header">
+      <div class="companion-svg-wrap">
+        <svg id="castle-svg" viewBox="0 0 150 155" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="companion-speech" id="castle-speech"></div>
+      </div>
+      <div style="flex:1">
+        <div class="companion-stage-lbl" id="castle-stage-lbl">BARE LAND</div>
+        <div class="companion-name" id="castle-name-el">🏰 My Castle</div>
+        <div class="companion-evo-txt" id="castle-evo-txt">Start building!</div>
+        <div class="castle-xp-hdr companion-xp-hdr" id="castle-xp-hdr">0</div>
+        <div style="font-size:11px;color:var(--text-muted)">English XP</div>
+      </div>
+    </div>
+
+    <div class="pbar-section companion-pbar-section">
+      <div class="pbar-row">
+        <span class="pbar-lbl">🏰 Castle Progress</span>
+        <span class="pbar-lbl-r" id="castle-pbar-xp-lbl">0/40</span>
+      </div>
+      <div class="pbar-track"><div class="pbar-fill" id="castle-pbar-xp" style="width:0%;background:var(--eng-1)"></div></div>
+    </div>
+
+    <div class="evo-row" id="castle-evo-row"></div>
+
+    <button class="companion-action-btn castle-action-btn" id="castle-brick-btn" onclick="CASTLE.placeBrick()">
+      🧱 Play English to earn bricks!
+    </button>
+
+    <div class="companion-tip">
+      <strong id="castle-tip-title">📖 Play English games to earn bricks!</strong>
+      <span id="castle-tip-body">Every English game you complete earns bricks. Place bricks to grow your castle!</span>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="bnav-btn" data-tab="home" onclick="TABS.show('home')"><span class="bnav-btn-icon">🏠</span>HOME</button>
+    <button class="bnav-btn" data-tab="map"  onclick="TABS.show('map')"><span class="bnav-btn-icon">🗺️</span>MAP</button>
+    <button class="bnav-btn" data-tab="pet"  onclick="TABS.show('pet')"><span class="bnav-btn-icon" id="castle-pet-icon">🥚</span>PET</button>
+    <button class="bnav-btn bnav-active" data-tab="castle" onclick="TABS.show('castle')"><span class="bnav-btn-icon">🏰</span>CASTLE</button>
+    <button class="bnav-btn" data-tab="lab"  onclick="TABS.show('lab')"><span class="bnav-btn-icon">🔬</span>LAB</button>
+  </div>
+</section>
+
+<!-- ================================================================
+     LAB — Science companion screen
+================================================================ -->
+<section class="screen" id="scr-lab">
+  <div class="companion-screen">
+    <div class="companion-header">
+      <div class="companion-svg-wrap">
+        <svg id="lab-svg" viewBox="0 0 150 155" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="companion-speech" id="lab-speech"></div>
+      </div>
+      <div style="flex:1">
+        <div class="companion-stage-lbl" id="lab-stage-lbl">EMPTY LAB</div>
+        <div class="companion-name" id="lab-name-el">🔬 My Lab</div>
+        <div class="companion-evo-txt" id="lab-evo-txt">Start experimenting!</div>
+        <div class="lab-xp-hdr companion-xp-hdr" id="lab-xp-hdr">0</div>
+        <div style="font-size:11px;color:var(--text-muted)">Science XP</div>
+      </div>
+    </div>
+
+    <div class="pbar-section companion-pbar-section">
+      <div class="pbar-row">
+        <span class="pbar-lbl">⚗️ Lab Progress</span>
+        <span class="pbar-lbl-r" id="lab-pbar-xp-lbl">0/40</span>
+      </div>
+      <div class="pbar-track"><div class="pbar-fill" id="lab-pbar-xp" style="width:0%;background:var(--sci-1)"></div></div>
+    </div>
+
+    <div class="evo-row" id="lab-evo-row"></div>
+
+    <button class="companion-action-btn lab-action-btn" id="lab-flask-btn" onclick="LAB.runExperiment()">
+      ⚗️ Play Science to fill flasks!
+    </button>
+
+    <div class="companion-tip">
+      <strong id="lab-tip-title">🔬 Play Science games to fill flasks!</strong>
+      <span id="lab-tip-body">Every Science game earns flasks. Run experiments to grow your lab!</span>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="bnav-btn" data-tab="home"   onclick="TABS.show('home')"><span class="bnav-btn-icon">🏠</span>HOME</button>
+    <button class="bnav-btn" data-tab="map"    onclick="TABS.show('map')"><span class="bnav-btn-icon">🗺️</span>MAP</button>
+    <button class="bnav-btn" data-tab="pet"    onclick="TABS.show('pet')"><span class="bnav-btn-icon">🥚</span>PET</button>
+    <button class="bnav-btn" data-tab="castle" onclick="TABS.show('castle')"><span class="bnav-btn-icon">🏰</span>CASTLE</button>
+    <button class="bnav-btn bnav-active" data-tab="lab" onclick="TABS.show('lab')"><span class="bnav-btn-icon">🔬</span>LAB</button>
+  </div>
+</section>
+
 <section class="screen" id="scr-games">
   <div class="content-area">
     <div class="screen-title-row" id="stitle-row"></div>
+    <div id="subject-tab-row" class="subject-tab-row"></div>
     <div class="xp-progress"><div class="xp-fill" id="xp-fill" style="width:12%"></div></div>
     <div class="games-grid" id="games-grid"></div>
     <div class="tip-card" id="tip-card" style="display:none">
@@ -1108,6 +1253,8 @@ body {
 <!-- JS loaded at end of body — executes after DOM is ready, no defer needed -->
 
 </script>
+
+</script>
 <script>
 // ── js/data.js ──────────────────────────────────────────
 
@@ -1116,138 +1263,254 @@ body {
 
 const SUBJECT_REGISTRY = {
   math: {
-    id: 'math',
-    name: 'Mathematics',
-    icon: '🔢',
-    iconClass: 'math',
-    color: 'var(--math-1)',
-    gradientFill: 'linear-gradient(90deg, #6366f1, #a78bfa)',
+    id: 'math', name: 'Mathematics', icon: '🔢', iconClass: 'math',
+    color: 'var(--math-1)', gradientFill: 'linear-gradient(90deg,#6366f1,#a78bfa)',
     timerColor: '#818cf8',
+    companion: 'pet',     // which companion system this subject uses
   },
-  // Future: sci, eng, evs entries go here
+  sci: {
+    id: 'sci', name: 'Science', icon: '🔬', iconClass: 'sci',
+    color: 'var(--sci-1)', gradientFill: 'linear-gradient(90deg,#00d4aa,#33ddb8)',
+    timerColor: '#00d4aa',
+    companion: 'lab',
+  },
+  eng: {
+    id: 'eng', name: 'English', icon: '📖', iconClass: 'eng',
+    color: 'var(--eng-1)', gradientFill: 'linear-gradient(90deg,#a855f7,#bf7fff)',
+    timerColor: '#a855f7',
+    companion: 'castle',
+  },
 };
 
 // ================================================================
-// GAME REGISTRY — CBSE/ICSE/NCERT Syllabus Aligned (2025-26)
-// Sources: Joyful Mathematics (Cl.1-2), Maths Mela (Cl.3), Math-Magic (Cl.4)
-// Each class covers: Numbers, Operations, Measurement, Time, Money,
-//                    Geometry, Patterns, Data Handling — progressively.
+// GAME REGISTRY — CBSE/NCERT/ICSE Syllabus Aligned (2025-26)
 // ================================================================
 const GAME_REGISTRY = {
+
+  // ──────────────────────────────────────────────────────────────
+  // MATHEMATICS
+  // ──────────────────────────────────────────────────────────────
   math: {
-
-    // ── CLASS 1 ─────────────────────────────────────────────
-    // NCERT: Joyful Mathematics | Topics: Pre-number concepts,
-    // Numbers 1-99, Addition/Subtraction up to 20, Shapes,
-    // Measurement (length/weight), Time, Money, Patterns, Data Handling
     1: {
-      tip: {
-        title: "Parent Tip 💡",
-        body: "Class 1 is about building number sense! Count objects at home — steps, buttons, fruits. Real-world counting sticks better than worksheets."
-      },
+      tip: { title:'Parent Tip 💡', body:'Count objects at home — steps, buttons, fruits. Real-world counting sticks better than worksheets.' },
       games: [
-        { id:'count_objects',   icon:'🍎', bg:'rgba(255,107,53,0.18)', name:'Count It!',        desc:'Count objects up to 20',       diff:'easy'   },
-        { id:'quiz_add1',       icon:'➕', bg:'rgba(46,213,115,0.15)', name:'Adding Fun',        desc:'Single-digit sums (1-10)',     diff:'easy'   },
-        { id:'quiz_sub1',       icon:'➖', bg:'rgba(255,71,87,0.15)',  name:'Take Away!',        desc:'Subtract within 20',           diff:'easy'   },
-        { id:'shape_quiz',      icon:'🔷', bg:'rgba(168,85,247,0.15)', name:'Shape Safari',      desc:'2D & 3D shapes around us',     diff:'easy'   },
-        { id:'missing_seq',     icon:'❓', bg:'rgba(255,215,0,0.15)',  name:'What Comes Next?',  desc:'Number patterns 1-50',         diff:'easy'   },
-        { id:'compare_nums',    icon:'⚖️', bg:'rgba(0,212,170,0.15)',  name:'Big or Small?',     desc:'Compare numbers up to 50',     diff:'easy'   },
-        { id:'time_easy',       icon:'🕐', bg:'rgba(255,107,53,0.12)', name:'Clock o\'Clock',    desc:'Read o\'clock & half past',    diff:'easy'   },
-        { id:'money_easy',      icon:'💰', bg:'rgba(46,213,115,0.12)', name:'Coin Count',        desc:'Identify coins & notes',       diff:'easy'   },
-        { id:'measure_easy',    icon:'📏', bg:'rgba(168,85,247,0.12)', name:'Long or Short?',    desc:'Compare lengths & weights',    diff:'easy'   },
-        { id:'pattern_easy',    icon:'🎨', bg:'rgba(255,215,0,0.12)',  name:'Pattern Play',      desc:'Complete AB, AAB patterns',    diff:'easy'   },
-        { id:'odd_even',        icon:'🌗', bg:'rgba(0,212,170,0.12)',  name:'Odd or Even?',      desc:'Sort numbers 1-20',            diff:'medium' },
-        { id:'data_easy',       icon:'📊', bg:'rgba(255,71,87,0.12)',  name:'Tally Time',        desc:'Read simple tally charts',     diff:'medium' },
+        { id:'count_objects', icon:'🍎', bg:'rgba(255,107,53,0.18)',  name:'Count It!',       desc:'Count objects up to 20',       diff:'easy'   },
+        { id:'quiz_add1',     icon:'➕', bg:'rgba(46,213,115,0.15)',  name:'Adding Fun',       desc:'Single-digit sums (1–10)',      diff:'easy'   },
+        { id:'quiz_sub1',     icon:'➖', bg:'rgba(255,71,87,0.15)',   name:'Take Away!',       desc:'Subtract within 20',           diff:'easy'   },
+        { id:'shape_quiz',    icon:'🔷', bg:'rgba(168,85,247,0.15)',  name:'Shape Safari',     desc:'2D & 3D shapes around us',     diff:'easy'   },
+        { id:'missing_seq',   icon:'❓', bg:'rgba(255,215,0,0.15)',   name:'What Comes Next?', desc:'Number patterns 1–50',         diff:'easy'   },
+        { id:'compare_nums',  icon:'⚖️', bg:'rgba(0,212,170,0.15)',   name:'Big or Small?',    desc:'Compare numbers up to 50',     diff:'easy'   },
+        { id:'time_easy',     icon:'🕐', bg:'rgba(255,107,53,0.12)',  name:"Clock o'Clock",    desc:"Read o'clock & half past",     diff:'easy'   },
+        { id:'money_easy',    icon:'💰', bg:'rgba(46,213,115,0.12)',  name:'Coin Count',       desc:'Identify coins & notes',       diff:'easy'   },
+        { id:'measure_easy',  icon:'📏', bg:'rgba(168,85,247,0.12)', name:'Long or Short?',   desc:'Compare lengths & weights',    diff:'easy'   },
+        { id:'pattern_easy',  icon:'🎨', bg:'rgba(255,215,0,0.12)',  name:'Pattern Play',     desc:'Complete AB, AAB patterns',    diff:'easy'   },
+        { id:'odd_even',      icon:'🌗', bg:'rgba(0,212,170,0.12)',  name:'Odd or Even?',     desc:'Sort numbers 1–20',            diff:'medium' },
+        { id:'data_easy',     icon:'📊', bg:'rgba(255,71,87,0.12)',  name:'Tally Time',       desc:'Read simple tally charts',     diff:'medium' },
       ]
     },
-
-    // ── CLASS 2 ─────────────────────────────────────────────
-    // NCERT: Joyful Mathematics | Topics: Numbers up to 1000,
-    // 3-digit addition/subtraction, Multiplication intro,
-    // Division intro (grouping/sharing), Shapes, Measurement
-    // (cm/m, kg/g), Time (days/weeks/months), Money, Data
     2: {
-      tip: {
-        title: "Try This! 🎯",
-        body: "Use 10 coins = 1 ten. Line them up and count in groups of 10 to make place value concrete. Class 2 is the year kids 'get' two-digit numbers!"
-      },
+      tip: { title:'Try This! 🎯', body:"Use 10 coins = 1 ten. Line them up and count in groups to make place value concrete." },
       games: [
-        { id:'place_value',     icon:'🏠', bg:'rgba(0,212,170,0.15)',  name:'Tens & Units',      desc:'Numbers up to 99',             diff:'easy'   },
-        { id:'quiz_add2',       icon:'➕', bg:'rgba(46,213,115,0.15)', name:'2-Digit Adder',     desc:'Add up to 99, with carry',     diff:'medium' },
-        { id:'quiz_sub',        icon:'➖', bg:'rgba(255,71,87,0.15)',  name:'2-Digit Take Away', desc:'Subtract within 99',           diff:'medium' },
-        { id:'multiply_groups', icon:'✖️', bg:'rgba(255,215,0,0.15)',  name:'Groups & Skip',     desc:'Multiply by 2, 5, 10',         diff:'medium' },
-        { id:'division_share',  icon:'➗', bg:'rgba(168,85,247,0.15)', name:'Fair Share',        desc:'Equal grouping & sharing',     diff:'medium' },
-        { id:'shape_quiz',      icon:'🔷', bg:'rgba(255,107,53,0.15)', name:'3D Shape Spotter',  desc:'Cube, cone, cylinder & more',  diff:'easy'   },
-        { id:'missing_seq',     icon:'❓', bg:'rgba(0,212,170,0.12)',  name:'Number Patterns',   desc:'Skip count by 2, 5, 10',       diff:'medium' },
-        { id:'time_easy',       icon:'🕐', bg:'rgba(255,215,0,0.12)',  name:'Clock Challenge',   desc:'Quarter past & quarter to',    diff:'medium' },
-        { id:'money_easy',      icon:'💰', bg:'rgba(46,213,115,0.12)', name:'Market Maths',      desc:'Add amounts, give change',     diff:'medium' },
-        { id:'measure_easy',    icon:'📏', bg:'rgba(168,85,247,0.12)', name:'Measure Up!',       desc:'cm, m, kg & g basics',         diff:'easy'   },
-        { id:'odd_even',        icon:'🌗', bg:'rgba(255,71,87,0.12)',  name:'Odd or Even?',      desc:'Numbers up to 100',            diff:'easy'   },
-        { id:'data_easy',       icon:'📊', bg:'rgba(0,212,170,0.12)',  name:'Picture Graph',     desc:'Read pictographs',             diff:'medium' },
+        { id:'place_value',    icon:'🏠', bg:'rgba(0,212,170,0.15)',  name:'Tens & Units',      desc:'Numbers up to 99',             diff:'easy'   },
+        { id:'quiz_add2',      icon:'➕', bg:'rgba(46,213,115,0.15)', name:'2-Digit Adder',     desc:'Add up to 99, with carry',     diff:'medium' },
+        { id:'quiz_sub',       icon:'➖', bg:'rgba(255,71,87,0.15)',  name:'2-Digit Take Away', desc:'Subtract within 99',           diff:'medium' },
+        { id:'multiply_groups',icon:'✖️', bg:'rgba(255,215,0,0.15)',  name:'Groups & Skip',     desc:'Multiply by 2, 5, 10',         diff:'medium' },
+        { id:'division_share', icon:'➗', bg:'rgba(168,85,247,0.15)', name:'Fair Share',        desc:'Equal grouping & sharing',     diff:'medium' },
+        { id:'shape_quiz',     icon:'🔷', bg:'rgba(255,107,53,0.15)', name:'3D Shape Spotter',  desc:'Cube, cone, cylinder & more',  diff:'easy'   },
+        { id:'missing_seq',    icon:'❓', bg:'rgba(0,212,170,0.12)',  name:'Number Patterns',   desc:'Skip count by 2, 5, 10',       diff:'medium' },
+        { id:'time_easy',      icon:'🕐', bg:'rgba(255,215,0,0.12)',  name:'Clock Challenge',   desc:'Quarter past & quarter to',    diff:'medium' },
+        { id:'money_easy',     icon:'💰', bg:'rgba(46,213,115,0.12)', name:'Market Maths',      desc:'Add amounts, give change',     diff:'medium' },
+        { id:'measure_easy',   icon:'📏', bg:'rgba(168,85,247,0.12)',name:'Measure Up!',        desc:'cm, m, kg & g basics',         diff:'easy'   },
+        { id:'odd_even',       icon:'🌗', bg:'rgba(255,71,87,0.12)', name:'Odd or Even?',      desc:'Numbers up to 100',            diff:'easy'   },
+        { id:'data_easy',      icon:'📊', bg:'rgba(0,212,170,0.12)', name:'Picture Graph',     desc:'Read pictographs',             diff:'medium' },
       ]
     },
-
-    // ── CLASS 3 ─────────────────────────────────────────────
-    // NCERT: Maths Mela | Topics: Numbers up to 10,000,
-    // 4-digit addition/subtraction with carry/borrow,
-    // Multiplication tables 2-10, Division, Fractions (1/2, 1/4, etc.),
-    // Geometry (angles concept, shapes), Perimeter intro,
-    // Time (calendar, hours/minutes), Money (rupees & paise), Data
     3: {
-      tip: {
-        title: "9× Table Magic 🪄",
-        body: "Hold out 10 fingers. For 9×3, fold the 3rd finger. Count fingers on the LEFT (2) = tens digit. Count fingers on RIGHT (7) = units digit. Answer: 27!"
-      },
+      tip: { title:'9× Table Magic 🪄', body:'Hold out 10 fingers. For 9×3, fold the 3rd finger. Left fingers = tens, right = units!' },
       games: [
-        { id:'place_value3',    icon:'🏙️', bg:'rgba(0,212,170,0.15)',  name:'Hundreds & Thousands', desc:'4-digit place value',        diff:'medium' },
-        { id:'quiz_add3',       icon:'➕', bg:'rgba(46,213,115,0.15)', name:'4-Digit Adder',     desc:'Add with carry up to 9999',    diff:'medium' },
-        { id:'quiz_sub3',       icon:'➖', bg:'rgba(255,71,87,0.15)',  name:'Big Subtraction',   desc:'Subtract with borrowing',      diff:'medium' },
-        { id:'quiz_mul',        icon:'✖️', bg:'rgba(255,215,0,0.15)',  name:'Times Tables',      desc:'Multiplication tables 2-10',   diff:'medium' },
-        { id:'quiz_div',        icon:'➗', bg:'rgba(168,85,247,0.15)', name:'Division Quest',    desc:'Divide within 100',            diff:'medium' },
-        { id:'fractions',       icon:'🍕', bg:'rgba(255,107,53,0.15)', name:'Fraction Fun',      desc:'Halves, thirds & quarters',    diff:'medium', badge:'new' },
-        { id:'missing_seq',     icon:'❓', bg:'rgba(0,212,170,0.12)',  name:'Skip Count Pro',    desc:'By 3, 4, 6, 7, 8, 9',         diff:'medium' },
-        { id:'time_medium',     icon:'🕐', bg:'rgba(255,215,0,0.12)',  name:'Calendar & Clock',  desc:'Minutes, hours, days, months', diff:'medium' },
-        { id:'money_medium',    icon:'💰', bg:'rgba(46,213,115,0.12)', name:'Shopkeeper!',       desc:'Rupees, paise & change',       diff:'medium' },
-        { id:'perimeter_easy',  icon:'📐', bg:'rgba(168,85,247,0.12)', name:'Perimeter Walk',    desc:'Find the perimeter of shapes', diff:'hard'   },
-        { id:'compare_nums',    icon:'⚖️', bg:'rgba(255,107,53,0.12)', name:'Number Compare',    desc:'Order 4-digit numbers',        diff:'easy'   },
-        { id:'data_easy',       icon:'📊', bg:'rgba(255,71,87,0.12)',  name:'Bar Graph',         desc:'Read & interpret bar graphs',  diff:'hard'   },
+        { id:'place_value3',   icon:'🏙️', bg:'rgba(0,212,170,0.15)',  name:'Hundreds & Thousands', desc:'4-digit place value',        diff:'medium' },
+        { id:'quiz_add3',      icon:'➕', bg:'rgba(46,213,115,0.15)', name:'4-Digit Adder',     desc:'Add with carry up to 9999',    diff:'medium' },
+        { id:'quiz_sub3',      icon:'➖', bg:'rgba(255,71,87,0.15)',  name:'Big Subtraction',   desc:'Subtract with borrowing',      diff:'medium' },
+        { id:'quiz_mul',       icon:'✖️', bg:'rgba(255,215,0,0.15)',  name:'Times Tables',      desc:'Multiplication tables 2–10',   diff:'medium' },
+        { id:'quiz_div',       icon:'➗', bg:'rgba(168,85,247,0.15)', name:'Division Quest',    desc:'Divide within 100',            diff:'medium' },
+        { id:'fractions',      icon:'🍕', bg:'rgba(255,107,53,0.15)', name:'Fraction Fun',      desc:'Halves, thirds & quarters',    diff:'medium', badge:'new' },
+        { id:'missing_seq',    icon:'❓', bg:'rgba(0,212,170,0.12)',  name:'Skip Count Pro',    desc:'By 3, 4, 6, 7, 8, 9',         diff:'medium' },
+        { id:'time_medium',    icon:'🕐', bg:'rgba(255,215,0,0.12)',  name:'Calendar & Clock',  desc:'Minutes, hours, days, months', diff:'medium' },
+        { id:'money_medium',   icon:'💰', bg:'rgba(46,213,115,0.12)', name:'Shopkeeper!',       desc:'Rupees, paise & change',       diff:'medium' },
+        { id:'perimeter_easy', icon:'📐', bg:'rgba(168,85,247,0.12)',name:'Perimeter Walk',    desc:'Find the perimeter of shapes', diff:'hard'   },
+        { id:'compare_nums',   icon:'⚖️', bg:'rgba(255,107,53,0.12)',name:'Number Compare',    desc:'Order 4-digit numbers',        diff:'easy'   },
+        { id:'data_easy',      icon:'📊', bg:'rgba(255,71,87,0.12)', name:'Bar Graph',         desc:'Read & interpret bar graphs',  diff:'hard'   },
       ]
     },
-
-    // ── CLASS 4 ─────────────────────────────────────────────
-    // NCERT: Math-Magic | Topics: Large numbers (lakhs),
-    // 4-digit operations, Long multiplication & division,
-    // Fractions (equivalent, compare, operations),
-    // Geometry (angles: acute/obtuse/right, area), Measurement
-    // (km, conversion), Time (24-hr, elapsed time), Money (bills),
-    // Roman numerals, Data (bar graphs, timetable problems)
     4: {
-      tip: {
-        title: "Mental Math Hack ⚡",
-        body: "Multiply by 25? Multiply by 100, then ÷ 4. So 36×25 = 3600÷4 = 900. Multiply by 5? Halve the number, then ×10. 48×5 = 24×10 = 240!"
-      },
+      tip: { title:'Mental Math Hack ⚡', body:'Multiply by 25? Multiply by 100, then ÷ 4. So 36×25 = 3600÷4 = 900!' },
       games: [
-        { id:'place_value4',    icon:'🚀', bg:'rgba(0,212,170,0.15)',  name:'Lakh & Beyond',     desc:'Numbers up to 10 lakhs',       diff:'medium' },
-        { id:'quiz_add3',       icon:'➕', bg:'rgba(46,213,115,0.15)', name:'Large Sums',        desc:'5-digit addition',             diff:'hard'   },
-        { id:'quiz_sub3',       icon:'➖', bg:'rgba(255,71,87,0.15)',  name:'Large Differences', desc:'5-digit subtraction',          diff:'hard'   },
-        { id:'quiz_mul',        icon:'✖️', bg:'rgba(255,215,0,0.15)',  name:'Speed Multiply',    desc:'2-digit × 2-digit',            diff:'hard'   },
-        { id:'quiz_div',        icon:'➗', bg:'rgba(168,85,247,0.15)', name:'Long Division',     desc:'Divide up to 4 digits',        diff:'hard'   },
-        { id:'fractions',       icon:'🧩', bg:'rgba(255,107,53,0.15)', name:'Fraction Wars',     desc:'Compare & add fractions',      diff:'hard',   badge:'new' },
-        { id:'angles_quiz',     icon:'📐', bg:'rgba(0,212,170,0.12)',  name:'Angle Spotter',     desc:'Acute, obtuse, right angles',  diff:'hard'   },
-        { id:'area_easy',       icon:'🟦', bg:'rgba(255,215,0,0.12)',  name:'Area Explorer',     desc:'Count squares, find area',     diff:'hard'   },
-        { id:'time_medium',     icon:'🕐', bg:'rgba(46,213,115,0.12)', name:'24-Hour Clock',     desc:'Convert 12hr ↔ 24hr time',    diff:'hard'   },
-        { id:'money_medium',    icon:'💰', bg:'rgba(168,85,247,0.12)', name:'Bill Calculator',   desc:'Estimate & calculate bills',   diff:'hard'   },
-        { id:'roman_nums',      icon:'🏛️', bg:'rgba(255,107,53,0.12)', name:'Roman Numerals',    desc:'I V X L C — read & write',     diff:'hard',   badge:'new' },
-        { id:'data_easy',       icon:'📊', bg:'rgba(255,71,87,0.12)',  name:'Smart Charts',      desc:'Interpret bar graphs & tables',diff:'hard'   },
+        { id:'place_value4',icon:'🚀', bg:'rgba(0,212,170,0.15)',  name:'Lakh & Beyond',     desc:'Numbers up to 10 lakhs',       diff:'medium' },
+        { id:'quiz_add3',   icon:'➕', bg:'rgba(46,213,115,0.15)', name:'Large Sums',        desc:'5-digit addition',             diff:'hard'   },
+        { id:'quiz_sub3',   icon:'➖', bg:'rgba(255,71,87,0.15)',  name:'Large Differences', desc:'5-digit subtraction',          diff:'hard'   },
+        { id:'quiz_mul',    icon:'✖️', bg:'rgba(255,215,0,0.15)',  name:'Speed Multiply',    desc:'2-digit × 2-digit',            diff:'hard'   },
+        { id:'quiz_div',    icon:'➗', bg:'rgba(168,85,247,0.15)', name:'Long Division',     desc:'Divide up to 4 digits',        diff:'hard'   },
+        { id:'fractions',   icon:'🧩', bg:'rgba(255,107,53,0.15)', name:'Fraction Wars',     desc:'Compare & add fractions',      diff:'hard',   badge:'new' },
+        { id:'angles_quiz', icon:'📐', bg:'rgba(0,212,170,0.12)',  name:'Angle Spotter',     desc:'Acute, obtuse, right angles',  diff:'hard'   },
+        { id:'area_easy',   icon:'🟦', bg:'rgba(255,215,0,0.12)',  name:'Area Explorer',     desc:'Count squares, find area',     diff:'hard'   },
+        { id:'time_medium', icon:'🕐', bg:'rgba(46,213,115,0.12)', name:'24-Hour Clock',     desc:'Convert 12hr ↔ 24hr time',    diff:'hard'   },
+        { id:'money_medium',icon:'💰', bg:'rgba(168,85,247,0.12)',name:'Bill Calculator',    desc:'Estimate & calculate bills',   diff:'hard'   },
+        { id:'roman_nums',  icon:'🏛️', bg:'rgba(255,107,53,0.12)',name:'Roman Numerals',    desc:'I V X L C — read & write',     diff:'hard',   badge:'new' },
+        { id:'data_easy',   icon:'📊', bg:'rgba(255,71,87,0.12)', name:'Smart Charts',      desc:'Interpret bar graphs & tables',diff:'hard'   },
+      ]
+    }
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // SCIENCE  (NCERT / EVS-based, Classes 1-4)
+  // ──────────────────────────────────────────────────────────────
+  sci: {
+    1: {
+      tip: { title:'Science Tip 🔬', body:'Let kids sort objects at home — hard/soft, rough/smooth, float/sink. Sensory sorting builds scientific thinking!' },
+      games: [
+        { id:'sci_living',    icon:'🌱', bg:'rgba(0,212,170,0.18)', name:'Alive or Not?',     desc:'Living vs non-living things',  diff:'easy'   },
+        { id:'sci_body1',     icon:'🫀', bg:'rgba(255,107,53,0.15)',name:'My Body!',           desc:'Body parts and their jobs',    diff:'easy'   },
+        { id:'sci_senses',    icon:'👁️', bg:'rgba(168,85,247,0.15)',name:'5 Senses',           desc:'See, hear, smell, taste, touch',diff:'easy'  },
+        { id:'sci_animals1',  icon:'🐾', bg:'rgba(255,215,0,0.15)', name:'Animal World',       desc:'Pets, farm & wild animals',    diff:'easy'   },
+        { id:'sci_plants1',   icon:'🌿', bg:'rgba(46,213,115,0.15)',name:'Plants Around Us',   desc:'Parts of a plant, needs',      diff:'easy'   },
+        { id:'sci_sky',       icon:'☀️', bg:'rgba(255,71,87,0.12)', name:'Sun & Sky',          desc:'Day, night, sun, moon, stars', diff:'easy'   },
+        { id:'sci_weather1',  icon:'🌧️', bg:'rgba(0,212,170,0.12)', name:'Weather Watch',      desc:'Hot, cold, rainy, sunny',      diff:'easy'   },
+        { id:'sci_materials', icon:'🪨', bg:'rgba(255,107,53,0.12)',name:'Material Sort',      desc:'Hard, soft, rough, smooth',    diff:'easy'   },
+        { id:'sci_food1',     icon:'🥗', bg:'rgba(46,213,115,0.12)',name:'Healthy Eating',     desc:'Fruits, veggies, grains',      diff:'easy'   },
+        { id:'sci_water1',    icon:'💧', bg:'rgba(168,85,247,0.12)',name:'Water Wonders',      desc:'Uses of water, save water!',   diff:'easy'   },
+        { id:'sci_transport1',icon:'🚂', bg:'rgba(255,215,0,0.12)', name:'On the Move',        desc:'Land, water & air transport',  diff:'easy'   },
+        { id:'sci_family',    icon:'👨‍👩‍👧', bg:'rgba(255,71,87,0.12)',name:'My Family',           desc:'Family members & community',   diff:'easy'   },
+      ]
+    },
+    2: {
+      tip: { title:'Explore Outside! 🌍', body:'A short garden walk beats any worksheet. Ask: What eats what? What needs sunlight? Science is everywhere!' },
+      games: [
+        { id:'sci_foodchain1',icon:'🦁', bg:'rgba(255,107,53,0.18)',name:'Food Chains',        desc:'Who eats whom? Producer→Consumer', diff:'medium' },
+        { id:'sci_habitat',   icon:'🏔️', bg:'rgba(0,212,170,0.15)', name:'Habitat Match',      desc:'Where do animals live?',       diff:'easy'   },
+        { id:'sci_growth',    icon:'🌱', bg:'rgba(46,213,115,0.15)',name:'Life Cycles',        desc:'Seed → plant, egg → animal',   diff:'medium' },
+        { id:'sci_states',    icon:'💧', bg:'rgba(168,85,247,0.15)',name:'Solid, Liquid, Gas', desc:'States of matter around us',   diff:'medium' },
+        { id:'sci_force1',    icon:'🏀', bg:'rgba(255,215,0,0.15)', name:'Push & Pull',        desc:'Forces in everyday life',      diff:'easy'   },
+        { id:'sci_body2',     icon:'🦷', bg:'rgba(255,71,87,0.15)', name:'Body Systems',       desc:'Bones, teeth, digestion',      diff:'medium' },
+        { id:'sci_light1',    icon:'💡', bg:'rgba(255,107,53,0.12)',name:'Light & Shadow',     desc:'Sources of light, shadows',    diff:'easy'   },
+        { id:'sci_sound1',    icon:'🔊', bg:'rgba(0,212,170,0.12)', name:'Sounds Around',      desc:'How sound travels, loud/soft', diff:'easy'   },
+        { id:'sci_seasons',   icon:'🍂', bg:'rgba(255,215,0,0.12)', name:'Four Seasons',       desc:'Seasonal changes & effects',   diff:'easy'   },
+        { id:'sci_soil',      icon:'🌍', bg:'rgba(46,213,115,0.12)',name:'Soil & Rocks',       desc:'Types of soil, uses of rocks', diff:'medium' },
+        { id:'sci_magnets',   icon:'🧲', bg:'rgba(168,85,247,0.12)',name:'Magnet Magic',       desc:'Attract, repel, poles',        diff:'medium' },
+        { id:'sci_save',      icon:'♻️', bg:'rgba(255,71,87,0.12)', name:'Save Our Planet',    desc:'Reduce, reuse, recycle',       diff:'easy'   },
+      ]
+    },
+    3: {
+      tip: { title:'Kitchen Science 🍳', body:'Mix vinegar + baking soda and watch it fizz! Ask: Is this a physical or chemical change? Class 3 science loves experiments.' },
+      games: [
+        { id:'sci_skeleton',  icon:'🦴', bg:'rgba(255,107,53,0.18)',name:'Skeleton & Muscles', desc:'Bones, joints, how we move',   diff:'medium' },
+        { id:'sci_plants2',   icon:'🌳', bg:'rgba(46,213,115,0.15)',name:'Photosynthesis',     desc:'How plants make food',         diff:'medium' },
+        { id:'sci_ecosystem', icon:'🌿', bg:'rgba(0,212,170,0.15)', name:'Ecosystems',         desc:'Food webs & biodiversity',     diff:'hard'   },
+        { id:'sci_matter2',   icon:'⚗️', bg:'rgba(168,85,247,0.15)',name:'Matter & Changes',   desc:'Physical vs chemical changes', diff:'medium' },
+        { id:'sci_simple_machines',icon:'⚙️',bg:'rgba(255,215,0,0.15)',name:'Simple Machines', desc:'Lever, pulley, inclined plane',diff:'medium' },
+        { id:'sci_water2',    icon:'🌊', bg:'rgba(255,71,87,0.15)', name:'Water Cycle',        desc:'Evaporation, condensation, rain',diff:'medium'},
+        { id:'sci_electricity',icon:'⚡',bg:'rgba(255,107,53,0.12)',name:'Circuits',           desc:'Complete the circuit!',        diff:'hard'   },
+        { id:'sci_air',       icon:'🌬️', bg:'rgba(0,212,170,0.12)', name:'Air Around Us',      desc:'Wind, pressure, uses of air',  diff:'medium' },
+        { id:'sci_light2',    icon:'🌈', bg:'rgba(255,215,0,0.12)', name:'Rainbows & Light',   desc:'Reflection, refraction, prism',diff:'hard'   },
+        { id:'sci_animals2',  icon:'🦋', bg:'rgba(46,213,115,0.12)',name:'Animal Adaptations', desc:'How animals survive in habitats',diff:'medium'},
+        { id:'sci_human',     icon:'🫀', bg:'rgba(168,85,247,0.12)',name:'Human Body Systems', desc:'Heart, lungs, brain basics',   diff:'hard'   },
+        { id:'sci_planets',   icon:'🪐', bg:'rgba(255,71,87,0.12)', name:'Solar System',       desc:'Planets, orbit, the Sun',      diff:'hard',   badge:'new' },
+      ]
+    },
+    4: {
+      tip: { title:'Spark Curiosity! ✨', body:'Ask "Why does ice float?" at the dinner table. Class 4 science rewards children who question everything.' },
+      games: [
+        { id:'sci_cells',     icon:'🔬', bg:'rgba(0,212,170,0.18)', name:'Cell Explorer',      desc:'Plant vs animal cells',        diff:'hard'   },
+        { id:'sci_reproduction',icon:'🌸',bg:'rgba(46,213,115,0.15)',name:'How Life Continues', desc:'Reproduction in plants & animals',diff:'hard' },
+        { id:'sci_nutrition', icon:'🥦', bg:'rgba(255,107,53,0.15)',name:'Nutrition & Health',  desc:'Nutrients, vitamins, deficiencies',diff:'hard' },
+        { id:'sci_gravity',   icon:'🌍', bg:'rgba(168,85,247,0.15)',name:'Gravity & Motion',   desc:'Gravity, friction, Newton\'s laws',diff:'hard' },
+        { id:'sci_energy',    icon:'⚡', bg:'rgba(255,215,0,0.15)', name:'Energy Forms',       desc:'Kinetic, potential, heat, light',diff:'hard'  },
+        { id:'sci_planets',   icon:'🪐', bg:'rgba(255,71,87,0.15)', name:'Space Explorer',     desc:'Solar system, gravity, stars',  diff:'hard',  badge:'new' },
+        { id:'sci_pollution', icon:'🏭', bg:'rgba(255,107,53,0.12)',name:'Pollution & Earth',  desc:'Types of pollution, solutions', diff:'hard'   },
+        { id:'sci_rocks2',    icon:'💎', bg:'rgba(0,212,170,0.12)', name:'Rocks & Minerals',  desc:'Igneous, sedimentary, metamorphic',diff:'hard' },
+        { id:'sci_weather2',  icon:'🌪️', bg:'rgba(255,215,0,0.12)', name:'Weather & Climate',  desc:'Climate zones, weather patterns',diff:'hard'  },
+        { id:'sci_electricity2',icon:'🔋',bg:'rgba(46,213,115,0.12)',name:'Electricity',        desc:'Conductors, insulators, circuits',diff:'hard' },
+        { id:'sci_human2',    icon:'🧠', bg:'rgba(168,85,247,0.12)',name:'Nervous System',     desc:'Brain, nerves, senses & reflex', diff:'hard'  },
+        { id:'sci_environment',icon:'🌎',bg:'rgba(255,71,87,0.12)', name:'Save Earth',         desc:'Ecosystems, conservation, climate',diff:'hard' },
+      ]
+    }
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // ENGLISH  (NCERT Marigold/Raindrops + grammar, Classes 1-4)
+  // ──────────────────────────────────────────────────────────────
+  eng: {
+    1: {
+      tip: { title:'Read Aloud Daily 📖', body:'Just 10 minutes of reading aloud with your child builds vocabulary faster than any exercise book. Make it playful!' },
+      games: [
+        { id:'eng_letters',   icon:'🔤', bg:'rgba(168,85,247,0.18)',name:'Letter Match',       desc:'Uppercase & lowercase pairs',  diff:'easy'   },
+        { id:'eng_phonics1',  icon:'🗣️', bg:'rgba(255,107,53,0.15)',name:'Sound Starter',      desc:'Beginning sounds (A for Apple)', diff:'easy'  },
+        { id:'eng_cvc',       icon:'🐱', bg:'rgba(0,212,170,0.15)', name:'CVC Words',          desc:'Cat, dog, big — short vowels', diff:'easy'   },
+        { id:'eng_sight1',    icon:'👀', bg:'rgba(255,215,0,0.15)', name:'Sight Words',        desc:'The, is, was, and, can — read fast!', diff:'easy' },
+        { id:'eng_rhyme',     icon:'🎵', bg:'rgba(46,213,115,0.15)',name:'Rhyme Time',         desc:'Words that sound the same',    diff:'easy'   },
+        { id:'eng_sentence1', icon:'📝', bg:'rgba(255,71,87,0.15)', name:'My First Sentence',  desc:'Build simple sentences',       diff:'easy'   },
+        { id:'eng_nouns1',    icon:'🏷️', bg:'rgba(168,85,247,0.12)',name:'Name Game (Nouns)',  desc:'People, places, animals, things', diff:'easy'  },
+        { id:'eng_picture',   icon:'🖼️', bg:'rgba(255,107,53,0.12)',name:'Picture Story',      desc:'What is happening in the picture?', diff:'easy' },
+        { id:'eng_colours',   icon:'🎨', bg:'rgba(0,212,170,0.12)', name:'Colour Words',       desc:'Spell red, blue, green and more',diff:'easy'  },
+        { id:'eng_abc_order', icon:'🔡', bg:'rgba(255,215,0,0.12)', name:'ABC Order',          desc:'Arrange words alphabetically', diff:'easy'   },
+        { id:'eng_opposite1', icon:'↔️', bg:'rgba(46,213,115,0.12)',name:'Opposites!',         desc:'Hot–cold, big–small, day–night',diff:'easy'  },
+        { id:'eng_question1', icon:'❓', bg:'rgba(255,71,87,0.12)', name:'Question Words',     desc:'Who, what, where, when, why',  diff:'medium' },
+      ]
+    },
+    2: {
+      tip: { title:'Word Wall Magic ✨', body:'Stick 5 new words on the fridge each week. By seeing them daily, kids absorb vocabulary without even trying!' },
+      games: [
+        { id:'eng_blends',    icon:'🔀', bg:'rgba(168,85,247,0.18)',name:'Consonant Blends',   desc:'bl, cr, st, tr — blend sounds!',diff:'medium' },
+        { id:'eng_vowels',    icon:'🔤', bg:'rgba(255,107,53,0.15)',name:'Long & Short Vowels', desc:'Cake vs cat, kite vs kit',      diff:'medium' },
+        { id:'eng_sight2',    icon:'👀', bg:'rgba(0,212,170,0.15)', name:'Sight Words 2',      desc:'Because, every, people, their', diff:'medium' },
+        { id:'eng_plurals',   icon:'🐑', bg:'rgba(255,215,0,0.15)', name:'One or Many?',       desc:'Plural rules: -s, -es, -ies',   diff:'medium' },
+        { id:'eng_adjectives',icon:'🌟', bg:'rgba(46,213,115,0.15)',name:'Describing Words',   desc:'Adjectives that paint pictures!',diff:'medium'},
+        { id:'eng_verbs1',    icon:'🏃', bg:'rgba(255,71,87,0.15)', name:'Action Words',       desc:'Run, jump, eat — present tense',diff:'medium' },
+        { id:'eng_punctuation',icon:'.',bg:'rgba(168,85,247,0.12)',name:'Punctuation Pro',    desc:'. , ! ? — place them right',    diff:'medium' },
+        { id:'eng_sentence2', icon:'📝', bg:'rgba(255,107,53,0.12)',name:'Sentence Builder',   desc:'Subject + verb + object',      diff:'medium' },
+        { id:'eng_story1',    icon:'📚', bg:'rgba(0,212,170,0.12)', name:'Story Sequence',     desc:'Put events in the right order', diff:'medium' },
+        { id:'eng_spell2',    icon:'✍️', bg:'rgba(255,215,0,0.12)', name:'Spelling Bee Jnr',  desc:'Common 2-syllable words',      diff:'medium' },
+        { id:'eng_synonym1',  icon:'🔄', bg:'rgba(46,213,115,0.12)',name:'Same Meaning',       desc:'Big = large, happy = joyful',  diff:'medium' },
+        { id:'eng_question2', icon:'❓', bg:'rgba(255,71,87,0.12)', name:'Comprehension',      desc:'Read a short passage, answer', diff:'hard'   },
+      ]
+    },
+    3: {
+      tip: { title:'Grammar in Context 📝', body:'Instead of exercises, notice grammar in storybooks! "That\'s past tense — what\'s the rule?" Reading makes grammar stick.' },
+      games: [
+        { id:'eng_tense1',    icon:'⏰', bg:'rgba(168,85,247,0.18)',name:'Tense Traveller',    desc:'Past, present, future',         diff:'medium' },
+        { id:'eng_pronouns',  icon:'👤', bg:'rgba(255,107,53,0.15)',name:'Pronoun Power',      desc:'I, he, she, they, we, it',      diff:'medium' },
+        { id:'eng_articles',  icon:'📌', bg:'rgba(0,212,170,0.15)', name:'A, An or The?',      desc:'Articles in context',           diff:'medium' },
+        { id:'eng_prefixes',  icon:'🔧', bg:'rgba(255,215,0,0.15)', name:'Prefix Power',       desc:'Un-, re-, pre- — change meaning!',diff:'medium'},
+        { id:'eng_suffixes',  icon:'🔩', bg:'rgba(46,213,115,0.15)',name:'Suffix Squad',       desc:'-ful, -less, -er, -est',        diff:'medium' },
+        { id:'eng_compound',  icon:'➕', bg:'rgba(255,71,87,0.15)', name:'Compound Words',     desc:'Rain + bow = rainbow!',         diff:'easy'   },
+        { id:'eng_idioms1',   icon:'🤔', bg:'rgba(168,85,247,0.12)',name:'What Does It Mean?', desc:'Simple idioms explained',       diff:'hard'   },
+        { id:'eng_direct',    icon:'💬', bg:'rgba(255,107,53,0.12)',name:'Direct Speech',      desc:'Quotation marks & said/asked',  diff:'hard'   },
+        { id:'eng_story2',    icon:'📖', bg:'rgba(0,212,170,0.12)', name:'Story Elements',     desc:'Character, setting, plot',      diff:'medium' },
+        { id:'eng_spell3',    icon:'✍️', bg:'rgba(255,215,0,0.12)', name:'Spelling Bee',       desc:'Tricky 3-syllable words',       diff:'hard'   },
+        { id:'eng_paragraph', icon:'📄', bg:'rgba(46,213,115,0.12)',name:'Paragraph Power',    desc:'Main idea, supporting details', diff:'hard'   },
+        { id:'eng_poem',      icon:'🎭', bg:'rgba(255,71,87,0.12)', name:'Poetry Corner',      desc:'Rhyme scheme, rhythm, simile',  diff:'hard',   badge:'new' },
+      ]
+    },
+    4: {
+      tip: { title:'Write Every Day ✍️', body:"A 5-sentence diary entry daily transforms children's writing. Ask: What did you see today? What would you change?" },
+      games: [
+        { id:'eng_tense2',    icon:'⏰', bg:'rgba(168,85,247,0.18)',name:'Tense Master',       desc:'Perfect tenses & continuous',   diff:'hard'   },
+        { id:'eng_passive',   icon:'🔄', bg:'rgba(255,107,53,0.15)',name:'Active vs Passive',  desc:'The cat ate the mouse / was eaten',diff:'hard' },
+        { id:'eng_clauses',   icon:'🔗', bg:'rgba(0,212,170,0.15)', name:'Clauses & Phrases',  desc:'Main, subordinate, conjunctions',diff:'hard'  },
+        { id:'eng_figure',    icon:'🎭', bg:'rgba(255,215,0,0.15)', name:'Figure of Speech',   desc:'Simile, metaphor, personification',diff:'hard' },
+        { id:'eng_formal',    icon:'📧', bg:'rgba(46,213,115,0.15)',name:'Letter Writing',     desc:'Formal & informal letter format',diff:'hard'  },
+        { id:'eng_essay',     icon:'📝', bg:'rgba(255,71,87,0.15)', name:'Essay Builder',      desc:'Introduction, body, conclusion', diff:'hard'  },
+        { id:'eng_vocabulary',icon:'📚', bg:'rgba(168,85,247,0.12)',name:'Word Power',         desc:'Advanced vocabulary in context', diff:'hard'  },
+        { id:'eng_comprehension',icon:'🔍',bg:'rgba(255,107,53,0.12)',name:'Deep Reading',     desc:'Inference, theme, author intent',diff:'hard'  },
+        { id:'eng_story3',    icon:'🌟', bg:'rgba(0,212,170,0.12)', name:'Story Writing',      desc:'Write with setting & conflict',  diff:'hard'  },
+        { id:'eng_idioms2',   icon:'🤔', bg:'rgba(255,215,0,0.12)', name:'Idioms & Proverbs',  desc:'Common sayings & their meanings',diff:'hard'  },
+        { id:'eng_debate',    icon:'⚖️', bg:'rgba(46,213,115,0.12)',name:'Debate Time!',       desc:'Arguments for & against',       diff:'hard',  badge:'new' },
+        { id:'eng_spell4',    icon:'✍️', bg:'rgba(255,71,87,0.12)', name:'Spelling Champion', desc:'Advanced spelling patterns',     diff:'hard'  },
       ]
     }
   }
-  // sci: { 1:{...}, 2:{...}, 3:{...}, 4:{...} } — add when ready
 };
 
-// ================================================================
-// STATE
-// ================================================================
+// STATE (runtime — not game data)
 
 
 // ── js/app.js ──────────────────────────────────────────
@@ -1255,33 +1518,21 @@ const GAME_REGISTRY = {
 // app.js — APP module, nav, buildStarfield, THEME, Service Worker
 /* jshint esversion:6 */
 
-/* ================================================================
-   LEARNVERSE — UNIVERSAL GAMIFIED LEARNING APP
-   Architecture: Subject Registry Pattern
-   Adding new subjects = add entry to SUBJECT_REGISTRY + GAME_REGISTRY
-================================================================ */
-
-// ================================================================
-// SUBJECT REGISTRY — THE EXTENSION POINT
-// To add Science later: add an entry here + games in GAME_REGISTRY
-// ================================================================
-
 const APP = (() => {
   const S = {
-    xp:       +localStorage.getItem('lv_xp')      || 0,
-    played:   +localStorage.getItem('lv_played')  || 0,
-    correct:  +localStorage.getItem('lv_correct') || 0,
-    bestStreak: +localStorage.getItem('lv_streak')|| 0,
+    // Global XP (maths) — kept for backward compat
+    xp:         +localStorage.getItem('lv_xp')      || 0,
+    played:     +localStorage.getItem('lv_played')  || 0,
+    correct:    +localStorage.getItem('lv_correct') || 0,
+    bestStreak: +localStorage.getItem('lv_streak')  || 0,
+    // Per-subject XP (Science & English companions)
+    sciXp:      +localStorage.getItem('lv_sci_xp')  || 0,
+    engXp:      +localStorage.getItem('lv_eng_xp')  || 0,
     // session
     selectedClass:   1,
     selectedSubject: 'math',
     selectedGame:    null,
-    score:     0,
-    qNum:      0,
-    streak:    0,
-    timeLeft:  30,
-    timerInt:  null,
-    maxQ:      10,
+    score:  0, qNum: 0, streak: 0, timeLeft: 30, timerInt: null, maxQ: 10,
   };
 
   function save() {
@@ -1289,34 +1540,35 @@ const APP = (() => {
     localStorage.setItem('lv_played',  S.played);
     localStorage.setItem('lv_correct', S.correct);
     localStorage.setItem('lv_streak',  S.bestStreak);
+    localStorage.setItem('lv_sci_xp',  S.sciXp);
+    localStorage.setItem('lv_eng_xp',  S.engXp);
   }
 
   function refreshStats() {
-    ['xp','played','streak','correct'].forEach(k => {
-      const map = {xp:S.xp, played:S.played, streak:S.bestStreak, correct:S.correct};
-      const el = document.getElementById('st-'+k);
-      if(el) el.textContent = map[k];
-    });
+    const map = {xp:S.xp, played:S.played, streak:S.bestStreak, correct:S.correct};
+    Object.entries(map).forEach(([k,v]) => { const el=document.getElementById('st-'+k); if(el) el.textContent=v; });
     const hdr = document.getElementById('hdr-xp');
-    if(hdr) hdr.textContent = S.xp;
+    if (hdr) hdr.textContent = S.xp;
+    // Per-subject XP pills
+    const sciEl = document.getElementById('hdr-sci-xp'); if (sciEl) sciEl.textContent = S.sciXp;
+    const engEl = document.getElementById('hdr-eng-xp'); if (engEl) engEl.textContent = S.engXp;
   }
 
   // ── NAVIGATION ──────────────────────────────────────────────
   const nav = {
     history: ['home'],
 
-    goHome() {
-      nav.history = ['home'];
-      showScreen('home');
-      refreshStats();
-    },
+    goHome() { nav.history=['home']; showScreen('home'); refreshStats(); },
 
     openClass(cls) {
       S.selectedClass = cls;
-      // if only one subject live, go straight to it
-      nav.history.push('games');
-      showScreen('games');
-      renderGamesScreen(S.selectedSubject, cls);
+      // If multiple subjects are live, show the subject select (handled by subjectCount check)
+      const liveSubjects = Object.keys(SUBJECT_REGISTRY);
+      if (liveSubjects.length === 1) {
+        nav.openSubject(liveSubjects[0], cls);
+      } else {
+        nav.openSubject(S.selectedSubject, cls);
+      }
     },
 
     openSubject(subjectId, cls) {
@@ -1329,7 +1581,7 @@ const APP = (() => {
 
     startGame(gameId) {
       S.selectedGame = gameId;
-      S.score  = 0; S.qNum = 0; S.streak = 0;
+      S.score=0; S.qNum=0; S.streak=0;
       clearInterval(S.timerInt);
       nav.history.push('play');
       showScreen('play');
@@ -1338,395 +1590,200 @@ const APP = (() => {
     },
 
     goBack() {
-      if(nav.history.length > 1) {
+      if(nav.history.length>1) {
         nav.history.pop();
         const last = nav.history[nav.history.length-1];
-        if(last==='home')  { nav.goHome(); }
-        if(last==='games') { showScreen('games'); }
-      } else { nav.goHome(); }
+        if(last==='home')  nav.goHome();
+        if(last==='games') showScreen('games');
+      } else nav.goHome();
     }
   };
 
   // ── SCREEN RENDERER ─────────────────────────────────────────
   function showScreen(id) {
-    // Only manage game-flow screens (home/games/play) — tab screens (map/pet) are managed by TABS
-    ['scr-home','scr-games','scr-play'].forEach(s => {
+    ['scr-home','scr-games','scr-play','scr-map','scr-pet','scr-castle','scr-lab'].forEach(s => {
       document.getElementById(s)?.classList.remove('active');
     });
-    // Also hide map/pet when entering game flow
-    document.getElementById('scr-map')?.classList.remove('active');
-    document.getElementById('scr-pet')?.classList.remove('active');
     document.getElementById('scr-'+id)?.classList.add('active');
     const back = document.getElementById('nav-back');
-    if (back) {
-      back.style.display = id !== 'home' ? 'inline-flex' : 'none';
-      back.classList.toggle('show', id !== 'home');
-    }
-    // Reset header tagline when returning home
-    if (id === 'home') {
-      const tagline = document.querySelector('.logo-tagline');
-      if (tagline) tagline.textContent = 'FAST · FUN · SMART';
-    }
+    if (back) { back.style.display=id!=='home'?'inline-flex':'none'; back.classList.toggle('show',id!=='home'); }
+    if (id==='home') { const t=document.querySelector('.logo-tagline'); if(t) t.textContent='FAST · FUN · SMART'; }
   }
 
   function renderGamesScreen(subjectId, cls) {
     const subDef  = SUBJECT_REGISTRY[subjectId];
     const clsData = GAME_REGISTRY[subjectId]?.[cls];
-    if(!clsData) return;
+    if (!clsData) return;
 
-    // Title row
     document.getElementById('stitle-row').innerHTML = `
       <div class="stitle-icon ${subDef.iconClass}" style="background:linear-gradient(135deg,${subDef.color},${subDef.color}99)">${subDef.icon}</div>
       <div class="stitle-text">
         <h2>${subDef.name} — Class ${cls}</h2>
         <p>Choose a game and start your challenge!</p>
-      </div>
-    `;
+      </div>`;
 
-    // Progress
-    const pct = Math.min(100, (S.correct / (cls * 20)) * 100);
+    // Subject tab switcher (show all live subjects)
+    const tabRow = document.getElementById('subject-tab-row');
+    if (tabRow) {
+      tabRow.innerHTML = Object.values(SUBJECT_REGISTRY).map(s =>
+        `<button class="subj-tab-btn ${s.id===subjectId?'stb-active':''}"
+                 style="${s.id===subjectId?`border-color:${s.color};color:${s.color};background:${s.color}18`:''}"
+                 onclick="nav.openSubject('${s.id}',${cls})">
+           ${s.icon} ${s.name.split(' ')[0]}
+         </button>`
+      ).join('');
+    }
+
+    const pct = Math.min(100, (S.correct / (cls*20)) * 100);
     document.getElementById('xp-fill').style.cssText = `width:${pct}%;background:${subDef.gradientFill}`;
 
-    // Games
     const grid = document.getElementById('games-grid');
-    grid.innerHTML = clsData.games.map((g,i) => {
-      const diffClass = 'diff-'+(g.badge||g.diff);
-      return `
-        <div class="game-tile fade-in" style="animation-delay:${i*0.06}s" onclick="APP.nav.startGame('${g.id}')">
-          <div class="tile-glow" style="background:${subDef.color}"></div>
-          <span class="tile-diff ${diffClass}">${g.badge||g.diff}</span>
-          <div class="tile-icon" style="background:${g.bg};border:1px solid rgba(255,255,255,0.08)">${g.icon}</div>
-          <div class="tile-name">${g.name}</div>
-          <div class="tile-desc">${g.desc}</div>
-        </div>
-      `;
-    }).join('');
+    grid.innerHTML = clsData.games.map((g,i) => `
+      <div class="game-tile fade-in" style="animation-delay:${i*0.06}s" onclick="APP.nav.startGame('${g.id}')">
+        <div class="tile-glow" style="background:${subDef.color}"></div>
+        <span class="tile-diff diff-${g.badge||g.diff}">${g.badge||g.diff}</span>
+        <div class="tile-icon" style="background:${g.bg};border:1px solid rgba(255,255,255,0.08)">${g.icon}</div>
+        <div class="tile-name">${g.name}</div>
+        <div class="tile-desc">${g.desc}</div>
+      </div>`).join('');
 
-    // Tip
     const tc = document.getElementById('tip-card');
-    tc.style.display = 'flex';
-    document.getElementById('tip-title').textContent = clsData.tip.title;
-    document.getElementById('tip-body').textContent  = clsData.tip.body;
+    if (tc) { tc.style.display='flex'; document.getElementById('tip-title').textContent=clsData.tip.title; document.getElementById('tip-body').textContent=clsData.tip.body; }
   }
 
   // ── HUD ─────────────────────────────────────────────────────
   function initHUD() {
     document.getElementById('hud-score').textContent = '0';
-    document.getElementById('hud-q').textContent     = `1/${S.maxQ}`;
+    document.getElementById('hud-q').textContent = `1/${S.maxQ}`;
     const dots = document.getElementById('streak-dots');
     dots.innerHTML = Array.from({length:5},(_,i)=>`<div class="s-dot" id="dot-${i}"></div>`).join('');
   }
-
   function updateHUD() {
     document.getElementById('hud-score').textContent = S.score;
-    document.getElementById('hud-q').textContent     = `${S.qNum}/${S.maxQ}`;
+    document.getElementById('hud-q').textContent = `${S.qNum}/${S.maxQ}`;
   }
-
   function startTimer(secs) {
-    clearInterval(S.timerInt);
-    S.timeLeft = secs;
-    const fill = document.getElementById('arc-fill');
-    const num  = document.getElementById('arc-num');
-    const C    = 151;
-    function tick() {
-      const r = S.timeLeft/secs;
-      fill.style.strokeDashoffset = C*(1-r);
-      fill.style.stroke = S.timeLeft>8 ? SUBJECT_REGISTRY[S.selectedSubject].timerColor : '#ff4757';
-      num.textContent   = S.timeLeft;
-      if(S.timeLeft <= 0) { clearInterval(S.timerInt); onWrong(); }
-    }
-    tick();
-    S.timerInt = setInterval(()=>{ S.timeLeft--; tick(); }, 1000);
+    clearInterval(S.timerInt); S.timeLeft=secs;
+    const fill=document.getElementById('arc-fill'), num=document.getElementById('arc-num'), C=151;
+    function tick(){const r=S.timeLeft/secs;fill.style.strokeDashoffset=C*(1-r);fill.style.stroke=S.timeLeft>8?SUBJECT_REGISTRY[S.selectedSubject].timerColor:'#ff4757';num.textContent=S.timeLeft;if(S.timeLeft<=0){clearInterval(S.timerInt);onWrong();}}
+    tick(); S.timerInt=setInterval(()=>{S.timeLeft--;tick();},1000);
   }
 
   // ── QUESTION LOADER ─────────────────────────────────────────
   function loadQ(gameId) {
-    S.qNum++;
-    updateHUD();
-    startTimer(30);
+    S.qNum++; updateHUD(); startTimer(30);
     const pc = document.getElementById('play-content');
-    GAME_RENDERERS[gameId] ? GAME_RENDERERS[gameId](pc) : GAME_RENDERERS['quiz_add1'](pc);
+    const renderer = GAME_RENDERERS[gameId] || GAME_RENDERERS['quiz_add1'];
+    renderer(pc);
   }
 
   // ── ANSWER HANDLERS ─────────────────────────────────────────
   function onCorrect() {
-    S.streak++; S.correct++; S.score += 10 + (S.streak>2?5:0);
+    S.streak++; S.correct++; S.score+=10+(S.streak>2?5:0);
     if(S.streak>S.bestStreak) S.bestStreak=S.streak;
-    save();
-    lightDot();
-    floatFeedback('✓', '#2ed573');
-    setTimeout(()=>nextOrFinish(), 850);
+    // Route XP to the right subject bucket
+    if (S.selectedSubject === 'sci') S.sciXp += 5;
+    else if (S.selectedSubject === 'eng') S.engXp += 5;
+    save(); lightDot(); floatFeedback('✓','#2ed573'); setTimeout(()=>nextOrFinish(),850);
   }
   function onWrong() {
-    clearInterval(S.timerInt);
-    S.streak = 0;
-    resetDots();
-    floatFeedback('✗', '#ff4757');
-    save();
-    setTimeout(()=>nextOrFinish(), 1100);
+    clearInterval(S.timerInt); S.streak=0; resetDots();
+    floatFeedback('✗','#ff4757'); save(); setTimeout(()=>nextOrFinish(),1100);
   }
-  function nextOrFinish() {
-    if(S.qNum < S.maxQ) loadQ(S.selectedGame);
-    else                showReward();
-  }
+  function nextOrFinish() { if(S.qNum<S.maxQ) loadQ(S.selectedGame); else showReward(); }
   function lightDot() {
-    const idx = Math.min(S.streak-1,4);
-    const d   = document.getElementById('dot-'+idx);
+    const idx=Math.min(S.streak-1,4), d=document.getElementById('dot-'+idx);
     if(d) d.classList.add('lit');
-    if(S.streak>=5) { resetDots(); S.score+=25; updateHUD(); floatFeedback('🔥+25','#ffd700'); }
+    if(S.streak>=5){resetDots();S.score+=25;updateHUD();floatFeedback('🔥+25','#ffd700');}
   }
-  function resetDots() {
-    document.querySelectorAll('.s-dot').forEach(d=>d.classList.remove('lit'));
-  }
+  function resetDots(){document.querySelectorAll('.s-dot').forEach(d=>d.classList.remove('lit'));}
 
   // ── REWARD ──────────────────────────────────────────────────
   function showReward() {
     clearInterval(S.timerInt);
-    S.played++; S.xp += S.score; save();
-    const stars = S.score>=85?3:S.score>=50?2:1;
-    const msgs  = [
-      ['🌟 Perfect!',   'Incredible! You are a true maths champion!',          '🏆'],
-      ['👏 Well Done!', 'Great effort! Every practice makes you stronger.',     '🎊'],
-      ['💪 Good Try!',  'Keep going — every mistake is a lesson in disguise!',  '🎈'],
+    S.played++; S.xp+=S.score; save();
+    const stars=S.score>=85?3:S.score>=50?2:1;
+    // Subject-aware messages
+    const subj = S.selectedSubject;
+    const msgs = subj==='sci' ? [
+      ['🔬 Perfect Scientist!', 'You\'ve mastered this experiment!', '🏆'],
+      ['⚗️ Great Discovery!',   'Your lab skills are growing!',     '🎊'],
+      ['💡 Keep Experimenting!','Every hypothesis teaches us more!', '🎈'],
+    ] : subj==='eng' ? [
+      ['📖 Perfect Author!',    'Your words are truly magical!',    '🏆'],
+      ['✍️ Well Written!',      'Your castle grows stronger!',      '🎊'],
+      ['📝 Keep Writing!',      'Every story makes you better!',    '🎈'],
+    ] : [
+      ['🌟 Perfect!',           'Incredible! You are a true maths champion!', '🏆'],
+      ['👏 Well Done!',         'Great effort! Every practice makes you stronger.','🎊'],
+      ['💪 Good Try!',          'Keep going — every mistake is a lesson!',    '🎈'],
     ];
     const [title,msg,emoji] = msgs[3-stars];
     document.getElementById('r-emoji').textContent = emoji;
     document.getElementById('r-title').textContent = title;
     document.getElementById('r-score').textContent = `${S.score} pts earned!`;
-    document.getElementById('r-msg').innerHTML     = msg;
-    const sr = document.getElementById('r-stars');
-    sr.innerHTML = [1,2,3].map(i=>`<span class="r-star">${i<=stars?'⭐':'☆'}</span>`).join('');
-    makeConfetti();
-    document.getElementById('reward-overlay').classList.add('show');
-    refreshStats();
+    document.getElementById('r-msg').innerHTML = msg;
+    document.getElementById('r-stars').innerHTML = [1,2,3].map(i=>`<span class="r-star">${i<=stars?'⭐':'☆'}</span>`).join('');
+    makeConfetti(); document.getElementById('reward-overlay').classList.add('show'); refreshStats();
   }
   function makeConfetti() {
-    const c = document.getElementById('reward-confetti');
-    c.innerHTML='';
+    const c=document.getElementById('reward-confetti'); c.innerHTML='';
     const cols=['#ffd700','#ff6b35','#00d4aa','#a855f7','#ff6b9d','#2ed573'];
-    for(let i=0;i<70;i++){
-      const p=document.createElement('div');
-      p.className='confetti-piece';
-      p.style.cssText=`left:${Math.random()*100}%;background:${cols[Math.floor(Math.random()*cols.length)]};
-        width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;
-        animation:cFall ${1.4+Math.random()*1.8}s ${Math.random()*0.8}s linear forwards;
-        border-radius:${Math.random()>.5?'50%':'3px'};`;
-      c.appendChild(p);
-    }
+    for(let i=0;i<70;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.cssText=`left:${Math.random()*100}%;background:${cols[Math.floor(Math.random()*cols.length)]};width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;animation:cFall ${1.4+Math.random()*1.8}s ${Math.random()*0.8}s linear forwards;border-radius:${Math.random()>.5?'50%':'3px'};`;c.appendChild(p);}
   }
 
   function playAgain()   { document.getElementById('reward-overlay').classList.remove('show'); APP.nav.startGame(S.selectedGame); }
   function closeReward() { document.getElementById('reward-overlay').classList.remove('show'); nav.goBack(); }
+  function floatFeedback(sym,col){const el=document.createElement('div');el.className='float-feedback';el.textContent=sym;el.style.color=col;document.body.appendChild(el);setTimeout(()=>el.remove(),950);}
 
-  function floatFeedback(sym, col) {
-    const el=document.createElement('div');
-    el.className='float-feedback'; el.textContent=sym; el.style.color=col;
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(),950);
-  }
-
-  // init
-  refreshStats();
-  buildStarfield();
-
+  refreshStats(); buildStarfield();
   return { nav, state:S, playAgain, closeReward, refreshStats };
 })();
 
-// Expose nav globally so HTML onclick="nav.xxx()" works
 const nav = APP.nav;
 
-
+// ── THEME ────────────────────────────────────────────────────
 const THEME = (() => {
-  const STORAGE_KEY = 'zl_theme';
-  const DARK_META   = '#1a0533';
-  const LIGHT_META  = '#f0edff';
-
-  function apply(theme) {
-    const html = document.documentElement;
-    html.setAttribute('data-theme', theme);
-
-    // Update meta theme-color (Android status bar)
-    const meta = document.getElementById('meta-theme-color');
-    if (meta) meta.setAttribute('content', theme === 'dark' ? DARK_META : LIGHT_META);
-
-    // Update toggle icon
-    const btn = document.getElementById('theme-toggle');
-    if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
-
-    // Update nebula colors dynamically
-    const nebulas = document.querySelectorAll('.nebula');
-    if (theme === 'light') {
-      const lc = ['rgba(99,102,241,0.07)','rgba(139,92,246,0.06)','rgba(236,72,153,0.05)'];
-      nebulas.forEach((n,i) => n.style.background = lc[i] || lc[0]);
-    } else {
-      const dc = ['rgba(99,102,241,0.13)','rgba(139,92,246,0.10)','rgba(236,72,153,0.08)'];
-      nebulas.forEach((n,i) => n.style.background = dc[i] || dc[0]);
-    }
-
-    // Persist
-    localStorage.setItem(STORAGE_KEY, theme);
+  const KEY='zl_theme', DM='#1a0533', LM='#f0edff';
+  function apply(t){
+    document.documentElement.setAttribute('data-theme',t);
+    const m=document.getElementById('meta-theme-color'); if(m) m.setAttribute('content',t==='dark'?DM:LM);
+    const b=document.getElementById('theme-toggle'); if(b) b.textContent=t==='dark'?'☀️':'🌙';
+    const ns=document.querySelectorAll('.nebula');
+    const cols=t==='light'?['rgba(99,102,241,0.07)','rgba(139,92,246,0.06)','rgba(236,72,153,0.05)']:['rgba(99,102,241,0.13)','rgba(139,92,246,0.10)','rgba(236,72,153,0.08)'];
+    ns.forEach((n,i)=>n.style.background=cols[i]||cols[0]);
+    localStorage.setItem(KEY,t);
   }
-
-  function toggle() {
-    const current = document.documentElement.getAttribute('data-theme') || 'dark';
-    apply(current === 'dark' ? 'light' : 'dark');
-  }
-
-  // Init on load: saved pref → system pref → dark default
-  function init() {
-    const saved  = localStorage.getItem(STORAGE_KEY);
-    const system = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-    apply(saved || system);
-
-    // Also react to OS-level changes (when no user pref saved)
-    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
-      if (!localStorage.getItem(STORAGE_KEY)) apply(e.matches ? 'light' : 'dark');
-    });
-  }
-
-  init();
-  return { toggle, apply };
+  function toggle(){const c=document.documentElement.getAttribute('data-theme')||'dark';apply(c==='dark'?'light':'dark');}
+  function init(){const s=localStorage.getItem(KEY),sys=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';apply(s||sys);window.matchMedia('(prefers-color-scheme: light)').addEventListener('change',e=>{if(!localStorage.getItem(KEY))apply(e.matches?'light':'dark');});}
+  init(); return { toggle, apply };
 })();
 
-// ================================================================
-//  PWA SERVICE WORKER — AUTO-UPDATE SYSTEM
-//  Flow:
-//    1. SW installs in background after deploy
-//    2. SW posts UPDATE_AVAILABLE message to this tab
-//    3. We show a non-intrusive toast at the bottom
-//    4. User taps "Update" → send SKIP_WAITING → reload
-//    5. On reload, new SW activates, old cache is deleted
-// ================================================================
+// ── SERVICE WORKER ───────────────────────────────────────────
 (function initSW() {
   if (!('serviceWorker' in navigator)) return;
-
   let newWorker = null;
-
-  // ── Register SW ──────────────────────────────────────────
   navigator.serviceWorker.register('sw.js')
-    .then(registration => {
-      console.log('[App] SW registered, scope:', registration.scope);
-
-      // Check for updates every time the page gains focus
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          registration.update().catch(() => {});
-        }
+    .then(reg => {
+      document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});
+      setInterval(()=>reg.update().catch(()=>{}),60*60*1000);
+      reg.addEventListener('updatefound',()=>{
+        newWorker=reg.installing; if(!newWorker)return;
+        newWorker.addEventListener('statechange',()=>{if(newWorker.state==='installed'&&navigator.serviceWorker.controller)showToast();});
       });
-
-      // Also check every 60 minutes while tab is open
-      setInterval(() => registration.update().catch(() => {}), 60 * 60 * 1000);
-
-      // A new SW is waiting (already installed, pending activation)
-      registration.addEventListener('updatefound', () => {
-        newWorker = registration.installing;
-        if (!newWorker) return;
-
-        newWorker.addEventListener('statechange', () => {
-          // New SW has installed and is waiting — show toast
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('[App] New version ready');
-            showUpdateToast();
-          }
-        });
-      });
-
-      // If there's already a waiting SW on load (e.g. refreshed tab)
-      if (registration.waiting && navigator.serviceWorker.controller) {
-        newWorker = registration.waiting;
-        showUpdateToast();
-      }
-    })
-    .catch(err => console.warn('[App] SW registration failed:', err));
-
-  // ── Listen for messages from SW ──────────────────────────
-  navigator.serviceWorker.addEventListener('message', event => {
-    if (event.data?.type === 'UPDATE_AVAILABLE') {
-      console.log('[App] SW broadcast: update available, version', event.data.version);
-      // Small delay so the page finishes loading first
-      setTimeout(showUpdateToast, 2000);
-    }
-    if (event.data?.type === 'VERSION') {
-      console.log('[App] Current SW version:', event.data.version);
-    }
-  });
-
-  // ── After skipWaiting, reload all tabs ───────────────────
-  let reloading = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (reloading) return;
-    reloading = true;
-    console.log('[App] New SW activated — reloading');
-    window.location.reload();
-  });
-
-  // ── Update Toast UI ──────────────────────────────────────
-  function showUpdateToast() {
-    // Don't show twice
-    if (document.getElementById('update-toast')) return;
-
-    const toast = document.createElement('div');
-    toast.id = 'update-toast';
-    toast.innerHTML = `
-      <div style="
-        position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
-        z-index:9999; display:flex; align-items:center; gap:14px;
-        background:#1e0a3c; border:1px solid rgba(99,102,241,0.4);
-        border-radius:16px; padding:14px 20px;
-        box-shadow:0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.15);
-        max-width:calc(100vw - 40px);
-        animation: toastSlideUp 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
-        font-family:'Nunito',sans-serif;
-      ">
-        <span style="font-size:22px">⚡</span>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:2px">New version ready!</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.45);">Tap update to get the latest games</div>
-        </div>
-        <button id="update-btn" style="
-          background:linear-gradient(135deg,#6366f1,#8b5cf6);
-          border:none; border-radius:10px; padding:9px 18px;
-          color:#fff; font-family:'Nunito',sans-serif; font-weight:800; font-size:13px;
-          cursor:pointer; white-space:nowrap;
-          box-shadow:0 4px 12px rgba(99,102,241,0.4);
-        ">Update ↑</button>
-        <button id="dismiss-btn" style="
-          background:transparent; border:none; color:rgba(255,255,255,0.3);
-          font-size:18px; cursor:pointer; padding:0 4px; line-height:1;
-        ">×</button>
-      </div>
-      <style>
-        @keyframes toastSlideUp {
-          from { opacity:0; transform:translateX(-50%) translateY(20px); }
-          to   { opacity:1; transform:translateX(-50%) translateY(0); }
-        }
-      </style>
-    `;
-    document.body.appendChild(toast);
-
-    // Update button — tell SW to activate
-    document.getElementById('update-btn').addEventListener('click', () => {
-      toast.remove();
-      const sw = newWorker
-        || (navigator.serviceWorker.getRegistration
-            ? null  // will be resolved below
-            : null);
-
-      // Send SKIP_WAITING to the waiting SW
-      if (newWorker) {
-        newWorker.postMessage({ type: 'SKIP_WAITING' });
-      } else {
-        navigator.serviceWorker.getRegistration().then(reg => {
-          if (reg?.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        });
-      }
-    });
-
-    // Dismiss button — hide for this session (update will still apply next reload)
-    document.getElementById('dismiss-btn').addEventListener('click', () => toast.remove());
-
-    // Auto-dismiss after 15 seconds if user doesn't interact
-    setTimeout(() => toast?.remove(), 15000);
+      if(reg.waiting&&navigator.serviceWorker.controller){newWorker=reg.waiting;showToast();}
+    }).catch(e=>console.warn('[App] SW failed:',e));
+  navigator.serviceWorker.addEventListener('message',e=>{if(e.data?.type==='UPDATE_AVAILABLE')setTimeout(showToast,2000);});
+  let reloading=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)return;reloading=true;window.location.reload();});
+  function showToast(){
+    if(document.getElementById('update-toast'))return;
+    const t=document.createElement('div'); t.id='update-toast';
+    t.innerHTML=`<div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:14px;background:#1e0a3c;border:1px solid rgba(99,102,241,0.4);border-radius:16px;padding:14px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.5);max-width:calc(100vw - 40px);animation:toastSlideUp 0.4s cubic-bezier(0.34,1.56,0.64,1) both;font-family:'Nunito',sans-serif;"><span style="font-size:22px">⚡</span><div style="flex:1"><div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:2px">New version ready!</div><div style="font-size:11px;color:rgba(255,255,255,0.45)">Tap update for the latest games</div></div><button id="update-btn" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:10px;padding:9px 18px;color:#fff;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;cursor:pointer">Update ↑</button><button id="dismiss-btn" style="background:transparent;border:none;color:rgba(255,255,255,0.3);font-size:18px;cursor:pointer;padding:0 4px">×</button></div><style>@keyframes toastSlideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}</style>`;
+    document.body.appendChild(t);
+    document.getElementById('update-btn').addEventListener('click',()=>{t.remove();if(newWorker)newWorker.postMessage({type:'SKIP_WAITING'});else navigator.serviceWorker.getRegistration().then(r=>{if(r?.waiting)r.waiting.postMessage({type:'SKIP_WAITING'});});});
+    document.getElementById('dismiss-btn').addEventListener('click',()=>t.remove());
+    setTimeout(()=>t?.remove(),15000);
   }
 })();
 
@@ -2550,6 +2607,411 @@ const GAME_RENDERERS = (() => {
 
 // ── LEVELS ───────────────────────────────────────────────────
 
+// ================================================================
+// SCIENCE RENDERERS — CBSE/NCERT EVS/Science Classes 1-4
+// ================================================================
+const SCI_RENDERERS = (() => {
+  // Helper: build a multiple-choice question
+  function mcq(pc, question, options, correct, emoji) {
+    const opts = [...options].sort(() => Math.random() - 0.5);
+    pc.innerHTML = `
+      <div class="q-emoji">${emoji || '🔬'}</div>
+      <div class="q-text">${question}</div>
+      <div class="opts-grid opts-2">${opts.map(o =>
+        `<button class="opt-btn" data-ans="${o}" data-correct="${o===correct}">${o}</button>`
+      ).join('')}</div>`;
+    wireOpts(pc, correct);
+  }
+
+  // Helper: true/false question
+  function tf(pc, question, correct, emoji) {
+    pc.innerHTML = `
+      <div class="q-emoji">${emoji || '🔬'}</div>
+      <div class="q-text">${question}</div>
+      <div class="opts-grid opts-2">
+        <button class="opt-btn" data-ans="True"  data-correct="${correct==='True'}">✅ True</button>
+        <button class="opt-btn" data-ans="False" data-correct="${correct==='False'}">❌ False</button>
+      </div>`;
+    wireOpts(pc, correct);
+  }
+
+  // Helper: image/emoji match question
+  function imgMatch(pc, question, items, correct, emoji) {
+    const opts = [...items].sort(() => Math.random() - 0.5);
+    pc.innerHTML = `
+      <div class="q-emoji">${emoji}</div>
+      <div class="q-text">${question}</div>
+      <div class="opts-grid opts-2">${opts.map(o =>
+        `<button class="opt-btn opt-big" data-ans="${o.label}" data-correct="${o.label===correct}">${o.icon}<br><span style="font-size:13px">${o.label}</span></button>`
+      ).join('')}</div>`;
+    wireOpts(pc, correct);
+  }
+
+  // ── Class 1 Science ─────────────────────────────────────
+  const POOLS = {
+    sci_living: [
+      {q:'Is a dog a living thing?', opts:['Yes, it eats and grows','No, it cannot move','Yes, but only sometimes','No, it lives indoors'], correct:'Yes, it eats and grows', emoji:'🐕'},
+      {q:'Which of these is NOT a living thing?', opts:['🌺 Flower','🪨 Rock','🐛 Caterpillar','🌿 Grass'], correct:'🪨 Rock', emoji:'🌍'},
+      {q:'What do ALL living things need?', opts:['Food and water','Wheels','A house','A mobile phone'], correct:'Food and water', emoji:'🌱'},
+      {q:'Can a chair eat food?', opts:['No, chairs are not alive','Yes, it absorbs wood','Yes, in fairy tales','Only wooden chairs'], correct:'No, chairs are not alive', emoji:'🪑'},
+      {q:'Which grows and breathes?', opts:['A puppy','A brick','A spoon','A rock'], correct:'A puppy', emoji:'🐾'},
+    ],
+    sci_body1: [
+      {q:'Which part of your body do you use to see?', opts:['Eyes','Nose','Ear','Tongue'], correct:'Eyes', emoji:'👁️'},
+      {q:'How many fingers do we have in total?', opts:['10','8','12','5'], correct:'10', emoji:'✋'},
+      {q:'Which body part helps you smell?', opts:['Nose','Tongue','Ears','Eyes'], correct:'Nose', emoji:'👃'},
+      {q:'What does your heart do?', opts:['Pumps blood','Helps you think','Helps you breathe','Holds your bones'], correct:'Pumps blood', emoji:'❤️'},
+      {q:'Which part do you use to walk?', opts:['Legs','Arms','Head','Fingers'], correct:'Legs', emoji:'🦵'},
+    ],
+    sci_senses: [
+      {q:'You use your ears to ___', opts:['Hear sounds','Smell flowers','Taste food','See colours'], correct:'Hear sounds', emoji:'👂'},
+      {q:'Which sense helps you enjoy the smell of a rose?', opts:['Smell','Touch','Sight','Taste'], correct:'Smell', emoji:'🌹'},
+      {q:'Touching something hot or cold is which sense?', opts:['Touch','Sight','Hearing','Taste'], correct:'Touch', emoji:'🔥'},
+      {q:'You use your tongue to ___', opts:['Taste food','See things','Hear music','Smell flowers'], correct:'Taste food', emoji:'👅'},
+      {q:'How many senses do humans have?', opts:['5','3','6','10'], correct:'5', emoji:'🧠'},
+    ],
+    sci_animals1: [
+      {q:'Which animal gives us milk?', opts:['Cow','Dog','Parrot','Fish'], correct:'Cow', emoji:'🐄'},
+      {q:'Which animal lives in the sea?', opts:['Fish','Cat','Lion','Horse'], correct:'Fish', emoji:'🐟'},
+      {q:'A hen lays ___', opts:['Eggs','Milk','Wool','Honey'], correct:'Eggs', emoji:'🐔'},
+      {q:'Which is a wild animal?', opts:['Lion','Dog','Hen','Cow'], correct:'Lion', emoji:'🦁'},
+      {q:'Which animal can fly?', opts:['Eagle','Cat','Cow','Fish'], correct:'Eagle', emoji:'🦅'},
+    ],
+    sci_plants1: [
+      {q:'Plants make their food using ___', opts:['Sunlight','Water only','Soil only','Darkness'], correct:'Sunlight', emoji:'☀️'},
+      {q:'Which part of a plant is underground?', opts:['Root','Leaf','Flower','Stem'], correct:'Root', emoji:'🌱'},
+      {q:'What do plants breathe in?', opts:['Carbon dioxide','Oxygen only','Milk','Water'], correct:'Carbon dioxide', emoji:'🌿'},
+      {q:'Which part of the plant holds it up?', opts:['Stem','Root','Leaf','Flower'], correct:'Stem', emoji:'🌻'},
+      {q:'Flowers grow into ___', opts:['Fruits','Roots','Leaves','Soil'], correct:'Fruits', emoji:'🍎'},
+    ],
+    sci_sky: [
+      {q:'Which gives us light during the day?', opts:['Sun','Moon','Stars','Lamp'], correct:'Sun', emoji:'☀️'},
+      {q:'The moon shines brightest at ___', opts:['Night','Noon','Morning','Sunset'], correct:'Night', emoji:'🌕'},
+      {q:'Which is the closest star to Earth?', opts:['The Sun','Polaris','Sirius','Moon'], correct:'The Sun', emoji:'⭐'},
+      {q:'What causes day and night?', opts:['Earth spins','Sun moves','Moon changes','Clouds'], correct:'Earth spins', emoji:'🌍'},
+      {q:'Stars are seen clearly on a ___ night', opts:['Clear','Rainy','Foggy','Cloudy'], correct:'Clear', emoji:'🌟'},
+    ],
+    sci_weather1: [
+      {q:'We carry an umbrella when it is ___', opts:['Rainy','Sunny','Windy','Cold'], correct:'Rainy', emoji:'☔'},
+      {q:'In summer the weather is ___', opts:['Hot','Cold','Snowy','Rainy'], correct:'Hot', emoji:'🌞'},
+      {q:'Snow falls when it is very ___', opts:['Cold','Hot','Windy','Sunny'], correct:'Cold', emoji:'❄️'},
+      {q:'Wind is moving ___', opts:['Air','Water','Clouds','Dust'], correct:'Air', emoji:'🌬️'},
+      {q:'Which season has the most rain in India?', opts:['Monsoon','Winter','Summer','Spring'], correct:'Monsoon', emoji:'🌧️'},
+    ],
+    sci_materials: [
+      {q:'A pillow is ___', opts:['Soft','Hard','Rough','Heavy'], correct:'Soft', emoji:'🛏️'},
+      {q:'A rock feels ___', opts:['Hard','Soft','Smooth only','Warm'], correct:'Hard', emoji:'🪨'},
+      {q:'Which material can you see through?', opts:['Glass','Wood','Cloth','Metal'], correct:'Glass', emoji:'🪟'},
+      {q:'A sandpaper feels ___', opts:['Rough','Smooth','Soft','Slippery'], correct:'Rough', emoji:'📄'},
+      {q:'Wood floats on water. True or False?', opts:['True','False','Sometimes','Never'], correct:'True', emoji:'🌊'},
+    ],
+    sci_food1: [
+      {q:'Which food gives us energy?', opts:['Rice','Salt','Water only','Pepper'], correct:'Rice', emoji:'🍚'},
+      {q:'Vegetables and fruits give us ___', opts:['Vitamins','Only sugar','Only water','Nothing'], correct:'Vitamins', emoji:'🥦'},
+      {q:'Which is a healthy drink?', opts:['Water','Soda','Juice with sugar','Tea'], correct:'Water', emoji:'💧'},
+      {q:'Which food group do eggs belong to?', opts:['Protein','Vegetable','Grain','Fat'], correct:'Protein', emoji:'🥚'},
+      {q:'Eating too much sugar causes ___', opts:['Tooth decay','Strong bones','Better eyesight','More energy'], correct:'Tooth decay', emoji:'🦷'},
+    ],
+    sci_water1: [
+      {q:'Water is used for ___', opts:['Drinking & cooking','Only washing','Only cooking','Only bathing'], correct:'Drinking & cooking', emoji:'💧'},
+      {q:'Where is most of Earth\'s water found?', opts:['Oceans','Clouds','Rivers','Lakes'], correct:'Oceans', emoji:'🌊'},
+      {q:'We should save water because ___', opts:['It is limited','It is free','It is heavy','It is blue'], correct:'It is limited', emoji:'🚿'},
+      {q:'Rain water comes from ___', opts:['Clouds','Mountains','Rivers','Lakes'], correct:'Clouds', emoji:'☁️'},
+      {q:'Water turns to ice when it gets very ___', opts:['Cold','Hot','Salty','Dark'], correct:'Cold', emoji:'🧊'},
+    ],
+    sci_transport1: [
+      {q:'An aeroplane travels through ___', opts:['Air','Water','Land','Underground'], correct:'Air', emoji:'✈️'},
+      {q:'A boat travels on ___', opts:['Water','Land','Air','Space'], correct:'Water', emoji:'⛵'},
+      {q:'Which travels on land?', opts:['Bus','Aeroplane','Boat','Submarine'], correct:'Bus', emoji:'🚌'},
+      {q:'A train runs on ___', opts:['Rails','Roads','Water','Air'], correct:'Rails', emoji:'🚂'},
+      {q:'Which is the fastest?', opts:['Aeroplane','Car','Bus','Bicycle'], correct:'Aeroplane', emoji:'🚀'},
+    ],
+    sci_family: [
+      {q:'Your father\'s mother is your ___', opts:['Grandmother','Aunt','Sister','Cousin'], correct:'Grandmother', emoji:'👵'},
+      {q:'A family with many generations living together is called ___', opts:['Joint family','Nuclear family','Single family','One family'], correct:'Joint family', emoji:'👨‍👩‍👧‍👦'},
+      {q:'Who is a firefighter?', opts:['A community helper','A family member','A classmate','A pet'], correct:'A community helper', emoji:'👩‍🚒'},
+      {q:'A teacher helps us ___', opts:['Learn and grow','Sell things','Fix cars','Build houses'], correct:'Learn and grow', emoji:'👩‍🏫'},
+      {q:'Which family member is older than your parents?', opts:['Grandparents','Siblings','Cousins','Friends'], correct:'Grandparents', emoji:'👴'},
+    ],
+    // Class 2
+    sci_foodchain1: [
+      {q:'In a food chain, plants are called ___', opts:['Producers','Consumers','Decomposers','Hunters'], correct:'Producers', emoji:'🌿'},
+      {q:'What does a herbivore eat?', opts:['Plants only','Meat only','Plants and meat','Nothing'], correct:'Plants only', emoji:'🐰'},
+      {q:'A lion is a ___', opts:['Carnivore','Herbivore','Producer','Decomposer'], correct:'Carnivore', emoji:'🦁'},
+      {q:'Grass → Grasshopper → Frog → Snake. The grasshopper is a ___', opts:['Consumer','Producer','Decomposer','Predator'], correct:'Consumer', emoji:'🦗'},
+      {q:'What eats both plants AND animals?', opts:['Omnivore','Herbivore','Carnivore','Producer'], correct:'Omnivore', emoji:'🐻'},
+    ],
+    sci_habitat: [
+      {q:'A polar bear lives in ___', opts:['Arctic/snowy regions','Desert','Rainforest','Ocean'], correct:'Arctic/snowy regions', emoji:'🐻‍❄️'},
+      {q:'A camel is adapted to live in the ___', opts:['Desert','Forest','Ocean','Arctic'], correct:'Desert', emoji:'🐪'},
+      {q:'Which animal lives in water?', opts:['Dolphin','Elephant','Tiger','Eagle'], correct:'Dolphin', emoji:'🐬'},
+      {q:'Birds build nests to ___', opts:['Lay eggs and raise young','Store food','Sleep only','Hide from rain'], correct:'Lay eggs and raise young', emoji:'🐦'},
+      {q:'A fish breathes using ___', opts:['Gills','Lungs','Skin','Nose'], correct:'Gills', emoji:'🐟'},
+    ],
+    sci_states: [
+      {q:'Water is an example of a ___', opts:['Liquid','Solid','Gas','Plasma'], correct:'Liquid', emoji:'💧'},
+      {q:'Ice is water in its ___ form', opts:['Solid','Liquid','Gas','Energy'], correct:'Solid', emoji:'🧊'},
+      {q:'Steam is water changing to ___', opts:['Gas','Solid','Liquid','Nothing'], correct:'Gas', emoji:'♨️'},
+      {q:'Which is a solid?', opts:['Iron nail','Milk','Oxygen','Steam'], correct:'Iron nail', emoji:'🔩'},
+      {q:'A gas has ___ shape', opts:['No fixed shape','A fixed shape','A round shape','A square shape'], correct:'No fixed shape', emoji:'🌫️'},
+    ],
+    sci_force1: [
+      {q:'When you push a door, you apply a ___', opts:['Force','Sound','Light','Heat'], correct:'Force', emoji:'🚪'},
+      {q:'Pulling a rope is an example of a ___ force', opts:['Pull','Push','Gravity','Magnetic'], correct:'Pull', emoji:'🪢'},
+      {q:'Gravity pulls things ___', opts:['Downward','Upward','Sideways','In circles'], correct:'Downward', emoji:'🍎'},
+      {q:'Friction makes moving objects ___', opts:['Slow down','Speed up','Disappear','Float'], correct:'Slow down', emoji:'🛹'},
+      {q:'A magnet attracts ___', opts:['Iron','Wood','Plastic','Glass'], correct:'Iron', emoji:'🧲'},
+    ],
+    sci_magnets: [
+      {q:'A magnet has how many poles?', opts:['2 — North and South','1','3','4'], correct:'2 — North and South', emoji:'🧲'},
+      {q:'Like poles ___ each other', opts:['Repel','Attract','Ignore','Break'], correct:'Repel', emoji:'↔️'},
+      {q:'Which material is attracted to a magnet?', opts:['Iron pin','Plastic ruler','Rubber eraser','Wooden stick'], correct:'Iron pin', emoji:'📎'},
+      {q:'A compass needle points to ___', opts:['North','South','East','West'], correct:'North', emoji:'🧭'},
+      {q:'Opposite poles ___ each other', opts:['Attract','Repel','Break','Ignore'], correct:'Attract', emoji:'🔴🔵'},
+    ],
+    // Class 3
+    sci_plants2: [
+      {q:'The process by which plants make food is called ___', opts:['Photosynthesis','Digestion','Respiration','Transpiration'], correct:'Photosynthesis', emoji:'🌿'},
+      {q:'Plants need ___ to make food', opts:['Sunlight, water, CO₂','Only water','Only soil','Only sunlight'], correct:'Sunlight, water, CO₂', emoji:'☀️'},
+      {q:'Leaves contain ___ which traps sunlight', opts:['Chlorophyll','Glucose','Oxygen','Carbon'], correct:'Chlorophyll', emoji:'🍃'},
+      {q:'During photosynthesis, plants release ___', opts:['Oxygen','Carbon dioxide','Nitrogen','Water vapour'], correct:'Oxygen', emoji:'💨'},
+      {q:'Roots absorb ___ from soil', opts:['Water and minerals','Sunlight','Oxygen','Carbon dioxide'], correct:'Water and minerals', emoji:'🌱'},
+    ],
+    sci_water2: [
+      {q:'When water is heated, it becomes ___', opts:['Water vapour','Ice','Snow','Dew'], correct:'Water vapour', emoji:'♨️'},
+      {q:'Water vapour rising into the sky is called ___', opts:['Evaporation','Condensation','Precipitation','Transpiration'], correct:'Evaporation', emoji:'☀️'},
+      {q:'Water vapour cooling to form clouds is ___', opts:['Condensation','Evaporation','Freezing','Boiling'], correct:'Condensation', emoji:'☁️'},
+      {q:'Rain, snow and hail are forms of ___', opts:['Precipitation','Evaporation','Condensation','Transpiration'], correct:'Precipitation', emoji:'🌧️'},
+      {q:'Where does the water in clouds come from?', opts:['Oceans and seas','Mountains','Underground','Rivers only'], correct:'Oceans and seas', emoji:'🌊'},
+    ],
+    sci_planets: [
+      {q:'How many planets are in our solar system?', opts:['8','9','7','10'], correct:'8', emoji:'🪐'},
+      {q:'The planet closest to the Sun is ___', opts:['Mercury','Venus','Earth','Mars'], correct:'Mercury', emoji:'☀️'},
+      {q:'Which planet is known as the Red Planet?', opts:['Mars','Jupiter','Venus','Saturn'], correct:'Mars', emoji:'🔴'},
+      {q:'Earth is the ___ planet from the Sun', opts:['3rd','2nd','4th','1st'], correct:'3rd', emoji:'🌍'},
+      {q:'The largest planet in our solar system is ___', opts:['Jupiter','Saturn','Neptune','Uranus'], correct:'Jupiter', emoji:'🌌'},
+    ],
+    sci_electricity: [
+      {q:'For current to flow, a circuit must be ___', opts:['Complete/closed','Broken/open','Half connected','Inverted'], correct:'Complete/closed', emoji:'⚡'},
+      {q:'A ___ allows electricity to pass through it', opts:['Conductor','Insulator','Resistor','Switch'], correct:'Conductor', emoji:'🔌'},
+      {q:'Rubber is an example of an ___', opts:['Insulator','Conductor','Battery','Circuit'], correct:'Insulator', emoji:'🟡'},
+      {q:'A switch in the OFF position ___ the circuit', opts:['Opens/breaks','Closes','Completes','Powers'], correct:'Opens/breaks', emoji:'💡'},
+      {q:'Which is a good conductor of electricity?', opts:['Copper wire','Plastic spoon','Rubber glove','Wood'], correct:'Copper wire', emoji:'🔩'},
+    ],
+    sci_light2: [
+      {q:'When light bends as it passes through water, this is called ___', opts:['Refraction','Reflection','Dispersion','Absorption'], correct:'Refraction', emoji:'🌈'},
+      {q:'A mirror reflects light because its surface is ___', opts:['Smooth and shiny','Rough','Transparent','Coloured'], correct:'Smooth and shiny', emoji:'🪞'},
+      {q:'A prism splits white light into ___', opts:['Rainbow colours','Red only','Black','Two colours'], correct:'Rainbow colours', emoji:'🌈'},
+      {q:'Objects we can see through clearly are ___', opts:['Transparent','Opaque','Translucent','Reflective'], correct:'Transparent', emoji:'🪟'},
+      {q:'An opaque object ___ light', opts:['Blocks','Passes','Bends','Stores'], correct:'Blocks', emoji:'⬛'},
+    ],
+    // Class 4
+    sci_energy: [
+      {q:'A moving ball has ___ energy', opts:['Kinetic','Potential','Heat','Light'], correct:'Kinetic', emoji:'⚽'},
+      {q:'A book on a shelf has ___ energy', opts:['Potential','Kinetic','Sound','Light'], correct:'Potential', emoji:'📚'},
+      {q:'Energy cannot be ___ — only transformed', opts:['Created or destroyed','Stored','Transferred','Used'], correct:'Created or destroyed', emoji:'⚡'},
+      {q:'The sun is the source of ___ energy', opts:['Solar','Wind','Tidal','Nuclear'], correct:'Solar', emoji:'☀️'},
+      {q:'Which energy source is renewable?', opts:['Solar and wind','Coal','Petrol','Natural gas'], correct:'Solar and wind', emoji:'🌬️'},
+    ],
+    sci_nutrition: [
+      {q:'Carbohydrates give us ___', opts:['Energy','Immunity','Body building','Repair'], correct:'Energy', emoji:'🍞'},
+      {q:'Proteins help in ___ the body', opts:['Building and repairing','Giving energy','Protecting from germs','Digestion'], correct:'Building and repairing', emoji:'🥩'},
+      {q:'Vitamin C is found mainly in ___', opts:['Citrus fruits','Meat','Milk','Rice'], correct:'Citrus fruits', emoji:'🍊'},
+      {q:'Lack of Vitamin D causes ___', opts:['Weak bones (rickets)','Scurvy','Night blindness','Anaemia'], correct:'Weak bones (rickets)', emoji:'🦴'},
+      {q:'Minerals like calcium help build ___', opts:['Bones and teeth','Muscles only','Skin','Blood cells only'], correct:'Bones and teeth', emoji:'🦷'},
+    ],
+    sci_cells: [
+      {q:'The basic unit of life is the ___', opts:['Cell','Organ','Tissue','System'], correct:'Cell', emoji:'🔬'},
+      {q:'A cell wall is found in ___ cells only', opts:['Plant','Animal','Both','Neither'], correct:'Plant', emoji:'🌿'},
+      {q:'The powerhouse of the cell is the ___', opts:['Mitochondria','Nucleus','Cell membrane','Vacuole'], correct:'Mitochondria', emoji:'⚡'},
+      {q:'The nucleus controls ___', opts:['Cell activities','Cell wall','Photosynthesis','Water intake'], correct:'Cell activities', emoji:'🎯'},
+      {q:'Animal cells have a ___ but no cell wall', opts:['Cell membrane','Chloroplast','Rigid wall','Cellulose'], correct:'Cell membrane', emoji:'🟡'},
+    ],
+    sci_gravity: [
+      {q:'Gravity is the force that pulls objects ___', opts:['Downward','Upward','Sideways','In circles'], correct:'Downward', emoji:'🌍'},
+      {q:'An apple falls from a tree because of ___', opts:['Gravity','Wind','Friction','Magnetism'], correct:'Gravity', emoji:'🍎'},
+      {q:'Friction acts in ___ direction to motion', opts:['Opposite','Same','Upward','No'], correct:'Opposite', emoji:'🛹'},
+      {q:'In space, there is almost no ___', opts:['Gravity','Sound','Light','Heat'], correct:'Gravity', emoji:'🚀'},
+      {q:'On the Moon, gravity is ___ than on Earth', opts:['Less','More','The same','Zero'], correct:'Less', emoji:'🌕'},
+    ],
+  };
+
+  // Fallback renderer for any sci_ game
+  function make_sci_renderer(gameId) {
+    return function(pc) {
+      const pool = POOLS[gameId];
+      if (!pool) { pc.innerHTML='<div class="q-text">🔬 Coming soon!</div>'; return; }
+      const q = pool[Math.floor(Math.random() * pool.length)];
+      mcq(pc, q.q, q.opts, q.correct, q.emoji);
+    };
+  }
+
+  const renderers = {};
+  Object.keys(POOLS).forEach(id => { renderers[id] = make_sci_renderer(id); });
+  return renderers;
+})();
+
+// ================================================================
+// ENGLISH RENDERERS — CBSE/NCERT Marigold/Raindrops Classes 1-4
+// ================================================================
+const ENG_RENDERERS = (() => {
+  function mcq(pc, question, options, correct, emoji) {
+    const opts = [...options].sort(() => Math.random() - 0.5);
+    pc.innerHTML = `
+      <div class="q-emoji">${emoji || '📖'}</div>
+      <div class="q-text">${question}</div>
+      <div class="opts-grid opts-2">${opts.map(o =>
+        `<button class="opt-btn" data-ans="${o}" data-correct="${o===correct}">${o}</button>`
+      ).join('')}</div>`;
+    wireOpts(pc, correct);
+  }
+
+  const POOLS = {
+    eng_letters: [
+      {q:'What is the lowercase of "G"?', opts:['g','p','q','b'], correct:'g', emoji:'🔡'},
+      {q:'Which letter comes after "M" in the alphabet?', opts:['N','O','L','P'], correct:'N', emoji:'🔤'},
+      {q:'"D" and "d" are ___', opts:['Same letter, different case','Different letters','Vowels','Consonants only'], correct:'Same letter, different case', emoji:'📚'},
+      {q:'How many vowels are in the English alphabet?', opts:['5','6','4','7'], correct:'5', emoji:'🗣️'},
+      {q:'Which letter is this in uppercase? "a"', opts:['A','D','O','C'], correct:'A', emoji:'🔠'},
+    ],
+    eng_phonics1: [
+      {q:'What sound does "B" make?', opts:['Buh (as in Ball)','Puh (as in Pen)','Muh (as in Mop)','Duh (as in Dog)'], correct:'Buh (as in Ball)', emoji:'🎵'},
+      {q:'Apple starts with the sound ___', opts:['/a/','/ e/','/ i/','/ o/'], correct:'/a/', emoji:'🍎'},
+      {q:'Which word starts with the same sound as "CAT"?', opts:['Cup','Hat','Bat','Dot'], correct:'Cup', emoji:'🐱'},
+      {q:'The word "SUN" starts with ___', opts:['S','C','Z','Sh'], correct:'S', emoji:'☀️'},
+      {q:'"Dog" and "Doll" start with the same ___', opts:['Sound','Vowel','Ending','Rhyme'], correct:'Sound', emoji:'🐕'},
+    ],
+    eng_cvc: [
+      {q:'Which is a CVC (consonant-vowel-consonant) word?', opts:['Cat','Play','Tree','Blast'], correct:'Cat', emoji:'🐱'},
+      {q:'Complete the word: B _ G', opts:['i (big)','a (bag)','o (bog)','All of these'], correct:'All of these', emoji:'🎯'},
+      {q:'"H_T" — which vowel makes the word "hot"?', opts:['o','a','i','e'], correct:'o', emoji:'🔥'},
+      {q:'Which rhymes with "PIG"?', opts:['Big','Cat','Dog','Bed'], correct:'Big', emoji:'🐷'},
+      {q:'The word "MOP" has ___ letters', opts:['3','4','2','5'], correct:'3', emoji:'🧹'},
+    ],
+    eng_sight1: [
+      {q:'Which word means "the opposite of off"?', opts:['On','In','Up','At'], correct:'On', emoji:'💡'},
+      {q:'Fill in: "She ___ happy."', opts:['is','am','are','be'], correct:'is', emoji:'😊'},
+      {q:'Which sight word means "not false"?', opts:['True','Can','The','And'], correct:'True', emoji:'✅'},
+      {q:'"They ___ my friends." Choose the right word.', opts:['are','is','am','was'], correct:'are', emoji:'👫'},
+      {q:'Which is a sight word?', opts:['the','elephant','difficult','caterpillar'], correct:'the', emoji:'📖'},
+    ],
+    eng_rhyme: [
+      {q:'Which word rhymes with "CAKE"?', opts:['Lake','Kick','Sock','Pick'], correct:'Lake', emoji:'🎂'},
+      {q:'Which word rhymes with "MOON"?', opts:['Spoon','Star','Light','Night'], correct:'Spoon', emoji:'🌙'},
+      {q:'"CAT" rhymes with ___', opts:['Hat','Cut','Pit','Hot'], correct:'Hat', emoji:'🐱'},
+      {q:'Which pair rhymes?', opts:['Rain – Train','Cat – Dog','Sun – Moon','Tree – Bee... wait — Bee rhymes with Tree!'], correct:'Rain – Train', emoji:'🎵'},
+      {q:'Which word does NOT rhyme with "BALL"?', opts:['Bell','Wall','Hall','Fall'], correct:'Bell', emoji:'🎾'},
+    ],
+    eng_nouns1: [
+      {q:'Which is a noun?', opts:['Dog','Run','Happy','Quickly'], correct:'Dog', emoji:'🏷️'},
+      {q:'"School" is a ___ noun', opts:['Place','Person','Animal','Thing'], correct:'Place', emoji:'🏫'},
+      {q:'Which word is the name of a person?', opts:['Teacher','Jump','Blue','Fast'], correct:'Teacher', emoji:'👩‍🏫'},
+      {q:'Nouns are the names of ___', opts:['People, places, things, animals','Actions','Feelings only','Colours only'], correct:'People, places, things, animals', emoji:'📦'},
+      {q:'Which is a proper noun?', opts:['Mumbai','city','river','mountain'], correct:'Mumbai', emoji:'🏙️'},
+    ],
+    eng_opposite1: [
+      {q:'Opposite of "HOT" is ___', opts:['Cold','Warm','Cool','Icy'], correct:'Cold', emoji:'🌡️'},
+      {q:'Opposite of "BIG" is ___', opts:['Small','Huge','Tiny... wait — Tiny is also correct!','Little'], correct:'Small', emoji:'🐘'},
+      {q:'Opposite of "DAY" is ___', opts:['Night','Morning','Evening','Noon'], correct:'Night', emoji:'🌙'},
+      {q:'Opposite of "FAST" is ___', opts:['Slow','Quick','Swift','Rapid'], correct:'Slow', emoji:'🐢'},
+      {q:'Opposite of "HAPPY" is ___', opts:['Sad','Angry','Tired','Hungry'], correct:'Sad', emoji:'😢'},
+    ],
+    eng_plurals: [
+      {q:'Plural of "BOOK" is ___', opts:['Books','Bookes','Bookies','Book'], correct:'Books', emoji:'📚'},
+      {q:'Plural of "CHURCH" is ___', opts:['Churches','Churchs','Churchies','Church'], correct:'Churches', emoji:'⛪'},
+      {q:'Plural of "BABY" is ___', opts:['Babies','Babys','Babyes','Baby'], correct:'Babies', emoji:'👶'},
+      {q:'Plural of "LEAF" is ___', opts:['Leaves','Leafs','Leafes','Leaf'], correct:'Leaves', emoji:'🍃'},
+      {q:'Plural of "MOUSE" is ___', opts:['Mice','Mouses','Mousies','Mouse'], correct:'Mice', emoji:'🐭'},
+    ],
+    eng_adjectives: [
+      {q:'Which word is an adjective?', opts:['Beautiful','Run','Quickly','She'], correct:'Beautiful', emoji:'🌸'},
+      {q:'"The ___ cat slept." Which fits best?', opts:['Lazy','Run','She','Never'], correct:'Lazy', emoji:'😴'},
+      {q:'Adjectives describe ___', opts:['Nouns','Verbs','Pronouns','Prepositions'], correct:'Nouns', emoji:'🏷️'},
+      {q:'Which is NOT an adjective?', opts:['Dance','Tall','Small','Green'], correct:'Dance', emoji:'💃'},
+      {q:'"She has a ___ voice." Which adjective fits?', opts:['Sweet','Runs','Slowly','Her'], correct:'Sweet', emoji:'🎵'},
+    ],
+    eng_verbs1: [
+      {q:'Which is an action verb?', opts:['Jump','Happy','Blue','Quick'], correct:'Jump', emoji:'🏃'},
+      {q:'"She ___ to school." Which verb fits?', opts:['Runs','Running','Run only if past','Ran only'], correct:'Runs', emoji:'🏫'},
+      {q:'Verbs describe ___', opts:['Actions or states','Things','Places','People'], correct:'Actions or states', emoji:'⚡'},
+      {q:'Which is NOT a verb?', opts:['Beautiful','Eat','Sleep','Think'], correct:'Beautiful', emoji:'🌺'},
+      {q:'"They ___ a song." Which verb completes it?', opts:['Sang','Beautiful','Tall','Always'], correct:'Sang', emoji:'🎵'},
+    ],
+    eng_tense1: [
+      {q:'"She PLAYS cricket every day." This is ___ tense.', opts:['Present','Past','Future','Perfect'], correct:'Present', emoji:'⏰'},
+      {q:'"He PLAYED cricket yesterday." This is ___ tense.', opts:['Past','Present','Future','Perfect'], correct:'Past', emoji:'📅'},
+      {q:'"They WILL PLAY tomorrow." This is ___ tense.', opts:['Future','Past','Present','Continuous'], correct:'Future', emoji:'🔮'},
+      {q:'Change to past: "I EAT an apple."', opts:['I ate an apple','I eated an apple','I eats an apple','I eating'], correct:'I ate an apple', emoji:'🍎'},
+      {q:'Change to future: "She WRITES a letter."', opts:['She will write a letter','She wrote a letter','She writes a letter','She writing'], correct:'She will write a letter', emoji:'✉️'},
+    ],
+    eng_articles: [
+      {q:'"___ elephant is large." Use:', opts:['An','A','The','Some'], correct:'An', emoji:'🐘'},
+      {q:'"___ dog barked." (specific dog)', opts:['The','A','An','Some'], correct:'The', emoji:'🐕'},
+      {q:'"I saw ___ bird in the tree." (any bird)', opts:['A','An','The','Some'], correct:'A', emoji:'🐦'},
+      {q:'"___ honest man told the truth." Use:', opts:['An','A','The','Some'], correct:'An', emoji:'🤝'},
+      {q:'"She is ___ best student."', opts:['The','A','An','Some'], correct:'The', emoji:'🥇'},
+    ],
+    eng_prefixes: [
+      {q:'"UN" + "happy" = ___', opts:['Unhappy (not happy)','Very happy','Quite happy','Always happy'], correct:'Unhappy (not happy)', emoji:'😞'},
+      {q:'The prefix "RE" means ___', opts:['Again','Not','Before','After'], correct:'Again', emoji:'🔁'},
+      {q:'"PRE" + "school" = school ___', opts:['Before regular school','After school','In school','Big school'], correct:'Before regular school', emoji:'🏫'},
+      {q:'Opposite of "possible" using a prefix:', opts:['Impossible','Nonpossible','Unpossible','Dispossible'], correct:'Impossible', emoji:'🚫'},
+      {q:'"MIS" + "spell" = ___', opts:['Misspell (spell wrongly)','Spell again','Spell correctly','Double spell'], correct:'Misspell (spell wrongly)', emoji:'✍️'},
+    ],
+    eng_compound: [
+      {q:'"RAIN" + "BOW" = ___', opts:['Rainbow','Raincoat','Rainforest','Rainfall'], correct:'Rainbow', emoji:'🌈'},
+      {q:'"SUN" + "FLOWER" = ___', opts:['Sunflower','Sunshine','Sunburn','Sunset'], correct:'Sunflower', emoji:'🌻'},
+      {q:'"FOOT" + "BALL" = ___', opts:['Football','Footwear','Footstep','Footprint'], correct:'Football', emoji:'⚽'},
+      {q:'"BOOK" + "SHELF" = ___', opts:['Bookshelf','Bookstore','Bookmark','Bookworm'], correct:'Bookshelf', emoji:'📚'},
+      {q:'Which is a compound word?', opts:['Butterfly','Happy','Quickly','Beautiful'], correct:'Butterfly', emoji:'🦋'},
+    ],
+    eng_tense2: [
+      {q:'"She HAS EATEN lunch." This is ___ tense.', opts:['Present Perfect','Simple Past','Future Perfect','Past Continuous'], correct:'Present Perfect', emoji:'⏰'},
+      {q:'"They WERE PLAYING when it rained." — the playing was ___', opts:['Past Continuous','Simple Past','Future','Present Perfect'], correct:'Past Continuous', emoji:'⚽'},
+      {q:'Choose the correct form: "By tomorrow, I ___ finished."', opts:['will have','have','had','will be'], correct:'will have', emoji:'📅'},
+      {q:'"I ___ here since 2020." Use:', opts:['have been','was','am been','will be'], correct:'have been', emoji:'🏠'},
+      {q:'Past perfect: "She ___ before I arrived."', opts:['had left','has left','left','leaves'], correct:'had left', emoji:'🚶'},
+    ],
+    eng_figure: [
+      {q:'"The classroom was a ZOO." This is a ___', opts:['Metaphor','Simile','Personification','Alliteration'], correct:'Metaphor', emoji:'🦁'},
+      {q:'"As brave as a LION" is a ___', opts:['Simile','Metaphor','Personification','Hyperbole'], correct:'Simile', emoji:'🔍'},
+      {q:'"The WIND whispered" is an example of ___', opts:['Personification','Simile','Metaphor','Alliteration'], correct:'Personification', emoji:'🌬️'},
+      {q:'"Peter Piper picked a peck" — this is ___', opts:['Alliteration','Rhyme','Simile','Hyperbole'], correct:'Alliteration', emoji:'🎵'},
+      {q:'"I\'ve told you a MILLION times!" is ___', opts:['Hyperbole','Fact','Simile','Metaphor'], correct:'Hyperbole', emoji:'📢'},
+    ],
+    eng_clauses: [
+      {q:'"Although it was raining, she went out." The clause after "although" is a ___', opts:['Subordinate clause','Main clause','Noun clause','Independent clause'], correct:'Subordinate clause', emoji:'🌧️'},
+      {q:'Which conjunction joins two equal clauses?', opts:['And, but, or','Although, because, since','Whether, if','That, which'], correct:'And, but, or', emoji:'🔗'},
+      {q:'"Because she studied hard" — is this a complete sentence?', opts:['No — it is a fragment','Yes, it is complete','Yes, it is a question','Yes, it is a command'], correct:'No — it is a fragment', emoji:'📝'},
+      {q:'A main clause ___', opts:['Makes sense on its own','Needs another clause','Starts with "because"','Has no verb'], correct:'Makes sense on its own', emoji:'✅'},
+      {q:'"The girl WHO won the race is my friend." WHO introduces a ___', opts:['Relative clause','Main clause','Adverb clause','Noun clause'], correct:'Relative clause', emoji:'🏆'},
+    ],
+    eng_vocabulary: [
+      {q:'What does "BENEVOLENT" mean?', opts:['Kind and generous','Angry','Clever','Nervous'], correct:'Kind and generous', emoji:'💛'},
+      {q:'A synonym for "RAPID" is ___', opts:['Fast','Slow','Careful','Quiet'], correct:'Fast', emoji:'⚡'},
+      {q:'What does "TRANSPARENT" mean?', opts:['See-through','Hidden','Colourful','Rough'], correct:'See-through', emoji:'🪟'},
+      {q:'Antonym of "ANCIENT" is ___', opts:['Modern','Old','Antique','Historic'], correct:'Modern', emoji:'🏛️'},
+      {q:'Which word means "very happy"?', opts:['Ecstatic','Furious','Melancholy','Anxious'], correct:'Ecstatic', emoji:'🎉'},
+    ],
+  };
+
+  function make_eng_renderer(gameId) {
+    return function(pc) {
+      const pool = POOLS[gameId];
+      if (!pool) { pc.innerHTML='<div class="q-text">📖 Coming soon!</div>'; return; }
+      const q = pool[Math.floor(Math.random() * pool.length)];
+      mcq(pc, q.q, q.opts, q.correct, q.emoji);
+    };
+  }
+
+  const renderers = {};
+  Object.keys(POOLS).forEach(id => { renderers[id] = make_eng_renderer(id); });
+  return renderers;
+})();
+
+// Merge SCI and ENG renderers into GAME_RENDERERS
+Object.assign(GAME_RENDERERS, SCI_RENDERERS, ENG_RENDERERS);
+
 
 // ── js/gamification.js ──────────────────────────────────────────
 
@@ -3032,173 +3494,186 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 // ── js/features.js ──────────────────────────────────────────
 
-// features.js — TABS (tab router), ADVENTURE_MAP, PET (growing companion)
+// features.js — TABS, ADVENTURE_MAP, PET (Maths), CASTLE (English), LAB (Science)
 /* jshint esversion:6 */
 
+// ================================================================
+// TABS — tab router for home / map / pet / castle / lab screens
+// ================================================================
 const TABS = (() => {
-  const SCREENS = { home:'scr-home', map:'scr-map', pet:'scr-pet' };
-  const TAGLINES = { home:'FAST · FUN · SMART', map:'ADVENTURE MAP', pet:'MY PET' };
+  const SCREENS  = { home:'scr-home', map:'scr-map', pet:'scr-pet', castle:'scr-castle', lab:'scr-lab' };
+  const TAGLINES = { home:'FAST · FUN · SMART', map:'ADVENTURE MAP', pet:'MY PET 🐣', castle:'CASTLE BUILDER 🏰', lab:'SCIENCE LAB 🔬' };
   let current = 'home';
 
   function show(tab) {
-    // Hide ALL screens, then show only the target tab
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const next = document.getElementById(SCREENS[tab]);
     if (next) next.classList.add('active');
     current = tab;
 
-    // Update global header tagline
     const tagline = document.querySelector('.logo-tagline');
     if (tagline) tagline.textContent = TAGLINES[tab] || TAGLINES.home;
 
-    // Hide back button — tabs don't use it
     const backBtn = document.getElementById('nav-back');
-    if (backBtn) { backBtn.style.display = 'none'; backBtn.classList.remove('show'); }
+    if (backBtn) { backBtn.style.display='none'; backBtn.classList.remove('show'); }
 
-    // Sync XP in header
     const xpEl = document.getElementById('hdr-xp');
     if (xpEl) xpEl.textContent = APP.state.xp;
 
-    // Mark active state on all bottom-nav buttons across all three navs
     document.querySelectorAll('.bnav-btn').forEach(b => {
       b.classList.toggle('bnav-active', b.dataset.tab === tab);
     });
 
-    if (tab === 'map') ADVENTURE_MAP.render();
-    if (tab === 'pet') PET.render();
+    if (tab === 'map')    ADVENTURE_MAP.render();
+    if (tab === 'pet')    PET.render();
+    if (tab === 'castle') CASTLE.render();
+    if (tab === 'lab')    LAB.render();
   }
 
-  // Override goHome to show home tab and refresh stats
   APP.nav.goHome = function() { show('home'); if(typeof APP.refreshStats==='function') APP.refreshStats(); };
 
   return { show, current: () => current };
 })();
 
 // ================================================================
-// ADVENTURE MAP — 4 worlds matching 4 classes
+// ADVENTURE MAP — worlds for all three subjects
 // ================================================================
 const ADVENTURE_MAP = (() => {
-  const WORLDS = [
-    { class:1, name:'Counting Village',   region:'CLASS 1', icon:'🏡', color:'#ff6b35',
-      desc:'Where every number has a home and shapes come to life!',
-      topics:['Counting','Addition','Subtraction','Shapes','Patterns'] },
-    { class:2, name:'Number Forest',      region:'CLASS 2', icon:'🌲', color:'#2ed573',
-      desc:'Tall trees of tens and units, where multiplication sprouts!',
-      topics:['Place Value','Multiplication','Fractions','Measurement','Time'] },
-    { class:3, name:'Fraction Mountains', region:'CLASS 3', icon:'⛰️', color:'#818cf8',
-      desc:'Climb peaks of division and conquer the fraction cliffs!',
-      topics:['4-digit Numbers','Division','Fractions','Perimeter','Bar Graphs'] },
-    { class:4, name:'Champion Castle',    region:'CLASS 4', icon:'🏰', color:'#ffd700',
-      desc:'The ultimate fortress of large numbers and geometry!',
-      topics:['Lakhs','Long Division','Angles','Area','Roman Numerals'] },
-  ];
+  // Three subject tracks, each with 4 worlds
+  const TRACKS = {
+    math: [
+      { class:1, name:'Counting Village',   region:'MATHS · CLASS 1', icon:'🏡', color:'#ff6b35', desc:'Where every number has a home!' },
+      { class:2, name:'Number Forest',      region:'MATHS · CLASS 2', icon:'🌲', color:'#2ed573', desc:'Tall trees of tens and units!' },
+      { class:3, name:'Fraction Mountains', region:'MATHS · CLASS 3', icon:'⛰️', color:'#818cf8', desc:'Climb peaks of division!' },
+      { class:4, name:'Champion Castle',    region:'MATHS · CLASS 4', icon:'🏰', color:'#ffd700', desc:'The ultimate fortress of large numbers!' },
+    ],
+    sci: [
+      { class:1, name:'Discovery Garden',   region:'SCIENCE · CLASS 1', icon:'🌱', color:'#00d4aa', desc:'Discover living things all around you!' },
+      { class:2, name:'Explorer Jungle',    region:'SCIENCE · CLASS 2', icon:'🦁', color:'#2ed573', desc:'Food chains and habitats await!' },
+      { class:3, name:'Experiment Island',  region:'SCIENCE · CLASS 3', icon:'⚗️', color:'#33ddb8', desc:'Mix, observe and discover!' },
+      { class:4, name:'Space Station',      region:'SCIENCE · CLASS 4', icon:'🚀', color:'#818cf8', desc:'Explore the cosmos and beyond!', badge:'new' },
+    ],
+    eng: [
+      { class:1, name:'Alphabet Meadow',    region:'ENGLISH · CLASS 1', icon:'🌸', color:'#a855f7', desc:'Where letters bloom into words!' },
+      { class:2, name:'Story Forest',       region:'ENGLISH · CLASS 2', icon:'📚', color:'#bf7fff', desc:'Every tree holds a tale!' },
+      { class:3, name:'Grammar Peaks',      region:'ENGLISH · CLASS 3', icon:'✍️', color:'#c084fc', desc:'Master tenses and clauses!' },
+      { class:4, name:'Author\'s Citadel',  region:'ENGLISH · CLASS 4', icon:'🏰', color:'#ffd700', desc:'Write your own epic story!', badge:'new' },
+    ],
+  };
 
-  function getProgress(classNum) {
-    // Count how many games have been played for this class
-    // We track via localStorage key zl_played_c{n}
-    const played = JSON.parse(localStorage.getItem(`zl_played_c${classNum}`) || '[]');
-    const totalGames = (window.GAME_REGISTRY?.math?.[classNum]?.length) || 12;
-    return { played: played.length, total: totalGames };
+  function getProgress(subject, classNum) {
+    const played = JSON.parse(localStorage.getItem(`zl_played_${subject}_c${classNum}`) || '[]');
+    const total  = (GAME_REGISTRY[subject]?.[classNum]?.games?.length) || 12;
+    return { played: played.length, total };
   }
 
-  function isUnlocked(classNum) {
+  function isUnlocked(subject, classNum) {
     if (classNum === 1) return true;
-    const prev = getProgress(classNum - 1);
-    return prev.played >= Math.floor(prev.total * 0.5); // unlock when 50% of previous done
+    const prev = getProgress(subject, classNum - 1);
+    return prev.played >= Math.floor(prev.total * 0.5);
+  }
+
+  function renderTrack(subject, wrap) {
+    const worlds = TRACKS[subject];
+    const currentClass = APP.state.selectedClass || 1;
+    let html = '';
+
+    // Subject header pill
+    const subDef = SUBJECT_REGISTRY[subject];
+    html += `<div class="map-subject-pill" style="background:${subDef.color}22;border:1px solid ${subDef.color}44">
+      <span style="font-size:20px">${subDef.icon}</span>
+      <span style="color:${subDef.color};font-weight:700;font-size:13px">${subDef.name.toUpperCase()}</span>
+    </div>`;
+
+    worlds.forEach((w, idx) => {
+      const unlocked = isUnlocked(subject, w.class);
+      const prog = getProgress(subject, w.class);
+      const pct  = Math.round((prog.played / prog.total) * 100);
+      const done = pct >= 100;
+      const isCurrent = (w.class === currentClass && subject === (APP.state.selectedSubject || 'math'));
+
+      let badgeClass = 'wbg-locked', badgeText = '🔒 LOCKED';
+      if (done)          { badgeClass = 'wbg-done';    badgeText = '✅ COMPLETE'; }
+      else if (unlocked) { badgeClass = 'wbg-current'; badgeText = isCurrent ? '▶ CURRENT' : '🔓 UNLOCKED'; }
+
+      if (idx > 0) {
+        html += `<div class="world-connector"><div class="world-connector-inner">
+          <div class="wcon-line"></div><div class="wcon-dot"></div><div class="wcon-line"></div>
+        </div></div>`;
+      }
+
+      html += `<div class="world-card ${unlocked?'':'wlocked'} ${isCurrent&&unlocked?'wcurrent':''} ${done?'wdone':''}"
+           onclick="${unlocked ? `nav.openSubject('${subject}',${w.class})` : 'void(0)'}">
+        <div class="world-icon ${unlocked&&!done?'world-icon-glow':''}"
+             style="background:${unlocked?w.color+'22':'var(--bg-hud)'};border-radius:16px;width:56px;height:56px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">
+          ${done ? '🏆' : unlocked ? w.icon : '🔒'}
+        </div>
+        <div class="world-info">
+          <div class="world-name">${w.name} ${w.badge?'<span class="sp-badge live" style="font-size:9px">NEW</span>':''}</div>
+          <div class="world-region">${w.region}</div>
+          ${unlocked ? `
+            <div class="world-pbar-wrap"><div class="world-pbar" style="width:${pct}%;background:${done?'var(--success)':w.color}"></div></div>
+            <div class="world-pbar-label">${prog.played}/${prog.total} games · ${pct}%</div>
+          ` : `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">Complete Class ${w.class-1} to unlock</div>`}
+        </div>
+        <div class="world-badge ${badgeClass}">${badgeText}</div>
+      </div>`;
+    });
+
+    return html;
   }
 
   function render() {
     const wrap = document.getElementById('world-map-wrap');
     if (!wrap) return;
 
-    const currentClass = APP.state.selectedClass || 1;
-    let html = '';
+    // Tab pills for subject selection
+    const activeSubject = ADVENTURE_MAP._activeSubject || 'math';
+    let html = `<div class="map-tab-row">
+      ${['math','sci','eng'].map(s => {
+        const d = SUBJECT_REGISTRY[s];
+        return `<button class="map-tab-btn ${s===activeSubject?'mta-active':''}" onclick="ADVENTURE_MAP.setSubject('${s}')"
+                  style="${s===activeSubject?`background:${d.color}22;border-color:${d.color};color:${d.color}`:''}">
+          ${d.icon} ${d.name.split(' ')[0]}
+        </button>`;
+      }).join('')}
+    </div>`;
 
-    WORLDS.forEach((w, idx) => {
-      const unlocked = isUnlocked(w.class);
-      const prog = getProgress(w.class);
-      const pct = Math.round((prog.played / prog.total) * 100);
-      const done = pct >= 100;
-      const isCurrent = w.class === currentClass;
-
-      let badgeClass = 'wbg-locked', badgeText = '🔒 LOCKED';
-      if (done)         { badgeClass = 'wbg-done';    badgeText = '✅ COMPLETE'; }
-      else if (unlocked){ badgeClass = 'wbg-current';
-                          badgeText = isCurrent ? '▶ CURRENT' : '🔓 UNLOCKED'; }
-
-      if (idx > 0) {
-        html += `<div class="world-connector">
-          <div class="world-connector-inner">
-            <div class="wcon-line"></div>
-            <div class="wcon-dot"></div>
-            <div class="wcon-line"></div>
-          </div>
-        </div>`;
-      }
-
-      const iconBg = unlocked ? `background:${w.color}22;` : 'background:var(--bg-hud);';
-      const glowStyle = (unlocked && !done) ? `style="--wcolor:${w.color}" ` : '';
-
-      html += `
-        <div class="world-card ${unlocked?'':'wlocked'} ${isCurrent&&unlocked?'wcurrent':''} ${done?'wdone':''}"
-             onclick="${unlocked ? `nav.openClass(${w.class})` : 'void(0)'}">
-          <div class="world-icon ${unlocked&&!done?'world-icon-glow':''}" ${glowStyle}style="${iconBg}border-radius:16px;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;">
-            ${done ? '🏆' : unlocked ? w.icon : '🔒'}
-          </div>
-          <div class="world-info">
-            <div class="world-name">${w.name}</div>
-            <div class="world-region">${w.region}</div>
-            ${unlocked ? `
-              <div class="world-pbar-wrap">
-                <div class="world-pbar" style="width:${pct}%;background:${done?'var(--success)':w.color}"></div>
-              </div>
-              <div class="world-pbar-label">${prog.played}/${prog.total} games · ${pct}%</div>
-            ` : `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">Complete Class ${w.class-1} to unlock</div>`}
-          </div>
-          <div class="world-badge ${badgeClass}">${badgeText}</div>
-        </div>`;
-    });
-
+    html += renderTrack(activeSubject, wrap);
     wrap.innerHTML = html;
   }
 
-  // Track games played per class
-  function trackGamePlayed(classNum, gameId) {
-    const key = `zl_played_c${classNum}`;
-    const played = JSON.parse(localStorage.getItem(key) || '[]');
-    if (!played.includes(gameId)) {
-      played.push(gameId);
-      localStorage.setItem(key, JSON.stringify(played));
-    }
+  function setSubject(s) {
+    ADVENTURE_MAP._activeSubject = s;
+    render();
   }
 
-  return { render, trackGamePlayed, getProgress, isUnlocked };
+  function trackGamePlayed(subject, classNum, gameId) {
+    const key = `zl_played_${subject}_c${classNum}`;
+    const played = JSON.parse(localStorage.getItem(key) || '[]');
+    if (!played.includes(gameId)) { played.push(gameId); localStorage.setItem(key, JSON.stringify(played)); }
+  }
+
+  return { render, setSubject, trackGamePlayed, getProgress, isUnlocked, _activeSubject: 'math' };
 })();
 
-// Hook game completion into ADVENTURE_MAP tracker
-document.addEventListener('lv:correct', () => {
-  if (APP.state.selectedGame && APP.state.selectedClass) {
-    // Track after first correct answer as "started"
-  }
-}, false);
-
-// Track on reward shown (game completed)
+// Track on reward shown
 const _origOnRewardShown = window.onRewardShown;
 window.onRewardShown = function() {
+  const subj = APP.state.selectedSubject || 'math';
   if (APP.state.selectedGame && APP.state.selectedClass) {
-    ADVENTURE_MAP.trackGamePlayed(APP.state.selectedClass, APP.state.selectedGame);
+    ADVENTURE_MAP.trackGamePlayed(subj, APP.state.selectedClass, APP.state.selectedGame);
   }
   if (typeof _origOnRewardShown === 'function') _origOnRewardShown();
 };
 
 // ================================================================
-// PET — Growing companion, Tamagotchi-style
+// PET — Maths companion  (hatching & growing animal)
 // ================================================================
 const PET = (() => {
   const KEY = 'zl_pet';
-  const XP_PER_FEED = 20; // XP needed to unlock one "feed"
+  const XP_PER_FEED = 20;
 
-  // Evolution stages: [minXP, emoji, stageName, evoLabel, color]
   const EVOS = [
     { xp:0,    icon:'🥚', stage:'Egg',       label:'Hatch me!',          color:'#a78bfa' },
     { xp:50,   icon:'🐣', stage:'Hatchling', label:'Just hatched!',      color:'#ffd700' },
@@ -3210,313 +3685,568 @@ const PET = (() => {
   ];
 
   const SPEECHES = {
-    happy:   ['I love learning! ❤️', 'You\'re amazing! 🌟', 'Keep going! ⚡', 'Yummy brain food! 🧠'],
-    hungry:  ['Feed me please! 🍖', 'I\'m so hungry! 😢', 'Play a game to feed me!', 'I need XP! ⭐'],
-    fed:     ['Yum yum! 😋', 'So tasty! 🍖', 'Thank you! 💛', 'More please! 😄'],
-    levelup: ['I\'M EVOLVING! ✨', 'WOW I GREW! 🌟', 'Level UP! 🚀', 'So powerful now! ⚡'],
-    idle:    ['Hi there! 👋', 'Play with me! 🎮', 'I love maths! 🔢', 'Let\'s go! ⚡'],
+    happy:  ['I love maths! ❤️','You\'re amazing! 🌟','Keep going! ⚡','Yummy brain food! 🧠'],
+    hungry: ['Feed me please! 🍖','I\'m so hungry! 😢','Play a game to feed me!','I need XP! ⭐'],
+    fed:    ['Yum yum! 😋','So tasty! 🍖','Thank you! 💛','More please! 😄'],
+    levelup:['I\'M EVOLVING! ✨','WOW I GREW! 🌟','Level UP! 🚀','So powerful now! ⚡'],
+    idle:   ['Hi there! 👋','Play with me! 🎮','I love maths! 🔢','Let\'s go! ⚡'],
   };
 
-  function load() {
-    const def = { xp:0, hunger:100, happiness:80, lastFed:null, lastVisit:null, evoIdx:0, feedsAvail:0, totalXpGiven:0 };
-    try { return { ...def, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch(e) { return def; }
-  }
-  function save(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
-
-  function getEvo(xp) {
-    let e = EVOS[0];
-    for (const ev of EVOS) { if (xp >= ev.xp) e = ev; else break; }
-    return e;
-  }
-
-  function decay(d) {
-    // Hunger decays 10 pts per 12 hours, happiness decays 5 pts per day
-    const now = Date.now();
-    if (!d.lastVisit) { d.lastVisit = now; return d; }
-    const hoursPassed = (now - d.lastVisit) / 3600000;
-    d.hunger    = Math.max(0, d.hunger    - (hoursPassed / 12) * 10);
-    d.happiness = Math.max(0, d.happiness - (hoursPassed / 24) * 5);
-    d.lastVisit = now;
-    return d;
-  }
-
-  function syncXPFeeds(d) {
-    // Every XP_PER_FEED XP earned = 1 feed available
-    const xp = APP.state.xp;
-    const feedsEarned = Math.floor(xp / XP_PER_FEED);
-    const feedsGiven  = d.totalXpGiven || 0;
-    d.feedsAvail = Math.max(0, feedsEarned - feedsGiven);
-    d.xp = xp; // mirror total XP into pet
-    return d;
-  }
+  function load(){const d={xp:0,hunger:100,happiness:80,lastFed:null,lastVisit:null,evoIdx:0,feedsAvail:0,totalXpGiven:0};try{return{...d,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return d}}
+  function save(d){localStorage.setItem(KEY,JSON.stringify(d))}
+  function getEvo(xp){let e=EVOS[0];for(const ev of EVOS){if(xp>=ev.xp)e=ev;else break;}return e;}
+  function decay(d){const now=Date.now();if(!d.lastVisit){d.lastVisit=now;return d;}const h=(now-d.lastVisit)/3600000;d.hunger=Math.max(0,d.hunger-(h/12)*10);d.happiness=Math.max(0,d.happiness-(h/24)*5);d.lastVisit=now;return d;}
+  function syncXP(d){const xp=APP.state.xp;const fe=Math.floor(xp/XP_PER_FEED);d.feedsAvail=Math.max(0,fe-(d.totalXpGiven||0));d.xp=xp;return d;}
 
   function drawSVG(evo, hunger, happy) {
     const svg = document.getElementById('pet-svg');
     if (!svg) return;
     const mood = hunger < 25 ? 'hungry' : happy < 30 ? 'sad' : 'happy';
-    const col = evo.color;
-    const lighten = col + '44';
-
-    // Unique SVG art for each stage
+    const col = evo.color, lt = col + '44';
+    const smile = mood==='hungry'
+      ? `<path d="M62,100 Q75,94 88,100" stroke="rgba(0,0,0,0.35)" stroke-width="2.5" fill="none"/>`
+      : `<path d="M62,100 Q75,108 88,100" stroke="rgba(0,0,0,0.35)" stroke-width="2.5" fill="none"/>`;
     const arts = {
-      '🥚': `<ellipse cx="75" cy="85" rx="42" ry="52" fill="${col}" opacity="0.9"/>
-              <ellipse cx="75" cy="75" rx="34" ry="40" fill="${lighten}"/>
-              <ellipse cx="62" cy="68" rx="7" ry="9" fill="rgba(255,255,255,0.4)"/>
-              ${mood==='hungry'?`<path d="M60,100 Q75,94 90,100" stroke="rgba(0,0,0,0.3)" stroke-width="2.5" fill="none"/>`
-              :`<path d="M60,100 Q75,108 90,100" stroke="rgba(0,0,0,0.3)" stroke-width="2.5" fill="none"/>`}`,
-
-      '🐣': `<ellipse cx="75" cy="90" rx="40" ry="38" fill="${col}" opacity="0.85"/>
-              <ellipse cx="75" cy="72" rx="28" ry="30" fill="${col}"/>
-              <circle cx="65" cy="68" r="5" fill="#1a0533"/><circle cx="85" cy="68" r="5" fill="#1a0533"/>
-              <circle cx="63" cy="66" r="2" fill="white"/><circle cx="83" cy="66" r="2" fill="white"/>
-              <ellipse cx="75" cy="80" rx="10" ry="7" fill="#ff9500"/>
-              ${mood==='hungry'?`<path d="M62,88 Q75,83 88,88" stroke="#1a0533" stroke-width="2" fill="none"/>`
-              :`<path d="M62,88 Q75,95 88,88" stroke="#1a0533" stroke-width="2" fill="none"/>`}
-              <ellipse cx="40" cy="88" rx="18" ry="12" fill="${lighten}" transform="rotate(-20,40,88)"/>
-              <ellipse cx="110" cy="88" rx="18" ry="12" fill="${lighten}" transform="rotate(20,110,88)"/>`,
-
-      '🐤': `<ellipse cx="75" cy="88" rx="38" ry="35" fill="${col}" opacity="0.9"/>
-              <circle cx="75" cy="66" r="26" fill="${col}"/>
-              <circle cx="65" cy="62" r="5.5" fill="#1a0533"/><circle cx="85" cy="62" r="5.5" fill="#1a0533"/>
-              <circle cx="63" cy="60" r="2" fill="white"/><circle cx="83" cy="60" r="2" fill="white"/>
-              <ellipse cx="75" cy="74" rx="9" ry="6" fill="#ff9500"/>
-              ${mood==='hungry'?`<path d="M62,83 Q75,77 88,83" stroke="#1a0533" stroke-width="2.5" fill="none"/>`
-              :`<path d="M62,83 Q75,91 88,83" stroke="#1a0533" stroke-width="2.5" fill="none"/>`}
-              <path d="M37,80 Q28,65 40,58 Q52,70 48,83 Z" fill="${lighten}"/>
-              <path d="M113,80 Q122,65 110,58 Q98,70 102,83 Z" fill="${lighten}"/>
-              <path d="M60,118 L75,105 L90,118" stroke="${col}" stroke-width="6" fill="none" stroke-linecap="round"/>`,
-
-      '🦜': `<ellipse cx="75" cy="95" rx="32" ry="30" fill="${col}" opacity="0.85"/>
-              <circle cx="75" cy="65" r="24" fill="${col}"/>
-              <circle cx="65" cy="60" r="5" fill="#1a0533"/><circle cx="85" cy="60" r="5" fill="#1a0533"/>
-              <circle cx="63" cy="58" r="2" fill="white"/><circle cx="83" cy="58" r="2" fill="white"/>
-              <path d="M68,72 L75,78 L82,72 L78,68 L72,68 Z" fill="#ff6b35"/>
-              ${mood==='hungry'?`<path d="M60,82 Q75,76 90,82" stroke="#1a0533" stroke-width="2" fill="none"/>`
-              :`<path d="M60,82 Q75,90 90,82" stroke="#1a0533" stroke-width="2" fill="none"/>`}
-              <path d="M43,85 C30,70 25,55 38,50 C48,46 55,62 52,80 Z" fill="#ff6b35"/>
-              <path d="M107,85 C120,70 125,55 112,50 C102,46 95,62 98,80 Z" fill="#2ed573"/>
-              <path d="M65,120 C60,130 55,138 50,135" stroke="${col}" stroke-width="5" fill="none" stroke-linecap="round"/>
-              <path d="M85,120 C90,130 95,138 100,135" stroke="${col}" stroke-width="5" fill="none" stroke-linecap="round"/>`,
-
-      '🦅': `<ellipse cx="75" cy="98" rx="28" ry="26" fill="${col}" opacity="0.8"/>
-              <circle cx="75" cy="60" r="22" fill="${col}"/>
-              <circle cx="65" cy="56" r="5" fill="#1a0533"/><circle cx="85" cy="56" r="5" fill="#1a0533"/>
-              <circle cx="63" cy="54" r="2.5" fill="white"/><circle cx="83" cy="54" r="2.5" fill="white"/>
-              <path d="M68,68 L75,75 L82,68 L79,63 L71,63 Z" fill="#ffd700"/>
-              ${mood==='hungry'?`<path d="M61,78 Q75,72 89,78" stroke="#1a0533" stroke-width="2" fill="none"/>`
-              :`<path d="M61,78 Q75,86 89,78" stroke="#1a0533" stroke-width="2" fill="none"/>`}
-              <path d="M47,90 C25,75 15,50 30,42 C45,35 55,58 52,85 Z" fill="${lighten}"/>
-              <path d="M103,90 C125,75 135,50 120,42 C105,35 95,58 98,85 Z" fill="${lighten}"/>
-              <path d="M60,120 L50,140 M75,124 L75,144 M90,120 L100,140" stroke="${col}" stroke-width="4" stroke-linecap="round" fill="none"/>`,
-
-      '🐲': `<ellipse cx="75" cy="100" rx="35" ry="32" fill="${col}" opacity="0.8"/>
-              <ellipse cx="75" cy="62" rx="26" ry="24" fill="${col}"/>
-              <circle cx="63" cy="57" r="6" fill="#1a0533"/><circle cx="87" cy="57" r="6" fill="#1a0533"/>
-              <circle cx="61" cy="55" r="2.5" fill="white"/><circle cx="85" cy="55" r="2.5" fill="white"/>
-              <ellipse cx="75" cy="71" rx="8" ry="5" fill="#ff4757"/>
-              ${mood==='hungry'?`<path d="M59,82 Q75,76 91,82" stroke="#1a0533" stroke-width="2.5" fill="none"/>`
-              :`<path d="M59,82 Q75,91 91,82" stroke="#1a0533" stroke-width="2.5" fill="none"/>`}
-              <path d="M62,40 L67,52 M75,36 L75,50 M88,40 L83,52" stroke="#ffd700" stroke-width="3" stroke-linecap="round" fill="none"/>
-              <path d="M35,95 C10,75 5,45 25,40 C42,36 50,65 47,92 Z" fill="${col}" opacity="0.7"/>
-              <path d="M115,95 C140,75 145,45 125,40 C108,36 100,65 103,92 Z" fill="${col}" opacity="0.7"/>
-              <path d="M65,128 C55,145 48,155 42,150 M85,128 C95,145 102,155 108,150" stroke="${col}" stroke-width="5" fill="none" stroke-linecap="round"/>`,
-
-      '🔥': `<circle cx="75" cy="75" r="50" fill="${col}" opacity="0.12"/>
-              <path d="M75,30 C75,30 95,55 90,75 C108,58 110,80 95,100 C90,115 55,115 55,115 C40,115 30,100 35,82 C25,90 28,108 35,115 C20,105 18,85 30,70 C22,60 35,45 50,52 C50,38 65,25 75,30 Z" fill="${col}" opacity="0.9"/>
-              <path d="M75,55 C75,55 87,68 84,80 C92,72 93,84 86,94 C82,102 62,102 60,94 C53,86 58,74 65,72 C62,64 68,54 75,55 Z" fill="#ffd700" opacity="0.85"/>
-              <ellipse cx="75" cy="95" rx="12" ry="8" fill="white" opacity="0.7"/>
-              <circle cx="70" cy="93" r="3.5" fill="#1a0533"/><circle cx="80" cy="93" r="3.5" fill="#1a0533"/>
-              <circle cx="69" cy="92" r="1.2" fill="white"/><circle cx="79" cy="92" r="1.2" fill="white"/>
-              ${mood==='hungry'?`<path d="M65,102 Q75,97 85,102" stroke="#1a0533" stroke-width="2" fill="none"/>`
-              :`<path d="M65,102 Q75,108 85,102" stroke="#1a0533" stroke-width="2" fill="none"/>`}`,
+      '🥚':`<ellipse cx="75" cy="85" rx="42" ry="52" fill="${col}" opacity="0.9"/><ellipse cx="75" cy="75" rx="34" ry="40" fill="${lt}"/><ellipse cx="62" cy="68" rx="7" ry="9" fill="rgba(255,255,255,0.4)"/>${smile}`,
+      '🐣':`<ellipse cx="75" cy="90" rx="40" ry="38" fill="${col}" opacity="0.85"/><ellipse cx="75" cy="72" rx="28" ry="30" fill="${col}"/><circle cx="65" cy="68" r="5" fill="#1a0533"/><circle cx="85" cy="68" r="5" fill="#1a0533"/><circle cx="63" cy="66" r="2" fill="white"/><circle cx="83" cy="66" r="2" fill="white"/><ellipse cx="75" cy="80" rx="10" ry="7" fill="#ff9500"/>${mood==='hungry'?`<path d="M62,88 Q75,83 88,88" stroke="#1a0533" stroke-width="2" fill="none"/>`:`<path d="M62,88 Q75,95 88,88" stroke="#1a0533" stroke-width="2" fill="none"/>`}<ellipse cx="40" cy="88" rx="18" ry="12" fill="${lt}" transform="rotate(-20,40,88)"/><ellipse cx="110" cy="88" rx="18" ry="12" fill="${lt}" transform="rotate(20,110,88)"/>`,
+      '🐤':`<ellipse cx="75" cy="88" rx="38" ry="35" fill="${col}" opacity="0.9"/><circle cx="75" cy="66" r="26" fill="${col}"/><circle cx="65" cy="62" r="5.5" fill="#1a0533"/><circle cx="85" cy="62" r="5.5" fill="#1a0533"/><circle cx="63" cy="60" r="2" fill="white"/><circle cx="83" cy="60" r="2" fill="white"/><ellipse cx="75" cy="74" rx="9" ry="6" fill="#ff9500"/>${mood==='hungry'?`<path d="M62,83 Q75,77 88,83" stroke="#1a0533" stroke-width="2.5" fill="none"/>`:`<path d="M62,83 Q75,91 88,83" stroke="#1a0533" stroke-width="2.5" fill="none"/>`}<path d="M37,80 Q28,65 40,58 Q52,70 48,83 Z" fill="${lt}"/><path d="M113,80 Q122,65 110,58 Q98,70 102,83 Z" fill="${lt}"/><path d="M60,118 L75,105 L90,118" stroke="${col}" stroke-width="6" fill="none" stroke-linecap="round"/>`,
+      '🦜':`<ellipse cx="75" cy="95" rx="32" ry="30" fill="${col}" opacity="0.85"/><circle cx="75" cy="65" r="24" fill="${col}"/><circle cx="65" cy="60" r="5" fill="#1a0533"/><circle cx="85" cy="60" r="5" fill="#1a0533"/><circle cx="63" cy="58" r="2" fill="white"/><circle cx="83" cy="58" r="2" fill="white"/><path d="M68,72 L75,78 L82,72 L78,68 L72,68 Z" fill="#ff6b35"/>${mood==='hungry'?`<path d="M60,82 Q75,76 90,82" stroke="#1a0533" stroke-width="2" fill="none"/>`:`<path d="M60,82 Q75,90 90,82" stroke="#1a0533" stroke-width="2" fill="none"/>`}<path d="M43,85 C30,70 25,55 38,50 C48,46 55,62 52,80 Z" fill="#ff6b35"/><path d="M107,85 C120,70 125,55 112,50 C102,46 95,62 98,80 Z" fill="#2ed573"/>`,
+      '🦅':`<ellipse cx="75" cy="98" rx="28" ry="26" fill="${col}" opacity="0.8"/><circle cx="75" cy="60" r="22" fill="${col}"/><circle cx="65" cy="56" r="5" fill="#1a0533"/><circle cx="85" cy="56" r="5" fill="#1a0533"/><circle cx="63" cy="54" r="2.5" fill="white"/><circle cx="83" cy="54" r="2.5" fill="white"/><path d="M68,68 L75,75 L82,68 L79,63 L71,63 Z" fill="#ffd700"/>${mood==='hungry'?`<path d="M61,78 Q75,72 89,78" stroke="#1a0533" stroke-width="2" fill="none"/>`:`<path d="M61,78 Q75,86 89,78" stroke="#1a0533" stroke-width="2" fill="none"/>`}<path d="M47,90 C25,75 15,50 30,42 C45,35 55,58 52,85 Z" fill="${lt}"/><path d="M103,90 C125,75 135,50 120,42 C105,35 95,58 98,85 Z" fill="${lt}"/>`,
+      '🐲':`<ellipse cx="75" cy="100" rx="35" ry="32" fill="${col}" opacity="0.8"/><ellipse cx="75" cy="62" rx="26" ry="24" fill="${col}"/><circle cx="63" cy="57" r="6" fill="#1a0533"/><circle cx="87" cy="57" r="6" fill="#1a0533"/><circle cx="61" cy="55" r="2.5" fill="white"/><circle cx="85" cy="55" r="2.5" fill="white"/><ellipse cx="75" cy="71" rx="8" ry="5" fill="#ff4757"/>${mood==='hungry'?`<path d="M59,82 Q75,76 91,82" stroke="#1a0533" stroke-width="2.5" fill="none"/>`:`<path d="M59,82 Q75,91 91,82" stroke="#1a0533" stroke-width="2.5" fill="none"/>`}<path d="M62,40 L67,52 M75,36 L75,50 M88,40 L83,52" stroke="#ffd700" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M35,95 C10,75 5,45 25,40 C42,36 50,65 47,92 Z" fill="${col}" opacity="0.7"/><path d="M115,95 C140,75 145,45 125,40 C108,36 100,65 103,92 Z" fill="${col}" opacity="0.7"/>`,
+      '🔥':`<circle cx="75" cy="75" r="50" fill="${col}" opacity="0.12"/><path d="M75,30 C75,30 95,55 90,75 C108,58 110,80 95,100 C90,115 55,115 55,115 C40,115 30,100 35,82 C25,90 28,108 35,115 C20,105 18,85 30,70 C22,60 35,45 50,52 C50,38 65,25 75,30 Z" fill="${col}" opacity="0.9"/><path d="M75,55 C75,55 87,68 84,80 C92,72 93,84 86,94 C82,102 62,102 60,94 C53,86 58,74 65,72 C62,64 68,54 75,55 Z" fill="#ffd700" opacity="0.85"/><ellipse cx="75" cy="95" rx="12" ry="8" fill="white" opacity="0.7"/><circle cx="70" cy="93" r="3.5" fill="#1a0533"/><circle cx="80" cy="93" r="3.5" fill="#1a0533"/>`,
     };
-
     svg.innerHTML = arts[evo.icon] || arts['🥚'];
-
-    // Hunger visual overlay — slightly desaturate when hungry
-    if (hunger < 25) {
-      svg.style.filter = 'saturate(0.5) brightness(0.85)';
-      svg.classList.add('pet-anim-sad');
-      setTimeout(()=>svg.classList.remove('pet-anim-sad'),700);
-    } else {
-      svg.style.filter = '';
-    }
+    svg.style.filter = hunger < 25 ? 'saturate(0.5) brightness(0.85)' : '';
   }
 
   function renderEvoTrack(d) {
-    const row = document.getElementById('evo-row');
-    if (!row) return;
+    const row = document.getElementById('evo-row'); if (!row) return;
     const cur = getEvo(d.xp);
-    row.innerHTML = EVOS.map((e,i) => {
-      const reached = d.xp >= e.xp;
-      const isCur   = e.icon === cur.icon;
+    row.innerHTML = EVOS.map(e => {
+      const reached = d.xp >= e.xp, isCur = e.icon===cur.icon;
       return `<div class="evo-pip ${reached?'ep-reached':''} ${isCur?'ep-current':''}">
-        <div class="evo-pip-dot">${reached ? e.icon : '?'}</div>
+        <div class="evo-pip-dot">${reached?e.icon:'?'}</div>
         <div class="evo-pip-lbl">${e.stage}</div>
       </div>`;
     }).join('');
   }
 
   function renderBars(d) {
-    const hBar = document.getElementById('pbar-hunger');
-    const hLbl = document.getElementById('pbar-hunger-lbl');
-    const jBar = document.getElementById('pbar-happy');
-    const jLbl = document.getElementById('pbar-happy-lbl');
-    const xBar = document.getElementById('pbar-xp');
-    const xLbl = document.getElementById('pbar-xp-lbl');
-
-    if (hBar) hBar.style.width = Math.round(d.hunger) + '%';
-    if (hLbl) hLbl.textContent = d.hunger > 70 ? 'Full' : d.hunger > 40 ? 'Peckish' : d.hunger > 15 ? 'Hungry!' : 'Starving!';
-    if (jBar) jBar.style.width = Math.round(d.happiness) + '%';
-    if (jLbl) jLbl.textContent = d.happiness > 70 ? 'Happy' : d.happiness > 40 ? 'Okay' : 'Sad 😢';
-
-    const curEvo = getEvo(d.xp);
-    const nextEvo = EVOS.find(e => e.xp > d.xp);
-    if (xBar && nextEvo) {
-      const pct = ((d.xp - curEvo.xp) / (nextEvo.xp - curEvo.xp)) * 100;
-      xBar.style.width = Math.min(100, Math.round(pct)) + '%';
-      if (xLbl) xLbl.textContent = `${d.xp - curEvo.xp}/${nextEvo.xp - curEvo.xp}`;
-    } else if (xBar) {
-      xBar.style.width = '100%';
-      if (xLbl) xLbl.textContent = 'MAX!';
-    }
-  }
-
-  function renderFeedBtn(d) {
-    const btn = document.getElementById('pet-feed-btn');
-    if (!btn) return;
-    const avail = d.feedsAvail || 0;
-    btn.disabled = avail <= 0;
-    btn.textContent = avail > 0 ? `🍖 Feed (${avail} left)` : '🍖 Play to earn feeds!';
+    const curEvo=getEvo(d.xp), nextEvo=EVOS.find(e=>e.xp>d.xp);
+    const els = {
+      'pbar-hunger': Math.round(d.hunger), 'pbar-hunger-lbl': d.hunger>70?'Full':d.hunger>40?'Peckish':d.hunger>15?'Hungry!':'Starving!',
+      'pbar-happy':  Math.round(d.happiness), 'pbar-happy-lbl': d.happiness>70?'Happy':d.happiness>40?'Okay':'Sad 😢',
+    };
+    Object.entries(els).forEach(([id,v]) => {
+      const el=document.getElementById(id); if(!el)return;
+      if(typeof v==='number') el.style.width=v+'%'; else el.textContent=v;
+    });
+    const xBar=document.getElementById('pbar-xp'),xLbl=document.getElementById('pbar-xp-lbl');
+    if(xBar&&nextEvo){const p=((d.xp-curEvo.xp)/(nextEvo.xp-curEvo.xp))*100;xBar.style.width=Math.min(100,Math.round(p))+'%';if(xLbl)xLbl.textContent=`${d.xp-curEvo.xp}/${nextEvo.xp-curEvo.xp}`;}
+    else if(xBar){xBar.style.width='100%';if(xLbl)xLbl.textContent='MAX!';}
   }
 
   function speak(pool) {
-    const msgs = SPEECHES[pool] || SPEECHES.idle;
-    const bubble = document.getElementById('pet-speech');
-    if (!bubble) return;
-    bubble.textContent = msgs[Math.floor(Math.random() * msgs.length)];
-    bubble.classList.add('show');
-    clearTimeout(bubble._t);
-    bubble._t = setTimeout(() => bubble.classList.remove('show'), 2400);
+    const msgs=SPEECHES[pool]||SPEECHES.idle;
+    const b=document.getElementById('pet-speech'); if(!b)return;
+    b.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+    b.classList.add('show'); clearTimeout(b._t); b._t=setTimeout(()=>b.classList.remove('show'),2400);
   }
 
   function checkHungerBadge(d) {
-    const dot = document.getElementById('pet-hunger-dot');
-    if (dot) dot.style.display = d.hunger < 30 ? 'flex' : 'none';
-    // Update pet icon in bottom navs
-    const evo = getEvo(d.xp);
-    ['bnav-pet-icon','map-pet-icon','pet-pet-icon'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = evo.icon;
-    });
+    const dot=document.getElementById('pet-hunger-dot');
+    if(dot) dot.style.display=d.hunger<30?'flex':'none';
+    const evo=getEvo(d.xp);
+    ['bnav-pet-icon','map-pet-icon','pet-pet-icon'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=evo.icon;});
   }
 
   function render() {
-    let d = load();
-    d = decay(d);
-    d = syncXPFeeds(d);
-    save(d);
-
-    const evo = getEvo(d.xp);
-
-    const stageLbl = document.getElementById('pet-stage-lbl');
-    const nameLbl  = document.getElementById('pet-name-el');
-    const evoTxt   = document.getElementById('pet-evo-txt');
-    const xpHdr    = document.getElementById('pet-xp-hdr');
-
-    if (stageLbl) stageLbl.textContent = evo.stage.toUpperCase();
-    if (nameLbl)  nameLbl.textContent  = 'Zippy';
-    if (evoTxt)   evoTxt.textContent   = evo.label;
-    if (xpHdr)    xpHdr.textContent    = d.xp;
-
-    drawSVG(evo, d.hunger, d.happiness);
-    renderEvoTrack(d);
-    renderBars(d);
-    renderFeedBtn(d);
+    let d=load(); d=decay(d); d=syncXP(d); save(d);
+    const evo=getEvo(d.xp);
+    const map={'pet-stage-lbl':evo.stage.toUpperCase(),'pet-name-el':'Zippy','pet-evo-txt':evo.label,'pet-xp-hdr':d.xp};
+    Object.entries(map).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
+    drawSVG(evo,d.hunger,d.happiness); renderEvoTrack(d); renderBars(d);
+    const btn=document.getElementById('pet-feed-btn');
+    if(btn){btn.disabled=(d.feedsAvail||0)<=0;btn.textContent=d.feedsAvail>0?`🍖 Feed (${d.feedsAvail} left)`:'🍖 Play maths to earn feeds!';}
+    const tipT=document.getElementById('pet-tip-title'),tipB=document.getElementById('pet-tip-body');
+    if(d.hunger<30&&tipT){tipT.textContent='⚠️ Zippy is hungry!';if(tipB)tipB.textContent='Play maths games to earn XP!';}
+    else if(d.feedsAvail>0&&tipT){tipT.textContent=`🍖 ${d.feedsAvail} feed${d.feedsAvail>1?'s':''} ready!`;if(tipB)tipB.textContent='Tap Feed to give Zippy a treat!';}
     checkHungerBadge(d);
-
-    // Tip text
-    const tipTitle = document.getElementById('pet-tip-title');
-    const tipBody  = document.getElementById('pet-tip-body');
-    if (d.hunger < 30 && tipTitle) {
-      tipTitle.textContent = '⚠️ Zippy is hungry!';
-      if (tipBody) tipBody.textContent = ' Play games to earn XP, then come back to feed Zippy!';
-    } else if (d.feedsAvail > 0 && tipTitle) {
-      tipTitle.textContent = `🍖 You have ${d.feedsAvail} feed${d.feedsAvail>1?'s':''}!`;
-      if (tipBody) tipBody.textContent = ' Tap the Feed button to give Zippy a treat and boost happiness!';
-    }
-
-    // Idle speech
-    setTimeout(() => speak(d.hunger < 25 ? 'hungry' : 'idle'), 600);
+    setTimeout(()=>speak(d.hunger<25?'hungry':'idle'),600);
   }
 
   function feed() {
-    let d = load();
-    d = syncXPFeeds(d);
-    if ((d.feedsAvail || 0) <= 0) return;
-    d.feedsAvail--;
-    d.totalXpGiven = (d.totalXpGiven || 0) + 1;
-    d.hunger    = Math.min(100, d.hunger + 30);
-    d.happiness = Math.min(100, d.happiness + 20);
-    d.lastFed   = Date.now();
+    let d=load(); d=syncXP(d); if((d.feedsAvail||0)<=0)return;
+    d.feedsAvail--; d.totalXpGiven=(d.totalXpGiven||0)+1;
+    d.hunger=Math.min(100,d.hunger+30); d.happiness=Math.min(100,d.happiness+20); d.lastFed=Date.now();
     save(d);
-
-    // Animate
-    const svg = document.getElementById('pet-svg');
-    if (svg) {
-      svg.classList.remove('pet-anim-fed','pet-anim-happy');
-      void svg.offsetWidth;
-      svg.classList.add('pet-anim-fed');
-      setTimeout(() => svg.classList.remove('pet-anim-fed'), 900);
-    }
-    speak('fed');
-    PARTICLES.burst(window.innerWidth/2, window.innerHeight*0.4, 12, ['#ffd700','#ff9500','#ff6b35','#2ed573']);
-    SOUND.correct();
-
-    // Check evolution
-    const oldEvo = getEvo(d.xp);
-    const newEvo = getEvo(APP.state.xp);
-    if (newEvo.xp > oldEvo.xp) speak('levelup');
-
+    const svg=document.getElementById('pet-svg');
+    if(svg){svg.classList.remove('pet-anim-fed');void svg.offsetWidth;svg.classList.add('pet-anim-fed');setTimeout(()=>svg.classList.remove('pet-anim-fed'),900);}
+    speak('fed'); PARTICLES.burst(window.innerWidth/2,window.innerHeight*0.4,12,['#ffd700','#ff9500','#ff6b35','#2ed573']); SOUND.correct();
     render();
   }
 
-  // Called when XP is earned — sync feeds available
   function onXPEarned() {
-    let d = load();
-    d = syncXPFeeds(d);
-    save(d);
-    checkHungerBadge(d);
-    // Update pet icon in navs to reflect evolution
-    const evo = getEvo(APP.state.xp);
-    ['bnav-pet-icon','map-pet-icon','pet-pet-icon'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = evo.icon;
-    });
+    if ((APP.state.selectedSubject||'math') !== 'math') return; // only math XP feeds pet
+    let d=load(); d=syncXP(d); save(d); checkHungerBadge(d);
+    const evo=getEvo(APP.state.xp);
+    ['bnav-pet-icon','map-pet-icon','pet-pet-icon'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=evo.icon;});
   }
 
   return { render, feed, onXPEarned, speak, getEvo, load };
 })();
 
-// Hook PET.onXPEarned into the reward flow via MutationObserver on reward-overlay
-// (reward-overlay already has one observer from gamification — add another)
+// ================================================================
+// CASTLE — English companion  (build a castle, room by room)
+// ================================================================
+const CASTLE = (() => {
+  const KEY = 'zl_castle';
+  const XP_PER_BRICK = 15;
+
+  // Castle grows through 8 stages — each stage adds a new part
+  const STAGES = [
+    { xp:0,   name:'Bare Land',      label:'Start building!',       color:'#a855f7', part:'foundation',
+      desc:'Your castle story begins here…' },
+    { xp:40,  name:'Foundation',     label:'Walls rising!',          color:'#9333ea', part:'walls',
+      desc:'The first stones are laid!' },
+    { xp:100, name:'First Tower',    label:'A tower appears!',       color:'#7c3aed', part:'tower1',
+      desc:'Knights can watch from up high!' },
+    { xp:200, name:'Great Hall',     label:'Feasts inside!',         color:'#6d28d9', part:'hall',
+      desc:'Stories echo in the great hall!' },
+    { xp:380, name:'Second Tower',   label:'Growing stronger!',      color:'#c084fc', part:'tower2',
+      desc:'Your castle is the talk of the land!' },
+    { xp:600, name:'Drawbridge',     label:'A drawbridge appears!',  color:'#e879f9', part:'bridge',
+      desc:'Friends can visit your castle!' },
+    { xp:900, name:'Royal Banners',  label:'Banners flying!',        color:'#ffd700', part:'banners',
+      desc:'Your name flies above all!' },
+    { xp:1300,name:'Grand Castle',   label:'LEGENDARY AUTHOR!',      color:'#ffd700', part:'complete',
+      desc:'You are a master of English!', badge:'👑' },
+  ];
+
+  const PHRASES = {
+    correct: ['Brilliant word! 📖','Perfect grammar! ✨','Your castle grows! 🏰','Excellent! ⚡'],
+    wrong:   ['Try again, brave writer!','Every mistake is a lesson!','Keep writing! ✍️'],
+    brick:   ['A new brick is laid! 🧱','Your castle grows taller!','Building mastery! 🏰'],
+    complete:['YOUR CASTLE IS COMPLETE! 👑','LEGENDARY AUTHOR! 🌟','MASTER OF ENGLISH! 📚'],
+  };
+
+  function load(){const d={xp:0,bricks:0,totalBricksEarned:0,bricksAvail:0,lastVisit:null};try{return{...d,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return d}}
+  function save(d){localStorage.setItem(KEY,JSON.stringify(d))}
+  function getStage(xp){let s=STAGES[0];for(const st of STAGES){if(xp>=st.xp)s=st;else break;}return s;}
+  function syncBricks(d){const fe=Math.floor(APP.state.engXp/XP_PER_BRICK);d.bricksAvail=Math.max(0,fe-(d.totalBricksEarned||0));return d;}
+
+  function drawCastle(stage) {
+    const svg = document.getElementById('castle-svg');
+    if (!svg) return;
+    const c = stage.color, lt = c+'33';
+    const stageIdx = STAGES.indexOf(stage);
+
+    // Build castle SVG progressively by stage
+    let parts = '';
+
+    // Ground
+    parts += `<rect x="10" y="130" width="130" height="20" rx="4" fill="${lt}"/>`;
+
+    // Foundation / base walls (stage 1+)
+    if (stageIdx >= 1) {
+      parts += `<rect x="25" y="90" width="100" height="45" fill="${c}" opacity="0.8" rx="3"/>`;
+      parts += `<rect x="35" y="100" width="15" height="20" fill="${lt}" rx="2"/>`;
+      parts += `<rect x="65" y="100" width="20" height="35" fill="${lt}" rx="2"/>`;  // door
+      parts += `<rect x="100" y="100" width="15" height="20" fill="${lt}" rx="2"/>`;
+    } else {
+      // Just ground plot
+      parts += `<rect x="35" y="120" width="80" height="10" rx="3" fill="${c}" opacity="0.4"/>`;
+      parts += `<text x="75" y="115" text-anchor="middle" font-size="11" fill="${c}" opacity="0.7">Your story starts here</text>`;
+    }
+
+    // Tower 1 left (stage 2+)
+    if (stageIdx >= 2) {
+      parts += `<rect x="15" y="60" width="35" height="75" fill="${c}" opacity="0.9" rx="3"/>`;
+      // Battlements
+      parts += `<rect x="15" y="54" width="8" height="10" fill="${c}" rx="1"/>`;
+      parts += `<rect x="28" y="54" width="8" height="10" fill="${c}" rx="1"/>`;
+      parts += `<rect x="41" y="54" width="8" height="10" fill="${c}" rx="1"/>`;
+      parts += `<circle cx="32" cy="74" r="7" fill="${lt}"/>`;  // window
+    }
+
+    // Great Hall — wider middle section (stage 3+)
+    if (stageIdx >= 3) {
+      parts += `<rect x="50" y="70" width="50" height="65" fill="${c}" opacity="0.85" rx="3"/>`;
+      parts += `<path d="M50,70 Q75,55 100,70" fill="${c}" opacity="0.7"/>`;  // arch roof
+      // Windows
+      parts += `<circle cx="62" cy="85" r="6" fill="${lt}"/>`;
+      parts += `<circle cx="88" cy="85" r="6" fill="${lt}"/>`;
+    }
+
+    // Tower 2 right (stage 4+)
+    if (stageIdx >= 4) {
+      parts += `<rect x="100" y="60" width="35" height="75" fill="${c}" opacity="0.9" rx="3"/>`;
+      parts += `<rect x="100" y="54" width="8" height="10" fill="${c}" rx="1"/>`;
+      parts += `<rect x="113" y="54" width="8" height="10" fill="${c}" rx="1"/>`;
+      parts += `<rect x="126" y="54" width="8" height="10" fill="${c}" rx="1"/>`;
+      parts += `<circle cx="118" cy="74" r="7" fill="${lt}"/>`;
+    }
+
+    // Drawbridge (stage 5+)
+    if (stageIdx >= 5) {
+      parts += `<rect x="63" y="118" width="24" height="12" fill="#8b6914" rx="2"/>`;
+      parts += `<line x1="63" y1="118" x2="55" y2="130" stroke="#8b6914" stroke-width="2"/>`;
+      parts += `<line x1="87" y1="118" x2="95" y2="130" stroke="#8b6914" stroke-width="2"/>`;
+      // Moat
+      parts += `<ellipse cx="75" cy="134" rx="50" ry="8" fill="#1e40af" opacity="0.4"/>`;
+    }
+
+    // Banners (stage 6+)
+    if (stageIdx >= 6) {
+      parts += `<line x1="32" y1="32" x2="32" y2="56" stroke="#ffd700" stroke-width="2"/>`;
+      parts += `<polygon points="32,32 46,39 32,46" fill="#ffd700"/>`;
+      parts += `<line x1="118" y1="32" x2="118" y2="56" stroke="#ffd700" stroke-width="2"/>`;
+      parts += `<polygon points="118,32 132,39 118,46" fill="#ffd700"/>`;
+    }
+
+    // Complete — add sun/rainbow backdrop (stage 7)
+    if (stageIdx >= 7) {
+      parts = `<circle cx="130" cy="30" r="22" fill="#ffd700" opacity="0.25"/>` + parts;
+      parts += `<path d="M5,140 Q75,100 145,140" fill="none" stroke="url(#rainbow)" stroke-width="4" opacity="0.5"/>`;
+      parts += `<defs><linearGradient id="rainbow" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff0"/><stop offset="50%" stop-color="#0f0"/><stop offset="100%" stop-color="#00f"/></linearGradient></defs>`;
+    }
+
+    svg.innerHTML = parts;
+  }
+
+  function render() {
+    let d = load(); d = syncBricks(d); save(d);
+    const xp = APP.state.engXp || 0;
+    const stage = getStage(xp);
+    const stageIdx = STAGES.indexOf(stage);
+    const nextStage = STAGES[stageIdx + 1];
+
+    // Labels
+    ['castle-stage-lbl','castle-name-el'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = id.includes('stage') ? stage.name.toUpperCase() : '🏰 My Castle';
+    });
+    const evoTxt = document.getElementById('castle-evo-txt');
+    if (evoTxt) evoTxt.textContent = stage.label;
+    const xpHdr = document.getElementById('castle-xp-hdr');
+    if (xpHdr) xpHdr.textContent = xp;
+
+    drawCastle(stage);
+
+    // Progress bar to next stage
+    const xBar = document.getElementById('castle-pbar-xp');
+    const xLbl = document.getElementById('castle-pbar-xp-lbl');
+    if (xBar && nextStage) {
+      const pct = ((xp - stage.xp) / (nextStage.xp - stage.xp)) * 100;
+      xBar.style.width = Math.min(100, Math.round(pct)) + '%';
+      xBar.style.background = stage.color;
+      if (xLbl) xLbl.textContent = `${xp - stage.xp}/${nextStage.xp - stage.xp} to ${nextStage.name}`;
+    } else if (xBar) {
+      xBar.style.width = '100%';
+      if (xLbl) xLbl.textContent = '👑 LEGENDARY!';
+    }
+
+    // Stage track
+    const row = document.getElementById('castle-evo-row');
+    if (row) {
+      row.innerHTML = STAGES.map((s, i) => {
+        const reached = xp >= s.xp, isCur = s === stage;
+        return `<div class="evo-pip ${reached?'ep-reached':''} ${isCur?'ep-current':''}">
+          <div class="evo-pip-dot" style="${reached?`color:${s.color}`:''}">
+            ${reached ? (s.badge || '🧱') : '?'}
+          </div>
+          <div class="evo-pip-lbl">${s.part}</div>
+        </div>`;
+      }).join('');
+    }
+
+    // Brick button
+    const btn = document.getElementById('castle-brick-btn');
+    const avail = d.bricksAvail || 0;
+    if (btn) {
+      btn.disabled = avail <= 0;
+      btn.textContent = avail > 0 ? `🧱 Place Brick (${avail} left)` : '🧱 Play English to earn bricks!';
+    }
+
+    // Tip
+    const tipT = document.getElementById('castle-tip-title'), tipB = document.getElementById('castle-tip-body');
+    if (avail > 0 && tipT) {
+      tipT.textContent = `🧱 ${avail} brick${avail>1?'s':''} ready to place!`;
+      if (tipB) tipB.textContent = 'Tap "Place Brick" to grow your castle!';
+    } else if (tipT) {
+      tipT.textContent = `📖 Play English games to earn bricks!`;
+      if (tipB) tipB.textContent = stage.desc;
+    }
+
+    // Speech bubble
+    setTimeout(() => castleSpeak(stageIdx >= 7 ? 'complete' : 'brick'), 600);
+  }
+
+  function castleSpeak(pool) {
+    const msgs = PHRASES[pool] || PHRASES.brick;
+    const b = document.getElementById('castle-speech'); if (!b) return;
+    b.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    b.classList.add('show'); clearTimeout(b._t); b._t = setTimeout(() => b.classList.remove('show'), 2400);
+  }
+
+  function placeBrick() {
+    let d = load(); d = syncBricks(d);
+    if ((d.bricksAvail || 0) <= 0) return;
+    d.bricksAvail--;
+    d.totalBricksEarned = (d.totalBricksEarned || 0) + 1;
+    // Each brick adds XP to the castle
+    APP.state.engXp = (APP.state.engXp || 0) + XP_PER_BRICK;
+    save(d);
+    PARTICLES.burst(window.innerWidth/2, window.innerHeight*0.4, 14, ['#a855f7','#c084fc','#ffd700','#e879f9']);
+    SOUND.correct();
+    castleSpeak('brick');
+    render();
+  }
+
+  function onEngXP() {
+    if ((APP.state.selectedSubject || 'math') !== 'eng') return;
+    let d = load(); d = syncBricks(d); save(d);
+    const btn = document.getElementById('castle-brick-dot');
+    if (btn) btn.style.display = d.bricksAvail > 0 ? 'flex' : 'none';
+  }
+
+  return { render, placeBrick, onEngXP, castleSpeak, getStage, load };
+})();
+
+// ================================================================
+// LAB — Science companion  (grow an experiment / discovery tree)
+// ================================================================
+const LAB = (() => {
+  const KEY = 'zl_lab';
+  const XP_PER_FLASK = 18;
+
+  // Lab tree grows through 8 discoveries
+  const DISCOVERIES = [
+    { xp:0,   name:'Empty Lab',      label:'Start experimenting!',   color:'#00d4aa', icon:'🧪',
+      desc:'Every scientist starts with curiosity…' },
+    { xp:40,  name:'First Flask',    label:'Bubbles forming!',       color:'#33ddb8', icon:'⚗️',
+      desc:'Your first experiment is alive!' },
+    { xp:100, name:'Microscope',     label:'Tiny worlds revealed!',  color:'#00b8a9', icon:'🔬',
+      desc:'You can see cells now!' },
+    { xp:200, name:'Circuit Board',  label:'Electricity flows!',     color:'#2ed573', icon:'⚡',
+      desc:'You\'ve mastered circuits!' },
+    { xp:380, name:'Plant Chamber',  label:'Growing life!',          color:'#4ade80', icon:'🌱',
+      desc:'Plants respond to your experiments!' },
+    { xp:600, name:'Telescope',      label:'Stars in sight!',        color:'#818cf8', icon:'🔭',
+      desc:'The universe opens up!' },
+    { xp:900, name:'Robot Lab',      label:'AI is born!',            color:'#a78bfa', icon:'🤖',
+      desc:'You\'ve built a thinking machine!' },
+    { xp:1300,name:'Space Station',  label:'MASTER SCIENTIST!',      color:'#ffd700', icon:'🚀',
+      desc:'You are a true scientist!', badge:'🏆' },
+  ];
+
+  const PHRASES = {
+    discover:['Eureka! 🔬','Science is magic! ⚡','Great discovery! 🌟','You\'re a scientist! ⚗️'],
+    flask:   ['Flask filled! ⚗️','Experiment running!','Data collected! 📊','Hypothesis confirmed! ✅'],
+    complete:['MASTER SCIENTIST! 🚀','ALL EXPERIMENTS DONE! 🌟','THE UNIVERSE IS YOURS! 🔭'],
+  };
+
+  function load(){const d={xp:0,flasksAvail:0,totalFlasksEarned:0,lastVisit:null};try{return{...d,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return d}}
+  function save(d){localStorage.setItem(KEY,JSON.stringify(d))}
+  function getDiscovery(xp){let s=DISCOVERIES[0];for(const d of DISCOVERIES){if(xp>=d.xp)s=d;else break;}return s;}
+  function syncFlasks(d){const fe=Math.floor((APP.state.sciXp||0)/XP_PER_FLASK);d.flasksAvail=Math.max(0,fe-(d.totalFlasksEarned||0));return d;}
+
+  function drawLab(discovery) {
+    const svg = document.getElementById('lab-svg');
+    if (!svg) return;
+    const c = discovery.color, lt = c + '33';
+    const idx = DISCOVERIES.indexOf(discovery);
+
+    let parts = '';
+
+    // Lab bench — always present
+    parts += `<rect x="10" y="120" width="130" height="15" rx="4" fill="${lt}" stroke="${c}" stroke-width="1.5"/>`;
+    parts += `<rect x="15" y="135" width="25" height="20" rx="2" fill="${lt}"/>`;
+    parts += `<rect x="110" y="135" width="25" height="20" rx="2" fill="${lt}"/>`;
+
+    // Flask (stage 1+)
+    if (idx >= 1) {
+      parts += `<rect x="66" y="85" width="18" height="30" fill="${c}" opacity="0.7" rx="3"/>`;
+      parts += `<ellipse cx="75" cy="115" rx="22" ry="12" fill="${c}" opacity="0.8"/>`;
+      parts += `<circle cx="75" cy="110" r="6" fill="white" opacity="0.5"/>`;
+      // Bubbles
+      parts += `<circle cx="68" cy="100" r="3" fill="white" opacity="0.6"/>`;
+      parts += `<circle cx="82" cy="92" r="2" fill="white" opacity="0.5"/>`;
+      parts += `<text x="75" y="130" text-anchor="middle" font-size="9" fill="${c}">BOILING!</text>`;
+    }
+
+    // Microscope (stage 2+)
+    if (idx >= 2) {
+      parts += `<rect x="20" y="90" width="10" height="30" fill="${c}" opacity="0.8" rx="2"/>`;
+      parts += `<rect x="15" y="88" width="20" height="6" rx="2" fill="${c}" opacity="0.9"/>`;
+      parts += `<circle cx="25" cy="80" r="10" fill="${c}" opacity="0.5" stroke="${c}" stroke-width="2"/>`;
+      parts += `<circle cx="25" cy="80" r="5" fill="white" opacity="0.7"/>`;
+    }
+
+    // Circuit board (stage 3+)
+    if (idx >= 3) {
+      parts += `<rect x="95" y="88" width="40" height="28" rx="4" fill="${lt}" stroke="${c}" stroke-width="1.5"/>`;
+      parts += `<line x1="100" y1="98" x2="130" y2="98" stroke="${c}" stroke-width="1.5"/>`;
+      parts += `<line x1="115" y1="92" x2="115" y2="112" stroke="${c}" stroke-width="1.5"/>`;
+      parts += `<circle cx="107" cy="102" r="4" fill="${c}" opacity="0.7"/>`;
+      parts += `<circle cx="123" cy="102" r="4" fill="${c}" opacity="0.7"/>`;
+      // Lightning bolt
+      parts += `<text x="115" y="88" text-anchor="middle" font-size="14">⚡</text>`;
+    }
+
+    // Plant chamber (stage 4+)
+    if (idx >= 4) {
+      parts += `<rect x="48" y="65" width="20" height="50" fill="${lt}" stroke="${c}" stroke-width="1" rx="3"/>`;
+      // Plant growing inside
+      parts += `<line x1="58" y1="115" x2="58" y2="85" stroke="#22c55e" stroke-width="2.5"/>`;
+      parts += `<circle cx="58" cy="80" r="8" fill="#22c55e" opacity="0.8"/>`;
+      parts += `<circle cx="50" cy="90" r="5" fill="#4ade80" opacity="0.7"/>`;
+      parts += `<circle cx="66" cy="90" r="5" fill="#4ade80" opacity="0.7"/>`;
+    }
+
+    // Telescope (stage 5+)
+    if (idx >= 5) {
+      parts += `<rect x="5" y="60" width="50" height="12" rx="6" fill="${c}" opacity="0.8" transform="rotate(-20 30 66)"/>`;
+      parts += `<circle cx="8" cy="54" r="8" fill="${c}" opacity="0.5" stroke="${c}" stroke-width="2"/>`;
+      // Stars
+      parts += `<text x="130" y="40" font-size="16" opacity="0.8">⭐</text>`;
+      parts += `<text x="110" y="25" font-size="12" opacity="0.6">✨</text>`;
+      parts += `<text x="20" y="30" font-size="10" opacity="0.5">🌟</text>`;
+    }
+
+    // Robot (stage 6+)
+    if (idx >= 6) {
+      parts += `<rect x="108" y="55" width="28" height="28" rx="4" fill="${c}" opacity="0.7"/>`;
+      parts += `<circle cx="116" cy="63" r="4" fill="white" opacity="0.9"/>`;
+      parts += `<circle cx="128" cy="63" r="4" fill="white" opacity="0.9"/>`;
+      parts += `<rect x="114" y="71" width="14" height="5" rx="2" fill="${c}" opacity="0.5"/>`;
+      parts += `<text x="122" y="90" text-anchor="middle" font-size="9" fill="${c}">🤖</text>`;
+    }
+
+    // Space station backdrop (stage 7)
+    if (idx >= 7) {
+      parts = `<circle cx="75" cy="75" r="65" fill="${c}" opacity="0.06"/>` + parts;
+      parts += `<text x="75" y="30" text-anchor="middle" font-size="24">🚀</text>`;
+      parts += `<circle cx="25" cy="20" r="4" fill="#ffd700" opacity="0.7"/>`;
+      parts += `<circle cx="130" cy="15" r="3" fill="#ffd700" opacity="0.5"/>`;
+      parts += `<circle cx="140" cy="45" r="5" fill="#818cf8" opacity="0.5"/>`;
+    }
+
+    svg.innerHTML = parts;
+  }
+
+  function render() {
+    let d = load(); d = syncFlasks(d); save(d);
+    const xp = APP.state.sciXp || 0;
+    const disc = getDiscovery(xp);
+    const idx = DISCOVERIES.indexOf(disc);
+    const next = DISCOVERIES[idx + 1];
+
+    ['lab-stage-lbl','lab-name-el'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = id.includes('stage') ? disc.name.toUpperCase() : '🔬 My Lab';
+    });
+    const evoTxt = document.getElementById('lab-evo-txt');
+    if (evoTxt) evoTxt.textContent = disc.label;
+    const xpHdr = document.getElementById('lab-xp-hdr');
+    if (xpHdr) xpHdr.textContent = xp;
+
+    drawLab(disc);
+
+    const xBar = document.getElementById('lab-pbar-xp'), xLbl = document.getElementById('lab-pbar-xp-lbl');
+    if (xBar && next) {
+      const pct = ((xp - disc.xp) / (next.xp - disc.xp)) * 100;
+      xBar.style.width = Math.min(100, Math.round(pct)) + '%';
+      xBar.style.background = disc.color;
+      if (xLbl) xLbl.textContent = `${xp - disc.xp}/${next.xp - disc.xp} to ${next.name}`;
+    } else if (xBar) {
+      xBar.style.width = '100%';
+      if (xLbl) xLbl.textContent = '🚀 MASTER SCIENTIST!';
+    }
+
+    const row = document.getElementById('lab-evo-row');
+    if (row) {
+      row.innerHTML = DISCOVERIES.map((s, i) => {
+        const reached = xp >= s.xp, isCur = s === disc;
+        return `<div class="evo-pip ${reached?'ep-reached':''} ${isCur?'ep-current':''}">
+          <div class="evo-pip-dot">${reached ? s.icon : '?'}</div>
+          <div class="evo-pip-lbl">${s.name.split(' ')[0]}</div>
+        </div>`;
+      }).join('');
+    }
+
+    const btn = document.getElementById('lab-flask-btn');
+    const avail = d.flasksAvail || 0;
+    if (btn) {
+      btn.disabled = avail <= 0;
+      btn.textContent = avail > 0 ? `⚗️ Run Experiment (${avail} left)` : '⚗️ Play Science to fill flasks!';
+    }
+
+    const tipT = document.getElementById('lab-tip-title'), tipB = document.getElementById('lab-tip-body');
+    if (avail > 0 && tipT) {
+      tipT.textContent = `⚗️ ${avail} experiment${avail>1?'s':''} ready!`;
+      if (tipB) tipB.textContent = 'Tap "Run Experiment" to unlock discoveries!';
+    } else if (tipT) {
+      tipT.textContent = '🔬 Play Science games to fill flasks!';
+      if (tipB) tipB.textContent = disc.desc;
+    }
+
+    setTimeout(() => labSpeak(idx >= 7 ? 'complete' : 'discover'), 600);
+  }
+
+  function labSpeak(pool) {
+    const msgs = PHRASES[pool] || PHRASES.discover;
+    const b = document.getElementById('lab-speech'); if (!b) return;
+    b.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    b.classList.add('show'); clearTimeout(b._t); b._t = setTimeout(() => b.classList.remove('show'), 2400);
+  }
+
+  function runExperiment() {
+    let d = load(); d = syncFlasks(d);
+    if ((d.flasksAvail || 0) <= 0) return;
+    d.flasksAvail--;
+    d.totalFlasksEarned = (d.totalFlasksEarned || 0) + 1;
+    APP.state.sciXp = (APP.state.sciXp || 0) + XP_PER_FLASK;
+    save(d);
+    PARTICLES.burst(window.innerWidth/2, window.innerHeight*0.4, 14, ['#00d4aa','#33ddb8','#2ed573','#818cf8']);
+    SOUND.correct();
+    labSpeak('flask');
+    render();
+  }
+
+  function onSciXP() {
+    if ((APP.state.selectedSubject || 'math') !== 'sci') return;
+    let d = load(); d = syncFlasks(d); save(d);
+    const dot = document.getElementById('lab-flask-dot');
+    if (dot) dot.style.display = d.flasksAvail > 0 ? 'flex' : 'none';
+  }
+
+  return { render, runExperiment, onSciXP, labSpeak, getDiscovery, load };
+})();
+
+// ================================================================
+// Hook companions into XP reward flow
+// ================================================================
 new MutationObserver(mutations => {
   for (const m of mutations) {
     if (m.target.id === 'reward-overlay' && m.target.classList.contains('show')) {
-      PET.onXPEarned();
-      ADVENTURE_MAP.render(); // refresh map progress too
+      const subj = APP.state.selectedSubject || 'math';
+      if (subj === 'math') PET.onXPEarned();
+      if (subj === 'eng')  CASTLE.onEngXP();
+      if (subj === 'sci')  LAB.onSciXP();
+      ADVENTURE_MAP.render();
       break;
     }
   }
-}).observe(document.getElementById('reward-overlay'), {attributes:true,attributeFilter:['class']});
+}).observe(document.getElementById('reward-overlay'), {attributes:true, attributeFilter:['class']});
 
-// Init on load
+// Init
 setTimeout(() => {
   PET.render();
+  CASTLE.render();
+  LAB.render();
   ADVENTURE_MAP.render();
 }, 300);
-
-</script>
 
 </script>
 </body>

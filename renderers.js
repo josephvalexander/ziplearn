@@ -814,3 +814,408 @@ const GAME_RENDERERS = (() => {
 // ================================================================
 
 // ── LEVELS ───────────────────────────────────────────────────
+
+// ================================================================
+// SCIENCE RENDERERS — CBSE/NCERT EVS/Science Classes 1-4
+// ================================================================
+const SCI_RENDERERS = (() => {
+  // Helper: build a multiple-choice question
+  function mcq(pc, question, options, correct, emoji) {
+    const opts = [...options].sort(() => Math.random() - 0.5);
+    pc.innerHTML = `
+      <div class="q-emoji">${emoji || '🔬'}</div>
+      <div class="q-text">${question}</div>
+      <div class="opts-grid opts-2">${opts.map(o =>
+        `<button class="opt-btn" data-ans="${o}" data-correct="${o===correct}">${o}</button>`
+      ).join('')}</div>`;
+    wireOpts(pc, correct);
+  }
+
+  // Helper: true/false question
+  function tf(pc, question, correct, emoji) {
+    pc.innerHTML = `
+      <div class="q-emoji">${emoji || '🔬'}</div>
+      <div class="q-text">${question}</div>
+      <div class="opts-grid opts-2">
+        <button class="opt-btn" data-ans="True"  data-correct="${correct==='True'}">✅ True</button>
+        <button class="opt-btn" data-ans="False" data-correct="${correct==='False'}">❌ False</button>
+      </div>`;
+    wireOpts(pc, correct);
+  }
+
+  // Helper: image/emoji match question
+  function imgMatch(pc, question, items, correct, emoji) {
+    const opts = [...items].sort(() => Math.random() - 0.5);
+    pc.innerHTML = `
+      <div class="q-emoji">${emoji}</div>
+      <div class="q-text">${question}</div>
+      <div class="opts-grid opts-2">${opts.map(o =>
+        `<button class="opt-btn opt-big" data-ans="${o.label}" data-correct="${o.label===correct}">${o.icon}<br><span style="font-size:13px">${o.label}</span></button>`
+      ).join('')}</div>`;
+    wireOpts(pc, correct);
+  }
+
+  // ── Class 1 Science ─────────────────────────────────────
+  const POOLS = {
+    sci_living: [
+      {q:'Is a dog a living thing?', opts:['Yes, it eats and grows','No, it cannot move','Yes, but only sometimes','No, it lives indoors'], correct:'Yes, it eats and grows', emoji:'🐕'},
+      {q:'Which of these is NOT a living thing?', opts:['🌺 Flower','🪨 Rock','🐛 Caterpillar','🌿 Grass'], correct:'🪨 Rock', emoji:'🌍'},
+      {q:'What do ALL living things need?', opts:['Food and water','Wheels','A house','A mobile phone'], correct:'Food and water', emoji:'🌱'},
+      {q:'Can a chair eat food?', opts:['No, chairs are not alive','Yes, it absorbs wood','Yes, in fairy tales','Only wooden chairs'], correct:'No, chairs are not alive', emoji:'🪑'},
+      {q:'Which grows and breathes?', opts:['A puppy','A brick','A spoon','A rock'], correct:'A puppy', emoji:'🐾'},
+    ],
+    sci_body1: [
+      {q:'Which part of your body do you use to see?', opts:['Eyes','Nose','Ear','Tongue'], correct:'Eyes', emoji:'👁️'},
+      {q:'How many fingers do we have in total?', opts:['10','8','12','5'], correct:'10', emoji:'✋'},
+      {q:'Which body part helps you smell?', opts:['Nose','Tongue','Ears','Eyes'], correct:'Nose', emoji:'👃'},
+      {q:'What does your heart do?', opts:['Pumps blood','Helps you think','Helps you breathe','Holds your bones'], correct:'Pumps blood', emoji:'❤️'},
+      {q:'Which part do you use to walk?', opts:['Legs','Arms','Head','Fingers'], correct:'Legs', emoji:'🦵'},
+    ],
+    sci_senses: [
+      {q:'You use your ears to ___', opts:['Hear sounds','Smell flowers','Taste food','See colours'], correct:'Hear sounds', emoji:'👂'},
+      {q:'Which sense helps you enjoy the smell of a rose?', opts:['Smell','Touch','Sight','Taste'], correct:'Smell', emoji:'🌹'},
+      {q:'Touching something hot or cold is which sense?', opts:['Touch','Sight','Hearing','Taste'], correct:'Touch', emoji:'🔥'},
+      {q:'You use your tongue to ___', opts:['Taste food','See things','Hear music','Smell flowers'], correct:'Taste food', emoji:'👅'},
+      {q:'How many senses do humans have?', opts:['5','3','6','10'], correct:'5', emoji:'🧠'},
+    ],
+    sci_animals1: [
+      {q:'Which animal gives us milk?', opts:['Cow','Dog','Parrot','Fish'], correct:'Cow', emoji:'🐄'},
+      {q:'Which animal lives in the sea?', opts:['Fish','Cat','Lion','Horse'], correct:'Fish', emoji:'🐟'},
+      {q:'A hen lays ___', opts:['Eggs','Milk','Wool','Honey'], correct:'Eggs', emoji:'🐔'},
+      {q:'Which is a wild animal?', opts:['Lion','Dog','Hen','Cow'], correct:'Lion', emoji:'🦁'},
+      {q:'Which animal can fly?', opts:['Eagle','Cat','Cow','Fish'], correct:'Eagle', emoji:'🦅'},
+    ],
+    sci_plants1: [
+      {q:'Plants make their food using ___', opts:['Sunlight','Water only','Soil only','Darkness'], correct:'Sunlight', emoji:'☀️'},
+      {q:'Which part of a plant is underground?', opts:['Root','Leaf','Flower','Stem'], correct:'Root', emoji:'🌱'},
+      {q:'What do plants breathe in?', opts:['Carbon dioxide','Oxygen only','Milk','Water'], correct:'Carbon dioxide', emoji:'🌿'},
+      {q:'Which part of the plant holds it up?', opts:['Stem','Root','Leaf','Flower'], correct:'Stem', emoji:'🌻'},
+      {q:'Flowers grow into ___', opts:['Fruits','Roots','Leaves','Soil'], correct:'Fruits', emoji:'🍎'},
+    ],
+    sci_sky: [
+      {q:'Which gives us light during the day?', opts:['Sun','Moon','Stars','Lamp'], correct:'Sun', emoji:'☀️'},
+      {q:'The moon shines brightest at ___', opts:['Night','Noon','Morning','Sunset'], correct:'Night', emoji:'🌕'},
+      {q:'Which is the closest star to Earth?', opts:['The Sun','Polaris','Sirius','Moon'], correct:'The Sun', emoji:'⭐'},
+      {q:'What causes day and night?', opts:['Earth spins','Sun moves','Moon changes','Clouds'], correct:'Earth spins', emoji:'🌍'},
+      {q:'Stars are seen clearly on a ___ night', opts:['Clear','Rainy','Foggy','Cloudy'], correct:'Clear', emoji:'🌟'},
+    ],
+    sci_weather1: [
+      {q:'We carry an umbrella when it is ___', opts:['Rainy','Sunny','Windy','Cold'], correct:'Rainy', emoji:'☔'},
+      {q:'In summer the weather is ___', opts:['Hot','Cold','Snowy','Rainy'], correct:'Hot', emoji:'🌞'},
+      {q:'Snow falls when it is very ___', opts:['Cold','Hot','Windy','Sunny'], correct:'Cold', emoji:'❄️'},
+      {q:'Wind is moving ___', opts:['Air','Water','Clouds','Dust'], correct:'Air', emoji:'🌬️'},
+      {q:'Which season has the most rain in India?', opts:['Monsoon','Winter','Summer','Spring'], correct:'Monsoon', emoji:'🌧️'},
+    ],
+    sci_materials: [
+      {q:'A pillow is ___', opts:['Soft','Hard','Rough','Heavy'], correct:'Soft', emoji:'🛏️'},
+      {q:'A rock feels ___', opts:['Hard','Soft','Smooth only','Warm'], correct:'Hard', emoji:'🪨'},
+      {q:'Which material can you see through?', opts:['Glass','Wood','Cloth','Metal'], correct:'Glass', emoji:'🪟'},
+      {q:'A sandpaper feels ___', opts:['Rough','Smooth','Soft','Slippery'], correct:'Rough', emoji:'📄'},
+      {q:'Wood floats on water. True or False?', opts:['True','False','Sometimes','Never'], correct:'True', emoji:'🌊'},
+    ],
+    sci_food1: [
+      {q:'Which food gives us energy?', opts:['Rice','Salt','Water only','Pepper'], correct:'Rice', emoji:'🍚'},
+      {q:'Vegetables and fruits give us ___', opts:['Vitamins','Only sugar','Only water','Nothing'], correct:'Vitamins', emoji:'🥦'},
+      {q:'Which is a healthy drink?', opts:['Water','Soda','Juice with sugar','Tea'], correct:'Water', emoji:'💧'},
+      {q:'Which food group do eggs belong to?', opts:['Protein','Vegetable','Grain','Fat'], correct:'Protein', emoji:'🥚'},
+      {q:'Eating too much sugar causes ___', opts:['Tooth decay','Strong bones','Better eyesight','More energy'], correct:'Tooth decay', emoji:'🦷'},
+    ],
+    sci_water1: [
+      {q:'Water is used for ___', opts:['Drinking & cooking','Only washing','Only cooking','Only bathing'], correct:'Drinking & cooking', emoji:'💧'},
+      {q:'Where is most of Earth\'s water found?', opts:['Oceans','Clouds','Rivers','Lakes'], correct:'Oceans', emoji:'🌊'},
+      {q:'We should save water because ___', opts:['It is limited','It is free','It is heavy','It is blue'], correct:'It is limited', emoji:'🚿'},
+      {q:'Rain water comes from ___', opts:['Clouds','Mountains','Rivers','Lakes'], correct:'Clouds', emoji:'☁️'},
+      {q:'Water turns to ice when it gets very ___', opts:['Cold','Hot','Salty','Dark'], correct:'Cold', emoji:'🧊'},
+    ],
+    sci_transport1: [
+      {q:'An aeroplane travels through ___', opts:['Air','Water','Land','Underground'], correct:'Air', emoji:'✈️'},
+      {q:'A boat travels on ___', opts:['Water','Land','Air','Space'], correct:'Water', emoji:'⛵'},
+      {q:'Which travels on land?', opts:['Bus','Aeroplane','Boat','Submarine'], correct:'Bus', emoji:'🚌'},
+      {q:'A train runs on ___', opts:['Rails','Roads','Water','Air'], correct:'Rails', emoji:'🚂'},
+      {q:'Which is the fastest?', opts:['Aeroplane','Car','Bus','Bicycle'], correct:'Aeroplane', emoji:'🚀'},
+    ],
+    sci_family: [
+      {q:'Your father\'s mother is your ___', opts:['Grandmother','Aunt','Sister','Cousin'], correct:'Grandmother', emoji:'👵'},
+      {q:'A family with many generations living together is called ___', opts:['Joint family','Nuclear family','Single family','One family'], correct:'Joint family', emoji:'👨‍👩‍👧‍👦'},
+      {q:'Who is a firefighter?', opts:['A community helper','A family member','A classmate','A pet'], correct:'A community helper', emoji:'👩‍🚒'},
+      {q:'A teacher helps us ___', opts:['Learn and grow','Sell things','Fix cars','Build houses'], correct:'Learn and grow', emoji:'👩‍🏫'},
+      {q:'Which family member is older than your parents?', opts:['Grandparents','Siblings','Cousins','Friends'], correct:'Grandparents', emoji:'👴'},
+    ],
+    // Class 2
+    sci_foodchain1: [
+      {q:'In a food chain, plants are called ___', opts:['Producers','Consumers','Decomposers','Hunters'], correct:'Producers', emoji:'🌿'},
+      {q:'What does a herbivore eat?', opts:['Plants only','Meat only','Plants and meat','Nothing'], correct:'Plants only', emoji:'🐰'},
+      {q:'A lion is a ___', opts:['Carnivore','Herbivore','Producer','Decomposer'], correct:'Carnivore', emoji:'🦁'},
+      {q:'Grass → Grasshopper → Frog → Snake. The grasshopper is a ___', opts:['Consumer','Producer','Decomposer','Predator'], correct:'Consumer', emoji:'🦗'},
+      {q:'What eats both plants AND animals?', opts:['Omnivore','Herbivore','Carnivore','Producer'], correct:'Omnivore', emoji:'🐻'},
+    ],
+    sci_habitat: [
+      {q:'A polar bear lives in ___', opts:['Arctic/snowy regions','Desert','Rainforest','Ocean'], correct:'Arctic/snowy regions', emoji:'🐻‍❄️'},
+      {q:'A camel is adapted to live in the ___', opts:['Desert','Forest','Ocean','Arctic'], correct:'Desert', emoji:'🐪'},
+      {q:'Which animal lives in water?', opts:['Dolphin','Elephant','Tiger','Eagle'], correct:'Dolphin', emoji:'🐬'},
+      {q:'Birds build nests to ___', opts:['Lay eggs and raise young','Store food','Sleep only','Hide from rain'], correct:'Lay eggs and raise young', emoji:'🐦'},
+      {q:'A fish breathes using ___', opts:['Gills','Lungs','Skin','Nose'], correct:'Gills', emoji:'🐟'},
+    ],
+    sci_states: [
+      {q:'Water is an example of a ___', opts:['Liquid','Solid','Gas','Plasma'], correct:'Liquid', emoji:'💧'},
+      {q:'Ice is water in its ___ form', opts:['Solid','Liquid','Gas','Energy'], correct:'Solid', emoji:'🧊'},
+      {q:'Steam is water changing to ___', opts:['Gas','Solid','Liquid','Nothing'], correct:'Gas', emoji:'♨️'},
+      {q:'Which is a solid?', opts:['Iron nail','Milk','Oxygen','Steam'], correct:'Iron nail', emoji:'🔩'},
+      {q:'A gas has ___ shape', opts:['No fixed shape','A fixed shape','A round shape','A square shape'], correct:'No fixed shape', emoji:'🌫️'},
+    ],
+    sci_force1: [
+      {q:'When you push a door, you apply a ___', opts:['Force','Sound','Light','Heat'], correct:'Force', emoji:'🚪'},
+      {q:'Pulling a rope is an example of a ___ force', opts:['Pull','Push','Gravity','Magnetic'], correct:'Pull', emoji:'🪢'},
+      {q:'Gravity pulls things ___', opts:['Downward','Upward','Sideways','In circles'], correct:'Downward', emoji:'🍎'},
+      {q:'Friction makes moving objects ___', opts:['Slow down','Speed up','Disappear','Float'], correct:'Slow down', emoji:'🛹'},
+      {q:'A magnet attracts ___', opts:['Iron','Wood','Plastic','Glass'], correct:'Iron', emoji:'🧲'},
+    ],
+    sci_magnets: [
+      {q:'A magnet has how many poles?', opts:['2 — North and South','1','3','4'], correct:'2 — North and South', emoji:'🧲'},
+      {q:'Like poles ___ each other', opts:['Repel','Attract','Ignore','Break'], correct:'Repel', emoji:'↔️'},
+      {q:'Which material is attracted to a magnet?', opts:['Iron pin','Plastic ruler','Rubber eraser','Wooden stick'], correct:'Iron pin', emoji:'📎'},
+      {q:'A compass needle points to ___', opts:['North','South','East','West'], correct:'North', emoji:'🧭'},
+      {q:'Opposite poles ___ each other', opts:['Attract','Repel','Break','Ignore'], correct:'Attract', emoji:'🔴🔵'},
+    ],
+    // Class 3
+    sci_plants2: [
+      {q:'The process by which plants make food is called ___', opts:['Photosynthesis','Digestion','Respiration','Transpiration'], correct:'Photosynthesis', emoji:'🌿'},
+      {q:'Plants need ___ to make food', opts:['Sunlight, water, CO₂','Only water','Only soil','Only sunlight'], correct:'Sunlight, water, CO₂', emoji:'☀️'},
+      {q:'Leaves contain ___ which traps sunlight', opts:['Chlorophyll','Glucose','Oxygen','Carbon'], correct:'Chlorophyll', emoji:'🍃'},
+      {q:'During photosynthesis, plants release ___', opts:['Oxygen','Carbon dioxide','Nitrogen','Water vapour'], correct:'Oxygen', emoji:'💨'},
+      {q:'Roots absorb ___ from soil', opts:['Water and minerals','Sunlight','Oxygen','Carbon dioxide'], correct:'Water and minerals', emoji:'🌱'},
+    ],
+    sci_water2: [
+      {q:'When water is heated, it becomes ___', opts:['Water vapour','Ice','Snow','Dew'], correct:'Water vapour', emoji:'♨️'},
+      {q:'Water vapour rising into the sky is called ___', opts:['Evaporation','Condensation','Precipitation','Transpiration'], correct:'Evaporation', emoji:'☀️'},
+      {q:'Water vapour cooling to form clouds is ___', opts:['Condensation','Evaporation','Freezing','Boiling'], correct:'Condensation', emoji:'☁️'},
+      {q:'Rain, snow and hail are forms of ___', opts:['Precipitation','Evaporation','Condensation','Transpiration'], correct:'Precipitation', emoji:'🌧️'},
+      {q:'Where does the water in clouds come from?', opts:['Oceans and seas','Mountains','Underground','Rivers only'], correct:'Oceans and seas', emoji:'🌊'},
+    ],
+    sci_planets: [
+      {q:'How many planets are in our solar system?', opts:['8','9','7','10'], correct:'8', emoji:'🪐'},
+      {q:'The planet closest to the Sun is ___', opts:['Mercury','Venus','Earth','Mars'], correct:'Mercury', emoji:'☀️'},
+      {q:'Which planet is known as the Red Planet?', opts:['Mars','Jupiter','Venus','Saturn'], correct:'Mars', emoji:'🔴'},
+      {q:'Earth is the ___ planet from the Sun', opts:['3rd','2nd','4th','1st'], correct:'3rd', emoji:'🌍'},
+      {q:'The largest planet in our solar system is ___', opts:['Jupiter','Saturn','Neptune','Uranus'], correct:'Jupiter', emoji:'🌌'},
+    ],
+    sci_electricity: [
+      {q:'For current to flow, a circuit must be ___', opts:['Complete/closed','Broken/open','Half connected','Inverted'], correct:'Complete/closed', emoji:'⚡'},
+      {q:'A ___ allows electricity to pass through it', opts:['Conductor','Insulator','Resistor','Switch'], correct:'Conductor', emoji:'🔌'},
+      {q:'Rubber is an example of an ___', opts:['Insulator','Conductor','Battery','Circuit'], correct:'Insulator', emoji:'🟡'},
+      {q:'A switch in the OFF position ___ the circuit', opts:['Opens/breaks','Closes','Completes','Powers'], correct:'Opens/breaks', emoji:'💡'},
+      {q:'Which is a good conductor of electricity?', opts:['Copper wire','Plastic spoon','Rubber glove','Wood'], correct:'Copper wire', emoji:'🔩'},
+    ],
+    sci_light2: [
+      {q:'When light bends as it passes through water, this is called ___', opts:['Refraction','Reflection','Dispersion','Absorption'], correct:'Refraction', emoji:'🌈'},
+      {q:'A mirror reflects light because its surface is ___', opts:['Smooth and shiny','Rough','Transparent','Coloured'], correct:'Smooth and shiny', emoji:'🪞'},
+      {q:'A prism splits white light into ___', opts:['Rainbow colours','Red only','Black','Two colours'], correct:'Rainbow colours', emoji:'🌈'},
+      {q:'Objects we can see through clearly are ___', opts:['Transparent','Opaque','Translucent','Reflective'], correct:'Transparent', emoji:'🪟'},
+      {q:'An opaque object ___ light', opts:['Blocks','Passes','Bends','Stores'], correct:'Blocks', emoji:'⬛'},
+    ],
+    // Class 4
+    sci_energy: [
+      {q:'A moving ball has ___ energy', opts:['Kinetic','Potential','Heat','Light'], correct:'Kinetic', emoji:'⚽'},
+      {q:'A book on a shelf has ___ energy', opts:['Potential','Kinetic','Sound','Light'], correct:'Potential', emoji:'📚'},
+      {q:'Energy cannot be ___ — only transformed', opts:['Created or destroyed','Stored','Transferred','Used'], correct:'Created or destroyed', emoji:'⚡'},
+      {q:'The sun is the source of ___ energy', opts:['Solar','Wind','Tidal','Nuclear'], correct:'Solar', emoji:'☀️'},
+      {q:'Which energy source is renewable?', opts:['Solar and wind','Coal','Petrol','Natural gas'], correct:'Solar and wind', emoji:'🌬️'},
+    ],
+    sci_nutrition: [
+      {q:'Carbohydrates give us ___', opts:['Energy','Immunity','Body building','Repair'], correct:'Energy', emoji:'🍞'},
+      {q:'Proteins help in ___ the body', opts:['Building and repairing','Giving energy','Protecting from germs','Digestion'], correct:'Building and repairing', emoji:'🥩'},
+      {q:'Vitamin C is found mainly in ___', opts:['Citrus fruits','Meat','Milk','Rice'], correct:'Citrus fruits', emoji:'🍊'},
+      {q:'Lack of Vitamin D causes ___', opts:['Weak bones (rickets)','Scurvy','Night blindness','Anaemia'], correct:'Weak bones (rickets)', emoji:'🦴'},
+      {q:'Minerals like calcium help build ___', opts:['Bones and teeth','Muscles only','Skin','Blood cells only'], correct:'Bones and teeth', emoji:'🦷'},
+    ],
+    sci_cells: [
+      {q:'The basic unit of life is the ___', opts:['Cell','Organ','Tissue','System'], correct:'Cell', emoji:'🔬'},
+      {q:'A cell wall is found in ___ cells only', opts:['Plant','Animal','Both','Neither'], correct:'Plant', emoji:'🌿'},
+      {q:'The powerhouse of the cell is the ___', opts:['Mitochondria','Nucleus','Cell membrane','Vacuole'], correct:'Mitochondria', emoji:'⚡'},
+      {q:'The nucleus controls ___', opts:['Cell activities','Cell wall','Photosynthesis','Water intake'], correct:'Cell activities', emoji:'🎯'},
+      {q:'Animal cells have a ___ but no cell wall', opts:['Cell membrane','Chloroplast','Rigid wall','Cellulose'], correct:'Cell membrane', emoji:'🟡'},
+    ],
+    sci_gravity: [
+      {q:'Gravity is the force that pulls objects ___', opts:['Downward','Upward','Sideways','In circles'], correct:'Downward', emoji:'🌍'},
+      {q:'An apple falls from a tree because of ___', opts:['Gravity','Wind','Friction','Magnetism'], correct:'Gravity', emoji:'🍎'},
+      {q:'Friction acts in ___ direction to motion', opts:['Opposite','Same','Upward','No'], correct:'Opposite', emoji:'🛹'},
+      {q:'In space, there is almost no ___', opts:['Gravity','Sound','Light','Heat'], correct:'Gravity', emoji:'🚀'},
+      {q:'On the Moon, gravity is ___ than on Earth', opts:['Less','More','The same','Zero'], correct:'Less', emoji:'🌕'},
+    ],
+  };
+
+  // Fallback renderer for any sci_ game
+  function make_sci_renderer(gameId) {
+    return function(pc) {
+      const pool = POOLS[gameId];
+      if (!pool) { pc.innerHTML='<div class="q-text">🔬 Coming soon!</div>'; return; }
+      const q = pool[Math.floor(Math.random() * pool.length)];
+      mcq(pc, q.q, q.opts, q.correct, q.emoji);
+    };
+  }
+
+  const renderers = {};
+  Object.keys(POOLS).forEach(id => { renderers[id] = make_sci_renderer(id); });
+  return renderers;
+})();
+
+// ================================================================
+// ENGLISH RENDERERS — CBSE/NCERT Marigold/Raindrops Classes 1-4
+// ================================================================
+const ENG_RENDERERS = (() => {
+  function mcq(pc, question, options, correct, emoji) {
+    const opts = [...options].sort(() => Math.random() - 0.5);
+    pc.innerHTML = `
+      <div class="q-emoji">${emoji || '📖'}</div>
+      <div class="q-text">${question}</div>
+      <div class="opts-grid opts-2">${opts.map(o =>
+        `<button class="opt-btn" data-ans="${o}" data-correct="${o===correct}">${o}</button>`
+      ).join('')}</div>`;
+    wireOpts(pc, correct);
+  }
+
+  const POOLS = {
+    eng_letters: [
+      {q:'What is the lowercase of "G"?', opts:['g','p','q','b'], correct:'g', emoji:'🔡'},
+      {q:'Which letter comes after "M" in the alphabet?', opts:['N','O','L','P'], correct:'N', emoji:'🔤'},
+      {q:'"D" and "d" are ___', opts:['Same letter, different case','Different letters','Vowels','Consonants only'], correct:'Same letter, different case', emoji:'📚'},
+      {q:'How many vowels are in the English alphabet?', opts:['5','6','4','7'], correct:'5', emoji:'🗣️'},
+      {q:'Which letter is this in uppercase? "a"', opts:['A','D','O','C'], correct:'A', emoji:'🔠'},
+    ],
+    eng_phonics1: [
+      {q:'What sound does "B" make?', opts:['Buh (as in Ball)','Puh (as in Pen)','Muh (as in Mop)','Duh (as in Dog)'], correct:'Buh (as in Ball)', emoji:'🎵'},
+      {q:'Apple starts with the sound ___', opts:['/a/','/ e/','/ i/','/ o/'], correct:'/a/', emoji:'🍎'},
+      {q:'Which word starts with the same sound as "CAT"?', opts:['Cup','Hat','Bat','Dot'], correct:'Cup', emoji:'🐱'},
+      {q:'The word "SUN" starts with ___', opts:['S','C','Z','Sh'], correct:'S', emoji:'☀️'},
+      {q:'"Dog" and "Doll" start with the same ___', opts:['Sound','Vowel','Ending','Rhyme'], correct:'Sound', emoji:'🐕'},
+    ],
+    eng_cvc: [
+      {q:'Which is a CVC (consonant-vowel-consonant) word?', opts:['Cat','Play','Tree','Blast'], correct:'Cat', emoji:'🐱'},
+      {q:'Complete the word: B _ G', opts:['i (big)','a (bag)','o (bog)','All of these'], correct:'All of these', emoji:'🎯'},
+      {q:'"H_T" — which vowel makes the word "hot"?', opts:['o','a','i','e'], correct:'o', emoji:'🔥'},
+      {q:'Which rhymes with "PIG"?', opts:['Big','Cat','Dog','Bed'], correct:'Big', emoji:'🐷'},
+      {q:'The word "MOP" has ___ letters', opts:['3','4','2','5'], correct:'3', emoji:'🧹'},
+    ],
+    eng_sight1: [
+      {q:'Which word means "the opposite of off"?', opts:['On','In','Up','At'], correct:'On', emoji:'💡'},
+      {q:'Fill in: "She ___ happy."', opts:['is','am','are','be'], correct:'is', emoji:'😊'},
+      {q:'Which sight word means "not false"?', opts:['True','Can','The','And'], correct:'True', emoji:'✅'},
+      {q:'"They ___ my friends." Choose the right word.', opts:['are','is','am','was'], correct:'are', emoji:'👫'},
+      {q:'Which is a sight word?', opts:['the','elephant','difficult','caterpillar'], correct:'the', emoji:'📖'},
+    ],
+    eng_rhyme: [
+      {q:'Which word rhymes with "CAKE"?', opts:['Lake','Kick','Sock','Pick'], correct:'Lake', emoji:'🎂'},
+      {q:'Which word rhymes with "MOON"?', opts:['Spoon','Star','Light','Night'], correct:'Spoon', emoji:'🌙'},
+      {q:'"CAT" rhymes with ___', opts:['Hat','Cut','Pit','Hot'], correct:'Hat', emoji:'🐱'},
+      {q:'Which pair rhymes?', opts:['Rain – Train','Cat – Dog','Sun – Moon','Tree – Bee... wait — Bee rhymes with Tree!'], correct:'Rain – Train', emoji:'🎵'},
+      {q:'Which word does NOT rhyme with "BALL"?', opts:['Bell','Wall','Hall','Fall'], correct:'Bell', emoji:'🎾'},
+    ],
+    eng_nouns1: [
+      {q:'Which is a noun?', opts:['Dog','Run','Happy','Quickly'], correct:'Dog', emoji:'🏷️'},
+      {q:'"School" is a ___ noun', opts:['Place','Person','Animal','Thing'], correct:'Place', emoji:'🏫'},
+      {q:'Which word is the name of a person?', opts:['Teacher','Jump','Blue','Fast'], correct:'Teacher', emoji:'👩‍🏫'},
+      {q:'Nouns are the names of ___', opts:['People, places, things, animals','Actions','Feelings only','Colours only'], correct:'People, places, things, animals', emoji:'📦'},
+      {q:'Which is a proper noun?', opts:['Mumbai','city','river','mountain'], correct:'Mumbai', emoji:'🏙️'},
+    ],
+    eng_opposite1: [
+      {q:'Opposite of "HOT" is ___', opts:['Cold','Warm','Cool','Icy'], correct:'Cold', emoji:'🌡️'},
+      {q:'Opposite of "BIG" is ___', opts:['Small','Huge','Tiny... wait — Tiny is also correct!','Little'], correct:'Small', emoji:'🐘'},
+      {q:'Opposite of "DAY" is ___', opts:['Night','Morning','Evening','Noon'], correct:'Night', emoji:'🌙'},
+      {q:'Opposite of "FAST" is ___', opts:['Slow','Quick','Swift','Rapid'], correct:'Slow', emoji:'🐢'},
+      {q:'Opposite of "HAPPY" is ___', opts:['Sad','Angry','Tired','Hungry'], correct:'Sad', emoji:'😢'},
+    ],
+    eng_plurals: [
+      {q:'Plural of "BOOK" is ___', opts:['Books','Bookes','Bookies','Book'], correct:'Books', emoji:'📚'},
+      {q:'Plural of "CHURCH" is ___', opts:['Churches','Churchs','Churchies','Church'], correct:'Churches', emoji:'⛪'},
+      {q:'Plural of "BABY" is ___', opts:['Babies','Babys','Babyes','Baby'], correct:'Babies', emoji:'👶'},
+      {q:'Plural of "LEAF" is ___', opts:['Leaves','Leafs','Leafes','Leaf'], correct:'Leaves', emoji:'🍃'},
+      {q:'Plural of "MOUSE" is ___', opts:['Mice','Mouses','Mousies','Mouse'], correct:'Mice', emoji:'🐭'},
+    ],
+    eng_adjectives: [
+      {q:'Which word is an adjective?', opts:['Beautiful','Run','Quickly','She'], correct:'Beautiful', emoji:'🌸'},
+      {q:'"The ___ cat slept." Which fits best?', opts:['Lazy','Run','She','Never'], correct:'Lazy', emoji:'😴'},
+      {q:'Adjectives describe ___', opts:['Nouns','Verbs','Pronouns','Prepositions'], correct:'Nouns', emoji:'🏷️'},
+      {q:'Which is NOT an adjective?', opts:['Dance','Tall','Small','Green'], correct:'Dance', emoji:'💃'},
+      {q:'"She has a ___ voice." Which adjective fits?', opts:['Sweet','Runs','Slowly','Her'], correct:'Sweet', emoji:'🎵'},
+    ],
+    eng_verbs1: [
+      {q:'Which is an action verb?', opts:['Jump','Happy','Blue','Quick'], correct:'Jump', emoji:'🏃'},
+      {q:'"She ___ to school." Which verb fits?', opts:['Runs','Running','Run only if past','Ran only'], correct:'Runs', emoji:'🏫'},
+      {q:'Verbs describe ___', opts:['Actions or states','Things','Places','People'], correct:'Actions or states', emoji:'⚡'},
+      {q:'Which is NOT a verb?', opts:['Beautiful','Eat','Sleep','Think'], correct:'Beautiful', emoji:'🌺'},
+      {q:'"They ___ a song." Which verb completes it?', opts:['Sang','Beautiful','Tall','Always'], correct:'Sang', emoji:'🎵'},
+    ],
+    eng_tense1: [
+      {q:'"She PLAYS cricket every day." This is ___ tense.', opts:['Present','Past','Future','Perfect'], correct:'Present', emoji:'⏰'},
+      {q:'"He PLAYED cricket yesterday." This is ___ tense.', opts:['Past','Present','Future','Perfect'], correct:'Past', emoji:'📅'},
+      {q:'"They WILL PLAY tomorrow." This is ___ tense.', opts:['Future','Past','Present','Continuous'], correct:'Future', emoji:'🔮'},
+      {q:'Change to past: "I EAT an apple."', opts:['I ate an apple','I eated an apple','I eats an apple','I eating'], correct:'I ate an apple', emoji:'🍎'},
+      {q:'Change to future: "She WRITES a letter."', opts:['She will write a letter','She wrote a letter','She writes a letter','She writing'], correct:'She will write a letter', emoji:'✉️'},
+    ],
+    eng_articles: [
+      {q:'"___ elephant is large." Use:', opts:['An','A','The','Some'], correct:'An', emoji:'🐘'},
+      {q:'"___ dog barked." (specific dog)', opts:['The','A','An','Some'], correct:'The', emoji:'🐕'},
+      {q:'"I saw ___ bird in the tree." (any bird)', opts:['A','An','The','Some'], correct:'A', emoji:'🐦'},
+      {q:'"___ honest man told the truth." Use:', opts:['An','A','The','Some'], correct:'An', emoji:'🤝'},
+      {q:'"She is ___ best student."', opts:['The','A','An','Some'], correct:'The', emoji:'🥇'},
+    ],
+    eng_prefixes: [
+      {q:'"UN" + "happy" = ___', opts:['Unhappy (not happy)','Very happy','Quite happy','Always happy'], correct:'Unhappy (not happy)', emoji:'😞'},
+      {q:'The prefix "RE" means ___', opts:['Again','Not','Before','After'], correct:'Again', emoji:'🔁'},
+      {q:'"PRE" + "school" = school ___', opts:['Before regular school','After school','In school','Big school'], correct:'Before regular school', emoji:'🏫'},
+      {q:'Opposite of "possible" using a prefix:', opts:['Impossible','Nonpossible','Unpossible','Dispossible'], correct:'Impossible', emoji:'🚫'},
+      {q:'"MIS" + "spell" = ___', opts:['Misspell (spell wrongly)','Spell again','Spell correctly','Double spell'], correct:'Misspell (spell wrongly)', emoji:'✍️'},
+    ],
+    eng_compound: [
+      {q:'"RAIN" + "BOW" = ___', opts:['Rainbow','Raincoat','Rainforest','Rainfall'], correct:'Rainbow', emoji:'🌈'},
+      {q:'"SUN" + "FLOWER" = ___', opts:['Sunflower','Sunshine','Sunburn','Sunset'], correct:'Sunflower', emoji:'🌻'},
+      {q:'"FOOT" + "BALL" = ___', opts:['Football','Footwear','Footstep','Footprint'], correct:'Football', emoji:'⚽'},
+      {q:'"BOOK" + "SHELF" = ___', opts:['Bookshelf','Bookstore','Bookmark','Bookworm'], correct:'Bookshelf', emoji:'📚'},
+      {q:'Which is a compound word?', opts:['Butterfly','Happy','Quickly','Beautiful'], correct:'Butterfly', emoji:'🦋'},
+    ],
+    eng_tense2: [
+      {q:'"She HAS EATEN lunch." This is ___ tense.', opts:['Present Perfect','Simple Past','Future Perfect','Past Continuous'], correct:'Present Perfect', emoji:'⏰'},
+      {q:'"They WERE PLAYING when it rained." — the playing was ___', opts:['Past Continuous','Simple Past','Future','Present Perfect'], correct:'Past Continuous', emoji:'⚽'},
+      {q:'Choose the correct form: "By tomorrow, I ___ finished."', opts:['will have','have','had','will be'], correct:'will have', emoji:'📅'},
+      {q:'"I ___ here since 2020." Use:', opts:['have been','was','am been','will be'], correct:'have been', emoji:'🏠'},
+      {q:'Past perfect: "She ___ before I arrived."', opts:['had left','has left','left','leaves'], correct:'had left', emoji:'🚶'},
+    ],
+    eng_figure: [
+      {q:'"The classroom was a ZOO." This is a ___', opts:['Metaphor','Simile','Personification','Alliteration'], correct:'Metaphor', emoji:'🦁'},
+      {q:'"As brave as a LION" is a ___', opts:['Simile','Metaphor','Personification','Hyperbole'], correct:'Simile', emoji:'🔍'},
+      {q:'"The WIND whispered" is an example of ___', opts:['Personification','Simile','Metaphor','Alliteration'], correct:'Personification', emoji:'🌬️'},
+      {q:'"Peter Piper picked a peck" — this is ___', opts:['Alliteration','Rhyme','Simile','Hyperbole'], correct:'Alliteration', emoji:'🎵'},
+      {q:'"I\'ve told you a MILLION times!" is ___', opts:['Hyperbole','Fact','Simile','Metaphor'], correct:'Hyperbole', emoji:'📢'},
+    ],
+    eng_clauses: [
+      {q:'"Although it was raining, she went out." The clause after "although" is a ___', opts:['Subordinate clause','Main clause','Noun clause','Independent clause'], correct:'Subordinate clause', emoji:'🌧️'},
+      {q:'Which conjunction joins two equal clauses?', opts:['And, but, or','Although, because, since','Whether, if','That, which'], correct:'And, but, or', emoji:'🔗'},
+      {q:'"Because she studied hard" — is this a complete sentence?', opts:['No — it is a fragment','Yes, it is complete','Yes, it is a question','Yes, it is a command'], correct:'No — it is a fragment', emoji:'📝'},
+      {q:'A main clause ___', opts:['Makes sense on its own','Needs another clause','Starts with "because"','Has no verb'], correct:'Makes sense on its own', emoji:'✅'},
+      {q:'"The girl WHO won the race is my friend." WHO introduces a ___', opts:['Relative clause','Main clause','Adverb clause','Noun clause'], correct:'Relative clause', emoji:'🏆'},
+    ],
+    eng_vocabulary: [
+      {q:'What does "BENEVOLENT" mean?', opts:['Kind and generous','Angry','Clever','Nervous'], correct:'Kind and generous', emoji:'💛'},
+      {q:'A synonym for "RAPID" is ___', opts:['Fast','Slow','Careful','Quiet'], correct:'Fast', emoji:'⚡'},
+      {q:'What does "TRANSPARENT" mean?', opts:['See-through','Hidden','Colourful','Rough'], correct:'See-through', emoji:'🪟'},
+      {q:'Antonym of "ANCIENT" is ___', opts:['Modern','Old','Antique','Historic'], correct:'Modern', emoji:'🏛️'},
+      {q:'Which word means "very happy"?', opts:['Ecstatic','Furious','Melancholy','Anxious'], correct:'Ecstatic', emoji:'🎉'},
+    ],
+  };
+
+  function make_eng_renderer(gameId) {
+    return function(pc) {
+      const pool = POOLS[gameId];
+      if (!pool) { pc.innerHTML='<div class="q-text">📖 Coming soon!</div>'; return; }
+      const q = pool[Math.floor(Math.random() * pool.length)];
+      mcq(pc, q.q, q.opts, q.correct, q.emoji);
+    };
+  }
+
+  const renderers = {};
+  Object.keys(POOLS).forEach(id => { renderers[id] = make_eng_renderer(id); });
+  return renderers;
+})();
+
+// Merge SCI and ENG renderers into GAME_RENDERERS
+Object.assign(GAME_RENDERERS, SCI_RENDERERS, ENG_RENDERERS);
