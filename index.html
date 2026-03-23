@@ -203,16 +203,24 @@ body {
 
 /* ── LAYOUT ── */
 #app { position:relative; z-index:1; min-height:100vh; }
-.screen { display:none; animation:screenIn 0.35s var(--smooth) both; }
-.screen.active { display:flex; flex-direction:column; }
+.screen {
+  display:none;
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;  /* occupy full viewport, block all clicks behind */
+  padding-top:57px;                   /* clear the fixed app-header */
+  z-index:10;
+  background:var(--bg-base);          /* opaque — nothing bleeds through */
+  flex-direction:column;
+  overflow:hidden;
+  animation:screenIn 0.35s var(--smooth) both;
+}
+.screen.active { display:flex; }
 /* Home / Map / Pet tabs: exactly viewport height, internal scroll */
-#scr-home.active,
-#scr-map.active,
-#scr-pet.active  { height:100vh; overflow:hidden; }
+/* height/overflow handled by .screen { position:fixed; inset:0 } */
 /* Home scrollable content (everything between header and bottom-nav) */
 #scr-home .home-scroll { flex:1; overflow-y:auto; }
 /* Play screen: viewport height, no outer scroll */
-#scr-play.active { height:100vh; overflow:hidden; }
+/* same */
 @keyframes screenIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
 
 /* ── HEADER ── */
@@ -222,7 +230,8 @@ body {
   background: var(--bg-header);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-header);
-  position:sticky; top:0; z-index:200;
+  position:fixed; top:0; left:0; right:0;
+  z-index:500;                /* above all screens (z-index:10) */
   flex-shrink:0;
   transition: background 0.35s var(--smooth), border-color 0.35s var(--smooth);
 }
@@ -774,7 +783,7 @@ body {
 /* Bottom nav tabs */
 .bottom-nav {
   display:flex; border-top:1px solid var(--border);
-  background:var(--bg-header); position:sticky; bottom:0; z-index:150; flex-shrink:0;
+  background:var(--bg-header); flex-shrink:0;
 }
 .bnav-btn {
   flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
@@ -806,7 +815,7 @@ body {
 .map-subject-pill { display:flex; align-items:center; gap:8px; margin:0 16px 12px; padding:10px 16px; border-radius:12px; }
 
 /* ── Castle & Lab screens ────────────────────────────── */
-#scr-castle.active, #scr-lab.active, #scr-garden.active { height:100vh; overflow:hidden; }
+/* same */
 .companion-screen { flex:1; overflow-y:auto; padding:16px 16px 80px; display:flex; flex-direction:column; gap:14px; }
 .companion-header { display:flex; align-items:center; gap:12px; }
 .companion-stage-lbl { font-size:10px; font-weight:800; letter-spacing:0.1em; color:var(--text-muted); }
