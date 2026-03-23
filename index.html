@@ -42,6 +42,7 @@
 <title>Zipplearn ⚡ Fast · Fun · Smart</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
 <style>
+<style>
 /* ============================================================
    ZIPPLEARN DESIGN SYSTEM — DUAL THEME
    Themes toggled via [data-theme="dark"|"light"] on <html>.
@@ -201,9 +202,15 @@ body {
 
 /* ── LAYOUT ── */
 #app { position:relative; z-index:1; min-height:100vh; }
-.screen { display:none; min-height:100vh; animation:screenIn 0.35s var(--smooth) both; }
-.screen.active { display:flex; flex-direction:column; overflow-y:auto; }
-/* scr-play is a fixed-height flex column — header+powerups are fixed, content scrolls */
+.screen { display:none; animation:screenIn 0.35s var(--smooth) both; }
+.screen.active { display:flex; flex-direction:column; }
+/* Home / Map / Pet tabs: exactly viewport height, internal scroll */
+#scr-home.active,
+#scr-map.active,
+#scr-pet.active  { height:100vh; overflow:hidden; }
+/* Home scrollable content (everything between header and bottom-nav) */
+#scr-home .home-scroll { flex:1; overflow-y:auto; }
+/* Play screen: viewport height, no outer scroll */
 #scr-play.active { height:100vh; overflow:hidden; }
 @keyframes screenIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
 
@@ -664,9 +671,127 @@ body {
 /* Reward overlay — scrollable for small screens */
 .reward-overlay { position:fixed; inset:0; z-index:500; background:var(--overlay-bg); backdrop-filter:blur(16px); display:none; flex-direction:column; align-items:center; justify-content:flex-start; text-align:center; padding:20px; overflow-y:auto; transition:background 0.35s var(--smooth); }
 .reward-overlay.show { display:flex; }
+/* ================================================================
+   ADVENTURE MAP
+================================================================ */
+.world-map-wrap { width:100%; max-width:480px; margin:0 auto; padding:0 20px 32px; }
+.world-card {
+  display:flex; align-items:center; gap:14px;
+  background:var(--bg-card); border:2px solid var(--border);
+  border-radius:var(--r-xl); padding:16px 18px; margin-bottom:8px;
+  cursor:pointer; transition:all 0.22s var(--bounce); position:relative; overflow:hidden;
+}
+.world-card::before { content:''; position:absolute; inset:0; opacity:0; background:radial-gradient(ellipse at 20% 50%,rgba(255,255,255,0.06),transparent 70%); transition:opacity 0.3s; }
+.world-card:hover:not(.wlocked)::before { opacity:1; }
+.world-card:hover:not(.wlocked) { transform:translateY(-3px) scale(1.015); box-shadow:0 12px 36px rgba(0,0,0,0.3); border-color:var(--border-hover); }
+.world-card:active:not(.wlocked) { transform:scale(0.97); }
+.world-card.wlocked { opacity:0.5; cursor:not-allowed; filter:grayscale(0.5); }
+.world-card.wcurrent { border-color:var(--gold); box-shadow:0 0 0 3px rgba(255,215,0,0.18); }
+.world-card.wdone { border-color:var(--success); }
+.world-icon {
+  width:60px; height:60px; border-radius:16px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:28px;
+  position:relative;
+}
+.world-icon-glow { animation:wGlow 2.5s ease-in-out infinite alternate; }
+@keyframes wGlow { from{box-shadow:0 0 8px var(--wcolor,#818cf8)} to{box-shadow:0 0 20px var(--wcolor,#818cf8)} }
+.world-info { flex:1; min-width:0; }
+.world-name { font-family:var(--font-display); font-size:19px; color:var(--text-primary); line-height:1.1; }
+.world-region { font-size:11px; color:var(--text-muted); font-weight:800; letter-spacing:0.8px; margin-bottom:6px; }
+.world-pbar-wrap { height:5px; background:var(--bg-hud); border-radius:20px; overflow:hidden; }
+.world-pbar { height:100%; border-radius:20px; transition:width 0.7s var(--smooth); }
+.world-pbar-label { font-size:10px; color:var(--text-muted); font-weight:700; margin-top:3px; }
+.world-badge {
+  position:absolute; top:10px; right:10px;
+  font-size:9px; font-weight:800; padding:2px 8px; border-radius:20px; letter-spacing:0.5px;
+}
+.wbg-locked  { background:var(--bg-hud); color:var(--text-muted); }
+.wbg-current { background:rgba(255,215,0,0.18); color:var(--gold); }
+.wbg-done    { background:rgba(46,213,115,0.15); color:var(--success); }
+.world-connector { text-align:center; margin:0 0 8px; }
+.world-connector-inner { display:inline-flex; flex-direction:column; align-items:center; gap:2px; }
+.wcon-line { width:2px; height:14px; background:linear-gradient(to bottom,var(--border),transparent); margin:0 auto; }
+.wcon-dot  { width:7px; height:7px; border-radius:50%; background:var(--gold); animation:wDotPulse 2s ease-in-out infinite; }
+@keyframes wDotPulse { 0%,100%{transform:scale(1);opacity:0.5} 50%{transform:scale(1.5);opacity:1} }
+
+/* ================================================================
+   GROWING PET
+================================================================ */
+.pet-wrap { width:100%; max-width:400px; margin:0 auto; display:flex; flex-direction:column; align-items:center; padding:0 20px 40px; }
+.pet-scene { position:relative; width:200px; height:200px; display:flex; align-items:center; justify-content:center; margin:0 auto 4px; }
+.pet-speech {
+  position:absolute; bottom:calc(100% - 16px); left:50%;
+  background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:7px 13px;
+  font-size:12px; font-weight:700; color:var(--text-primary); white-space:nowrap; pointer-events:none;
+  opacity:0; transform:translateX(-50%) translateY(4px);
+  transition:opacity 0.3s var(--bounce),transform 0.3s var(--bounce); z-index:10;
+}
+.pet-speech.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.pet-speech::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:var(--border); }
+.pet-svg-el { width:150px; height:150px; animation:petFloat 3s ease-in-out infinite; }
+@keyframes petFloat { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-10px) rotate(2deg)} }
+.pet-svg-el.pet-anim-happy   { animation:petHappy 0.6s var(--bounce) both; }
+.pet-svg-el.pet-anim-fed     { animation:petFed   0.8s var(--bounce) both; }
+.pet-svg-el.pet-anim-sad     { animation:petSad   0.6s both; }
+@keyframes petHappy { 0%,100%{transform:scale(1)} 35%{transform:scale(1.25) rotate(8deg)} 65%{transform:scale(0.92) rotate(-4deg)} }
+@keyframes petFed   { 0%{transform:scale(0.75)} 55%{transform:scale(1.3) rotate(-6deg)} 100%{transform:scale(1)} }
+@keyframes petSad   { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px) rotate(-6deg)} 75%{transform:translateX(8px) rotate(6deg)} }
+.pet-name-display { font-family:var(--font-display); font-size:26px; color:var(--text-primary); margin:4px 0 0; }
+.pet-evo-text { font-size:12px; color:var(--text-secondary); margin-bottom:14px; }
+.evo-row { display:flex; gap:6px; justify-content:center; margin-bottom:18px; }
+.evo-pip {
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  opacity:0.28; transition:all 0.4s var(--bounce);
+}
+.evo-pip.ep-reached { opacity:1; }
+.evo-pip.ep-current { opacity:1; transform:scale(1.18); }
+.evo-pip-dot {
+  width:34px; height:34px; border-radius:50%;
+  background:var(--bg-hud); border:2px solid var(--border);
+  display:flex; align-items:center; justify-content:center; font-size:17px; transition:all 0.4s;
+}
+.evo-pip.ep-reached .evo-pip-dot { background:rgba(255,215,0,0.12); border-color:var(--gold); }
+.evo-pip.ep-current .evo-pip-dot { background:linear-gradient(135deg,var(--indigo),var(--violet)); border-color:transparent; box-shadow:0 0 14px rgba(99,102,241,0.55); }
+.evo-pip-lbl { font-size:9px; font-weight:800; color:var(--text-muted); letter-spacing:0.3px; }
+.evo-pip.ep-reached .evo-pip-lbl,.evo-pip.ep-current .evo-pip-lbl { color:var(--text-secondary); }
+.pet-bars { width:100%; display:flex; flex-direction:column; gap:9px; margin-bottom:18px; }
+.pet-bar-row { display:flex; align-items:center; gap:10px; }
+.pbar-icon { font-size:15px; flex-shrink:0; }
+.pbar-track { flex:1; height:9px; background:var(--bg-hud); border-radius:20px; overflow:hidden; }
+.pbar-fill { height:100%; border-radius:20px; transition:width 0.8s cubic-bezier(0.34,1.56,0.64,1); }
+.pbar-label { font-size:10px; font-weight:800; color:var(--text-muted); min-width:44px; text-align:right; }
+.pet-actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:8px; }
+.pet-feed-btn {
+  background:linear-gradient(135deg,var(--gold),#ff9500); color:#1a0a00;
+  border:none; border-radius:var(--r-md); padding:12px 22px;
+  font-family:var(--font-body); font-weight:800; font-size:14px; cursor:pointer;
+  transition:all 0.2s var(--bounce); box-shadow:0 6px 20px rgba(255,215,0,0.3);
+}
+.pet-feed-btn:hover:not(:disabled) { transform:translateY(-2px) scale(1.04); box-shadow:0 10px 28px rgba(255,215,0,0.45); }
+.pet-feed-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+/* Bottom nav tabs */
+.bottom-nav {
+  display:flex; border-top:1px solid var(--border);
+  background:var(--bg-header); position:sticky; bottom:0; z-index:150; flex-shrink:0;
+}
+.bnav-btn {
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+  padding:9px 4px 7px; cursor:pointer; background:transparent; border:none;
+  color:var(--text-muted); font-size:9px; font-weight:800; letter-spacing:0.5px;
+  transition:all 0.15s; position:relative;
+}
+.bnav-btn:hover { color:var(--text-primary); background:var(--bg-card); }
+.bnav-btn.bnav-active { color:var(--indigo); border-top:2px solid var(--indigo); }
+.bnav-btn-icon { font-size:19px; line-height:1; }
+.bnav-alert {
+  position:absolute; top:4px; right:calc(50% - 20px);
+  background:var(--danger); color:#fff; font-size:8px; font-weight:800;
+  min-width:14px; height:14px; border-radius:7px;
+  display:flex; align-items:center; justify-content:center; padding:0 3px;
+}
 </style>
 
-</head>
 <body>
 
 <!-- ===== STAR FIELD ===== -->
@@ -702,16 +827,15 @@ body {
      SCREEN: HOME
 ============================================================ -->
 <section class="screen active" id="scr-home">
-  <div class="home-hero">
+  <div class="home-scroll">
+    <div class="home-hero">
     <div class="hero-eyebrow">⚡ For Every Kid • Classes 1–4</div>
-    <!-- Mascot with speech bubble in padding-top space -->
     <div class="mascot-wrap">
       <div class="mascot-speech" id="mascot-speech-home"></div>
       <span class="mascot" id="mascot-home">🦊</span>
     </div>
     <h1 class="hero-title">Learning at<br/><span class="accent">Lightning Speed</span></h1>
-    <p class="hero-sub">Earn badges, level up, and become a Maths Champion! ⚡</p>
-    <!-- XP / Level bar -->
+    <p class="hero-sub">Level up your pet, explore the map, and become a Maths Champion! ⚡</p>
     <div class="level-bar-wrap">
       <div class="level-row">
         <div class="level-label">
@@ -724,7 +848,6 @@ body {
     </div>
   </div>
 
-  <!-- Daily streak calendar -->
   <div style="padding:0 20px;max-width:420px;margin:0 auto">
     <div class="streak-cal">
       <div class="streak-cal-title">🔥 DAILY STREAK</div>
@@ -740,7 +863,7 @@ body {
     <div class="stat-chip"><div class="stat-val" id="st-correct">0</div><div class="stat-lbl">✅ Correct</div></div>
   </div>
 
-  <p class="section-heading">Choose Your Class</p>
+  <p class="section-heading" style="margin-top:4px">Quick shortcuts</p>
   <div class="class-orbit">
     <div class="class-orb c1" onclick="nav.openClass(1)"><div class="orb-ring"></div><div class="orb-num">1st</div><div class="orb-label">BEGINNER</div></div>
     <div class="class-orb c2" onclick="nav.openClass(2)"><div class="orb-ring"></div><div class="orb-num">2nd</div><div class="orb-label">BUILDER</div></div>
@@ -760,68 +883,119 @@ body {
       <div class="sp-info">
         <div class="sp-name">Mathematics</div>
         <div class="sp-desc">Numbers, shapes, patterns, and puzzles that make you think!</div>
-        <div class="sp-tags">
-          <span class="sp-tag math-tag">Counting</span>
-          <span class="sp-tag math-tag">Arithmetic</span>
-          <span class="sp-tag math-tag">Fractions</span>
-          <span class="sp-tag math-tag">Geometry</span>
-        </div>
+        <div class="sp-tags"><span class="sp-tag math-tag">Counting</span><span class="sp-tag math-tag">Arithmetic</span><span class="sp-tag math-tag">Fractions</span><span class="sp-tag math-tag">Geometry</span></div>
       </div>
-      <div class="sp-meta">
-        <span class="sp-badge live">● LIVE</span>
-        <span class="sp-arrow">→</span>
-      </div>
+      <div class="sp-meta"><span class="sp-badge live">● LIVE</span><span class="sp-arrow">→</span></div>
     </div>
     <div class="subject-planet sci" style="pointer-events:none;opacity:0.5">
       <div class="sp-icon sci">🔬</div>
-      <div class="sp-info">
-        <div class="sp-name">Science</div>
-        <div class="sp-desc">Discover how the world works through fun experiments!</div>
-        <div class="sp-tags">
-          <span class="sp-tag sci-tag">Living Things</span>
-          <span class="sp-tag sci-tag">Matter</span>
-          <span class="sp-tag sci-tag">Forces</span>
-        </div>
-      </div>
-      <div class="sp-meta">
-        <span class="sp-badge soon">COMING SOON</span>
-        <span class="sp-arrow">→</span>
-      </div>
+      <div class="sp-info"><div class="sp-name">Science</div><div class="sp-desc">Discover how the world works through fun experiments!</div><div class="sp-tags"><span class="sp-tag sci-tag">Living Things</span><span class="sp-tag sci-tag">Matter</span><span class="sp-tag sci-tag">Forces</span></div></div>
+      <div class="sp-meta"><span class="sp-badge soon">COMING SOON</span><span class="sp-arrow">→</span></div>
     </div>
     <div class="subject-planet eng" style="pointer-events:none;opacity:0.5">
       <div class="sp-icon eng">📖</div>
-      <div class="sp-info">
-        <div class="sp-name">English</div>
-        <div class="sp-desc">Read, write, spell and tell amazing stories!</div>
-        <div class="sp-tags">
-          <span class="sp-tag eng-tag">Vocabulary</span>
-          <span class="sp-tag eng-tag">Grammar</span>
-          <span class="sp-tag eng-tag">Reading</span>
-        </div>
-      </div>
-      <div class="sp-meta">
-        <span class="sp-badge soon">COMING SOON</span>
-        <span class="sp-arrow">→</span>
-      </div>
+      <div class="sp-info"><div class="sp-name">English</div><div class="sp-desc">Read, write, spell and tell amazing stories!</div><div class="sp-tags"><span class="sp-tag eng-tag">Vocabulary</span><span class="sp-tag eng-tag">Grammar</span><span class="sp-tag eng-tag">Reading</span></div></div>
+      <div class="sp-meta"><span class="sp-badge soon">COMING SOON</span><span class="sp-arrow">→</span></div>
     </div>
     <div class="subject-planet evs" style="pointer-events:none;opacity:0.5">
       <div class="sp-icon evs">🌿</div>
-      <div class="sp-info">
-        <div class="sp-name">EVS / GK</div>
-        <div class="sp-desc">Our planet, our community, our amazing world!</div>
-        <div class="sp-tags">
-          <span class="sp-tag evs-tag">Environment</span>
-          <span class="sp-tag evs-tag">Body</span>
-          <span class="sp-tag evs-tag">Community</span>
+      <div class="sp-info"><div class="sp-name">EVS / GK</div><div class="sp-desc">Our planet, our community, our amazing world!</div><div class="sp-tags"><span class="sp-tag evs-tag">Environment</span><span class="sp-tag evs-tag">Body</span><span class="sp-tag evs-tag">Community</span></div></div>
+      <div class="sp-meta"><span class="sp-badge soon">COMING SOON</span><span class="sp-arrow">→</span></div>
+    </div>
+  </div>
+
+  </div><!-- /.home-scroll -->
+
+  <!-- Bottom nav -->
+  <div class="bottom-nav">
+    <button class="bnav-btn bnav-active" data-tab="home" id="bnav-home" onclick="TABS.show('home')">
+      <span class="bnav-btn-icon">🏠</span>HOME
+    </button>
+    <button class="bnav-btn" data-tab="map" id="bnav-map" onclick="TABS.show('map')">
+      <span class="bnav-btn-icon">🗺️</span>MAP
+    </button>
+    <button class="bnav-btn" data-tab="pet" id="bnav-pet" onclick="TABS.show('pet')">
+      <span class="bnav-btn-icon" id="bnav-pet-icon">🥚</span>PET
+      <span class="bnav-alert" id="pet-hunger-dot" style="display:none">!</span>
+    </button>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCREEN: ADVENTURE MAP
+============================================================ -->
+<section class="screen" id="scr-map">
+  <div style="flex:1;overflow-y:auto;padding:20px 0 8px;text-align:center">
+    <h2 style="font-family:var(--font-display);font-size:clamp(22px,5vw,34px);color:var(--text-primary);margin-bottom:4px">Your Learning Journey</h2>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px">Complete each world to unlock the next!</p>
+    <div class="world-map-wrap" id="world-map-wrap"></div>
+  </div>
+  <div class="bottom-nav">
+    <button class="bnav-btn" data-tab="home" onclick="TABS.show('home')"><span class="bnav-btn-icon">🏠</span>HOME</button>
+    <button class="bnav-btn bnav-active" data-tab="map" onclick="TABS.show('map')"><span class="bnav-btn-icon">🗺️</span>MAP</button>
+    <button class="bnav-btn" data-tab="pet" onclick="TABS.show('pet')"><span class="bnav-btn-icon" id="map-pet-icon">🥚</span>PET</button>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCREEN: GROWING PET
+============================================================ -->
+<section class="screen" id="scr-pet">
+  <div style="flex:1;overflow-y:auto;padding-bottom:8px">
+    <div class="pet-wrap">
+      <!-- Stage label -->
+      <p style="font-size:10px;font-weight:800;letter-spacing:2px;color:var(--text-muted);margin-top:16px;text-transform:uppercase" id="pet-stage-lbl">EGG</p>
+
+      <!-- Pet SVG scene -->
+      <div class="pet-scene">
+        <div class="pet-speech" id="pet-speech"></div>
+        <svg class="pet-svg-el" id="pet-svg" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+
+      <div class="pet-name-display" id="pet-name-el">Zippy</div>
+      <div class="pet-evo-text" id="pet-evo-txt">Hatch me by earning XP!</div>
+
+      <!-- Evolution track -->
+      <div class="evo-row" id="evo-row"></div>
+
+      <!-- Stat bars -->
+      <div class="pet-bars">
+        <div class="pet-bar-row">
+          <span class="pbar-icon">🍖</span>
+          <div class="pbar-track"><div class="pbar-fill" id="pbar-hunger" style="width:100%;background:linear-gradient(90deg,#ff6b35,#ffd700)"></div></div>
+          <span class="pbar-label" id="pbar-hunger-lbl">Full</span>
+        </div>
+        <div class="pet-bar-row">
+          <span class="pbar-icon">😊</span>
+          <div class="pbar-track"><div class="pbar-fill" id="pbar-happy" style="width:80%;background:linear-gradient(90deg,#a78bfa,#e879f9)"></div></div>
+          <span class="pbar-label" id="pbar-happy-lbl">Happy</span>
+        </div>
+        <div class="pet-bar-row">
+          <span class="pbar-icon">⭐</span>
+          <div class="pbar-track"><div class="pbar-fill" id="pbar-xp" style="width:0%;background:linear-gradient(90deg,#6366f1,#a78bfa)"></div></div>
+          <span class="pbar-label" id="pbar-xp-lbl">0 XP</span>
         </div>
       </div>
-      <div class="sp-meta">
-        <span class="sp-badge soon">COMING SOON</span>
-        <span class="sp-arrow">→</span>
+
+      <!-- Actions -->
+      <div class="pet-actions">
+        <button class="pet-feed-btn" id="pet-feed-btn" onclick="PET.feed()">🍖 Feed</button>
+        <button class="btn btn-ghost" onclick="TABS.show('home')">🎮 Play Games</button>
+      </div>
+
+      <div class="tip-card" style="max-width:340px;width:100%;margin-top:8px">
+        <div class="tip-icon">💡</div>
+        <div class="tip-body"><strong id="pet-tip-title">Keep Zippy happy!</strong><span id="pet-tip-body"> Play games to earn XP. Feed every day to keep hunger full. Zippy evolves the more you learn!</span></div>
       </div>
     </div>
   </div>
+  <div class="bottom-nav">
+    <button class="bnav-btn" data-tab="home" onclick="TABS.show('home')"><span class="bnav-btn-icon">🏠</span>HOME</button>
+    <button class="bnav-btn" data-tab="map" onclick="TABS.show('map')"><span class="bnav-btn-icon">🗺️</span>MAP</button>
+    <button class="bnav-btn bnav-active" data-tab="pet" onclick="TABS.show('pet')"><span class="bnav-btn-icon" id="pet-pet-icon">🥚</span>PET</button>
+  </div>
 </section>
+
 
 <!-- ============================================================
      SCREEN: CLASS → SUBJECT GAMES
@@ -929,1883 +1103,12 @@ body {
   </div>
 </div>
 
-<script>
-/* ================================================================
-   LEARNVERSE — UNIVERSAL GAMIFIED LEARNING APP
-   Architecture: Subject Registry Pattern
-   Adding new subjects = add entry to SUBJECT_REGISTRY + GAME_REGISTRY
-================================================================ */
 
-// ================================================================
-// SUBJECT REGISTRY — THE EXTENSION POINT
-// To add Science later: add an entry here + games in GAME_REGISTRY
-// ================================================================
-const SUBJECT_REGISTRY = {
-  math: {
-    id: 'math',
-    name: 'Mathematics',
-    icon: '🔢',
-    iconClass: 'math',
-    color: 'var(--math-1)',
-    gradientFill: 'linear-gradient(90deg, #6366f1, #a78bfa)',
-    timerColor: '#818cf8',
-  },
-  // Future: sci, eng, evs entries go here
-};
-
-// ================================================================
-// GAME REGISTRY — CBSE/ICSE/NCERT Syllabus Aligned (2025-26)
-// Sources: Joyful Mathematics (Cl.1-2), Maths Mela (Cl.3), Math-Magic (Cl.4)
-// Each class covers: Numbers, Operations, Measurement, Time, Money,
-//                    Geometry, Patterns, Data Handling — progressively.
-// ================================================================
-const GAME_REGISTRY = {
-  math: {
-
-    // ── CLASS 1 ─────────────────────────────────────────────
-    // NCERT: Joyful Mathematics | Topics: Pre-number concepts,
-    // Numbers 1-99, Addition/Subtraction up to 20, Shapes,
-    // Measurement (length/weight), Time, Money, Patterns, Data Handling
-    1: {
-      tip: {
-        title: "Parent Tip 💡",
-        body: "Class 1 is about building number sense! Count objects at home — steps, buttons, fruits. Real-world counting sticks better than worksheets."
-      },
-      games: [
-        { id:'count_objects',   icon:'🍎', bg:'rgba(255,107,53,0.18)', name:'Count It!',        desc:'Count objects up to 20',       diff:'easy'   },
-        { id:'quiz_add1',       icon:'➕', bg:'rgba(46,213,115,0.15)', name:'Adding Fun',        desc:'Single-digit sums (1-10)',     diff:'easy'   },
-        { id:'quiz_sub1',       icon:'➖', bg:'rgba(255,71,87,0.15)',  name:'Take Away!',        desc:'Subtract within 20',           diff:'easy'   },
-        { id:'shape_quiz',      icon:'🔷', bg:'rgba(168,85,247,0.15)', name:'Shape Safari',      desc:'2D & 3D shapes around us',     diff:'easy'   },
-        { id:'missing_seq',     icon:'❓', bg:'rgba(255,215,0,0.15)',  name:'What Comes Next?',  desc:'Number patterns 1-50',         diff:'easy'   },
-        { id:'compare_nums',    icon:'⚖️', bg:'rgba(0,212,170,0.15)',  name:'Big or Small?',     desc:'Compare numbers up to 50',     diff:'easy'   },
-        { id:'time_easy',       icon:'🕐', bg:'rgba(255,107,53,0.12)', name:'Clock o\'Clock',    desc:'Read o\'clock & half past',    diff:'easy'   },
-        { id:'money_easy',      icon:'💰', bg:'rgba(46,213,115,0.12)', name:'Coin Count',        desc:'Identify coins & notes',       diff:'easy'   },
-        { id:'measure_easy',    icon:'📏', bg:'rgba(168,85,247,0.12)', name:'Long or Short?',    desc:'Compare lengths & weights',    diff:'easy'   },
-        { id:'pattern_easy',    icon:'🎨', bg:'rgba(255,215,0,0.12)',  name:'Pattern Play',      desc:'Complete AB, AAB patterns',    diff:'easy'   },
-        { id:'odd_even',        icon:'🌗', bg:'rgba(0,212,170,0.12)',  name:'Odd or Even?',      desc:'Sort numbers 1-20',            diff:'medium' },
-        { id:'data_easy',       icon:'📊', bg:'rgba(255,71,87,0.12)',  name:'Tally Time',        desc:'Read simple tally charts',     diff:'medium' },
-      ]
-    },
-
-    // ── CLASS 2 ─────────────────────────────────────────────
-    // NCERT: Joyful Mathematics | Topics: Numbers up to 1000,
-    // 3-digit addition/subtraction, Multiplication intro,
-    // Division intro (grouping/sharing), Shapes, Measurement
-    // (cm/m, kg/g), Time (days/weeks/months), Money, Data
-    2: {
-      tip: {
-        title: "Try This! 🎯",
-        body: "Use 10 coins = 1 ten. Line them up and count in groups of 10 to make place value concrete. Class 2 is the year kids 'get' two-digit numbers!"
-      },
-      games: [
-        { id:'place_value',     icon:'🏠', bg:'rgba(0,212,170,0.15)',  name:'Tens & Units',      desc:'Numbers up to 99',             diff:'easy'   },
-        { id:'quiz_add2',       icon:'➕', bg:'rgba(46,213,115,0.15)', name:'2-Digit Adder',     desc:'Add up to 99, with carry',     diff:'medium' },
-        { id:'quiz_sub',        icon:'➖', bg:'rgba(255,71,87,0.15)',  name:'2-Digit Take Away', desc:'Subtract within 99',           diff:'medium' },
-        { id:'multiply_groups', icon:'✖️', bg:'rgba(255,215,0,0.15)',  name:'Groups & Skip',     desc:'Multiply by 2, 5, 10',         diff:'medium' },
-        { id:'division_share',  icon:'➗', bg:'rgba(168,85,247,0.15)', name:'Fair Share',        desc:'Equal grouping & sharing',     diff:'medium' },
-        { id:'shape_quiz',      icon:'🔷', bg:'rgba(255,107,53,0.15)', name:'3D Shape Spotter',  desc:'Cube, cone, cylinder & more',  diff:'easy'   },
-        { id:'missing_seq',     icon:'❓', bg:'rgba(0,212,170,0.12)',  name:'Number Patterns',   desc:'Skip count by 2, 5, 10',       diff:'medium' },
-        { id:'time_easy',       icon:'🕐', bg:'rgba(255,215,0,0.12)',  name:'Clock Challenge',   desc:'Quarter past & quarter to',    diff:'medium' },
-        { id:'money_easy',      icon:'💰', bg:'rgba(46,213,115,0.12)', name:'Market Maths',      desc:'Add amounts, give change',     diff:'medium' },
-        { id:'measure_easy',    icon:'📏', bg:'rgba(168,85,247,0.12)', name:'Measure Up!',       desc:'cm, m, kg & g basics',         diff:'easy'   },
-        { id:'odd_even',        icon:'🌗', bg:'rgba(255,71,87,0.12)',  name:'Odd or Even?',      desc:'Numbers up to 100',            diff:'easy'   },
-        { id:'data_easy',       icon:'📊', bg:'rgba(0,212,170,0.12)',  name:'Picture Graph',     desc:'Read pictographs',             diff:'medium' },
-      ]
-    },
-
-    // ── CLASS 3 ─────────────────────────────────────────────
-    // NCERT: Maths Mela | Topics: Numbers up to 10,000,
-    // 4-digit addition/subtraction with carry/borrow,
-    // Multiplication tables 2-10, Division, Fractions (1/2, 1/4, etc.),
-    // Geometry (angles concept, shapes), Perimeter intro,
-    // Time (calendar, hours/minutes), Money (rupees & paise), Data
-    3: {
-      tip: {
-        title: "9× Table Magic 🪄",
-        body: "Hold out 10 fingers. For 9×3, fold the 3rd finger. Count fingers on the LEFT (2) = tens digit. Count fingers on RIGHT (7) = units digit. Answer: 27!"
-      },
-      games: [
-        { id:'place_value3',    icon:'🏙️', bg:'rgba(0,212,170,0.15)',  name:'Hundreds & Thousands', desc:'4-digit place value',        diff:'medium' },
-        { id:'quiz_add3',       icon:'➕', bg:'rgba(46,213,115,0.15)', name:'4-Digit Adder',     desc:'Add with carry up to 9999',    diff:'medium' },
-        { id:'quiz_sub3',       icon:'➖', bg:'rgba(255,71,87,0.15)',  name:'Big Subtraction',   desc:'Subtract with borrowing',      diff:'medium' },
-        { id:'quiz_mul',        icon:'✖️', bg:'rgba(255,215,0,0.15)',  name:'Times Tables',      desc:'Multiplication tables 2-10',   diff:'medium' },
-        { id:'quiz_div',        icon:'➗', bg:'rgba(168,85,247,0.15)', name:'Division Quest',    desc:'Divide within 100',            diff:'medium' },
-        { id:'fractions',       icon:'🍕', bg:'rgba(255,107,53,0.15)', name:'Fraction Fun',      desc:'Halves, thirds & quarters',    diff:'medium', badge:'new' },
-        { id:'missing_seq',     icon:'❓', bg:'rgba(0,212,170,0.12)',  name:'Skip Count Pro',    desc:'By 3, 4, 6, 7, 8, 9',         diff:'medium' },
-        { id:'time_medium',     icon:'🕐', bg:'rgba(255,215,0,0.12)',  name:'Calendar & Clock',  desc:'Minutes, hours, days, months', diff:'medium' },
-        { id:'money_medium',    icon:'💰', bg:'rgba(46,213,115,0.12)', name:'Shopkeeper!',       desc:'Rupees, paise & change',       diff:'medium' },
-        { id:'perimeter_easy',  icon:'📐', bg:'rgba(168,85,247,0.12)', name:'Perimeter Walk',    desc:'Find the perimeter of shapes', diff:'hard'   },
-        { id:'compare_nums',    icon:'⚖️', bg:'rgba(255,107,53,0.12)', name:'Number Compare',    desc:'Order 4-digit numbers',        diff:'easy'   },
-        { id:'data_easy',       icon:'📊', bg:'rgba(255,71,87,0.12)',  name:'Bar Graph',         desc:'Read & interpret bar graphs',  diff:'hard'   },
-      ]
-    },
-
-    // ── CLASS 4 ─────────────────────────────────────────────
-    // NCERT: Math-Magic | Topics: Large numbers (lakhs),
-    // 4-digit operations, Long multiplication & division,
-    // Fractions (equivalent, compare, operations),
-    // Geometry (angles: acute/obtuse/right, area), Measurement
-    // (km, conversion), Time (24-hr, elapsed time), Money (bills),
-    // Roman numerals, Data (bar graphs, timetable problems)
-    4: {
-      tip: {
-        title: "Mental Math Hack ⚡",
-        body: "Multiply by 25? Multiply by 100, then ÷ 4. So 36×25 = 3600÷4 = 900. Multiply by 5? Halve the number, then ×10. 48×5 = 24×10 = 240!"
-      },
-      games: [
-        { id:'place_value4',    icon:'🚀', bg:'rgba(0,212,170,0.15)',  name:'Lakh & Beyond',     desc:'Numbers up to 10 lakhs',       diff:'medium' },
-        { id:'quiz_add3',       icon:'➕', bg:'rgba(46,213,115,0.15)', name:'Large Sums',        desc:'5-digit addition',             diff:'hard'   },
-        { id:'quiz_sub3',       icon:'➖', bg:'rgba(255,71,87,0.15)',  name:'Large Differences', desc:'5-digit subtraction',          diff:'hard'   },
-        { id:'quiz_mul',        icon:'✖️', bg:'rgba(255,215,0,0.15)',  name:'Speed Multiply',    desc:'2-digit × 2-digit',            diff:'hard'   },
-        { id:'quiz_div',        icon:'➗', bg:'rgba(168,85,247,0.15)', name:'Long Division',     desc:'Divide up to 4 digits',        diff:'hard'   },
-        { id:'fractions',       icon:'🧩', bg:'rgba(255,107,53,0.15)', name:'Fraction Wars',     desc:'Compare & add fractions',      diff:'hard',   badge:'new' },
-        { id:'angles_quiz',     icon:'📐', bg:'rgba(0,212,170,0.12)',  name:'Angle Spotter',     desc:'Acute, obtuse, right angles',  diff:'hard'   },
-        { id:'area_easy',       icon:'🟦', bg:'rgba(255,215,0,0.12)',  name:'Area Explorer',     desc:'Count squares, find area',     diff:'hard'   },
-        { id:'time_medium',     icon:'🕐', bg:'rgba(46,213,115,0.12)', name:'24-Hour Clock',     desc:'Convert 12hr ↔ 24hr time',    diff:'hard'   },
-        { id:'money_medium',    icon:'💰', bg:'rgba(168,85,247,0.12)', name:'Bill Calculator',   desc:'Estimate & calculate bills',   diff:'hard'   },
-        { id:'roman_nums',      icon:'🏛️', bg:'rgba(255,107,53,0.12)', name:'Roman Numerals',    desc:'I V X L C — read & write',     diff:'hard',   badge:'new' },
-        { id:'data_easy',       icon:'📊', bg:'rgba(255,71,87,0.12)',  name:'Smart Charts',      desc:'Interpret bar graphs & tables',diff:'hard'   },
-      ]
-    }
-  }
-  // sci: { 1:{...}, 2:{...}, 3:{...}, 4:{...} } — add when ready
-};
-
-// ================================================================
-// STATE
-// ================================================================
-const APP = (() => {
-  const S = {
-    xp:       +localStorage.getItem('lv_xp')      || 0,
-    played:   +localStorage.getItem('lv_played')  || 0,
-    correct:  +localStorage.getItem('lv_correct') || 0,
-    bestStreak: +localStorage.getItem('lv_streak')|| 0,
-    // session
-    selectedClass:   1,
-    selectedSubject: 'math',
-    selectedGame:    null,
-    score:     0,
-    qNum:      0,
-    streak:    0,
-    timeLeft:  30,
-    timerInt:  null,
-    maxQ:      10,
-  };
-
-  function save() {
-    localStorage.setItem('lv_xp',      S.xp);
-    localStorage.setItem('lv_played',  S.played);
-    localStorage.setItem('lv_correct', S.correct);
-    localStorage.setItem('lv_streak',  S.bestStreak);
-  }
-
-  function refreshStats() {
-    ['xp','played','streak','correct'].forEach(k => {
-      const map = {xp:S.xp, played:S.played, streak:S.bestStreak, correct:S.correct};
-      const el = document.getElementById('st-'+k);
-      if(el) el.textContent = map[k];
-    });
-    const hdr = document.getElementById('hdr-xp');
-    if(hdr) hdr.textContent = S.xp;
-  }
-
-  // ── NAVIGATION ──────────────────────────────────────────────
-  const nav = {
-    history: ['home'],
-
-    goHome() {
-      nav.history = ['home'];
-      showScreen('home');
-      refreshStats();
-    },
-
-    openClass(cls) {
-      S.selectedClass = cls;
-      // if only one subject live, go straight to it
-      nav.history.push('games');
-      showScreen('games');
-      renderGamesScreen(S.selectedSubject, cls);
-    },
-
-    openSubject(subjectId, cls) {
-      S.selectedSubject = subjectId;
-      S.selectedClass   = cls;
-      nav.history.push('games');
-      showScreen('games');
-      renderGamesScreen(subjectId, cls);
-    },
-
-    startGame(gameId) {
-      S.selectedGame = gameId;
-      S.score  = 0; S.qNum = 0; S.streak = 0;
-      clearInterval(S.timerInt);
-      nav.history.push('play');
-      showScreen('play');
-      initHUD();
-      loadQ(gameId);
-    },
-
-    goBack() {
-      if(nav.history.length > 1) {
-        nav.history.pop();
-        const last = nav.history[nav.history.length-1];
-        if(last==='home')  { nav.goHome(); }
-        if(last==='games') { showScreen('games'); }
-      } else { nav.goHome(); }
-    }
-  };
-
-  // ── SCREEN RENDERER ─────────────────────────────────────────
-  function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-    document.getElementById('scr-'+id).classList.add('active');
-    const back = document.getElementById('nav-back');
-    back.classList.toggle('show', id !== 'home');
-  }
-
-  function renderGamesScreen(subjectId, cls) {
-    const subDef  = SUBJECT_REGISTRY[subjectId];
-    const clsData = GAME_REGISTRY[subjectId]?.[cls];
-    if(!clsData) return;
-
-    // Title row
-    document.getElementById('stitle-row').innerHTML = `
-      <div class="stitle-icon ${subDef.iconClass}" style="background:linear-gradient(135deg,${subDef.color},${subDef.color}99)">${subDef.icon}</div>
-      <div class="stitle-text">
-        <h2>${subDef.name} — Class ${cls}</h2>
-        <p>Choose a game and start your challenge!</p>
-      </div>
-    `;
-
-    // Progress
-    const pct = Math.min(100, (S.correct / (cls * 20)) * 100);
-    document.getElementById('xp-fill').style.cssText = `width:${pct}%;background:${subDef.gradientFill}`;
-
-    // Games
-    const grid = document.getElementById('games-grid');
-    grid.innerHTML = clsData.games.map((g,i) => {
-      const diffClass = 'diff-'+(g.badge||g.diff);
-      return `
-        <div class="game-tile fade-in" style="animation-delay:${i*0.06}s" onclick="APP.nav.startGame('${g.id}')">
-          <div class="tile-glow" style="background:${subDef.color}"></div>
-          <span class="tile-diff ${diffClass}">${g.badge||g.diff}</span>
-          <div class="tile-icon" style="background:${g.bg};border:1px solid rgba(255,255,255,0.08)">${g.icon}</div>
-          <div class="tile-name">${g.name}</div>
-          <div class="tile-desc">${g.desc}</div>
-        </div>
-      `;
-    }).join('');
-
-    // Tip
-    const tc = document.getElementById('tip-card');
-    tc.style.display = 'flex';
-    document.getElementById('tip-title').textContent = clsData.tip.title;
-    document.getElementById('tip-body').textContent  = clsData.tip.body;
-  }
-
-  // ── HUD ─────────────────────────────────────────────────────
-  function initHUD() {
-    document.getElementById('hud-score').textContent = '0';
-    document.getElementById('hud-q').textContent     = `1/${S.maxQ}`;
-    const dots = document.getElementById('streak-dots');
-    dots.innerHTML = Array.from({length:5},(_,i)=>`<div class="s-dot" id="dot-${i}"></div>`).join('');
-  }
-
-  function updateHUD() {
-    document.getElementById('hud-score').textContent = S.score;
-    document.getElementById('hud-q').textContent     = `${S.qNum}/${S.maxQ}`;
-  }
-
-  function startTimer(secs) {
-    clearInterval(S.timerInt);
-    S.timeLeft = secs;
-    const fill = document.getElementById('arc-fill');
-    const num  = document.getElementById('arc-num');
-    const C    = 151;
-    function tick() {
-      const r = S.timeLeft/secs;
-      fill.style.strokeDashoffset = C*(1-r);
-      fill.style.stroke = S.timeLeft>8 ? SUBJECT_REGISTRY[S.selectedSubject].timerColor : '#ff4757';
-      num.textContent   = S.timeLeft;
-      if(S.timeLeft <= 0) { clearInterval(S.timerInt); onWrong(); }
-    }
-    tick();
-    S.timerInt = setInterval(()=>{ S.timeLeft--; tick(); }, 1000);
-  }
-
-  // ── QUESTION LOADER ─────────────────────────────────────────
-  function loadQ(gameId) {
-    S.qNum++;
-    updateHUD();
-    startTimer(30);
-    const pc = document.getElementById('play-content');
-    GAME_RENDERERS[gameId] ? GAME_RENDERERS[gameId](pc) : GAME_RENDERERS['quiz_add1'](pc);
-  }
-
-  // ── ANSWER HANDLERS ─────────────────────────────────────────
-  function onCorrect() {
-    S.streak++; S.correct++; S.score += 10 + (S.streak>2?5:0);
-    if(S.streak>S.bestStreak) S.bestStreak=S.streak;
-    save();
-    lightDot();
-    floatFeedback('✓', '#2ed573');
-    setTimeout(()=>nextOrFinish(), 850);
-  }
-  function onWrong() {
-    clearInterval(S.timerInt);
-    S.streak = 0;
-    resetDots();
-    floatFeedback('✗', '#ff4757');
-    save();
-    setTimeout(()=>nextOrFinish(), 1100);
-  }
-  function nextOrFinish() {
-    if(S.qNum < S.maxQ) loadQ(S.selectedGame);
-    else                showReward();
-  }
-  function lightDot() {
-    const idx = Math.min(S.streak-1,4);
-    const d   = document.getElementById('dot-'+idx);
-    if(d) d.classList.add('lit');
-    if(S.streak>=5) { resetDots(); S.score+=25; updateHUD(); floatFeedback('🔥+25','#ffd700'); }
-  }
-  function resetDots() {
-    document.querySelectorAll('.s-dot').forEach(d=>d.classList.remove('lit'));
-  }
-
-  // ── REWARD ──────────────────────────────────────────────────
-  function showReward() {
-    clearInterval(S.timerInt);
-    S.played++; S.xp += S.score; save();
-    const stars = S.score>=85?3:S.score>=50?2:1;
-    const msgs  = [
-      ['🌟 Perfect!',   'Incredible! You are a true maths champion!',          '🏆'],
-      ['👏 Well Done!', 'Great effort! Every practice makes you stronger.',     '🎊'],
-      ['💪 Good Try!',  'Keep going — every mistake is a lesson in disguise!',  '🎈'],
-    ];
-    const [title,msg,emoji] = msgs[3-stars];
-    document.getElementById('r-emoji').textContent = emoji;
-    document.getElementById('r-title').textContent = title;
-    document.getElementById('r-score').textContent = `${S.score} pts earned!`;
-    document.getElementById('r-msg').innerHTML     = msg;
-    const sr = document.getElementById('r-stars');
-    sr.innerHTML = [1,2,3].map(i=>`<span class="r-star">${i<=stars?'⭐':'☆'}</span>`).join('');
-    makeConfetti();
-    document.getElementById('reward-overlay').classList.add('show');
-    refreshStats();
-  }
-  function makeConfetti() {
-    const c = document.getElementById('reward-confetti');
-    c.innerHTML='';
-    const cols=['#ffd700','#ff6b35','#00d4aa','#a855f7','#ff6b9d','#2ed573'];
-    for(let i=0;i<70;i++){
-      const p=document.createElement('div');
-      p.className='confetti-piece';
-      p.style.cssText=`left:${Math.random()*100}%;background:${cols[Math.floor(Math.random()*cols.length)]};
-        width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;
-        animation:cFall ${1.4+Math.random()*1.8}s ${Math.random()*0.8}s linear forwards;
-        border-radius:${Math.random()>.5?'50%':'3px'};`;
-      c.appendChild(p);
-    }
-  }
-
-  function playAgain()   { document.getElementById('reward-overlay').classList.remove('show'); APP.nav.startGame(S.selectedGame); }
-  function closeReward() { document.getElementById('reward-overlay').classList.remove('show'); nav.goBack(); }
-
-  function floatFeedback(sym, col) {
-    const el=document.createElement('div');
-    el.className='float-feedback'; el.textContent=sym; el.style.color=col;
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(),950);
-  }
-
-  // init
-  refreshStats();
-  buildStarfield();
-
-  return { nav, state:S, playAgain, closeReward };
-})();
-
-// Expose nav globally so HTML onclick="nav.xxx()" works
-const nav = APP.nav;
-
-// ================================================================
-// HELPERS
-// ================================================================
-function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
-
-function genOpts(correct, range=15, count=4) {
-  const s=new Set([correct]);
-  let tries=0;
-  while(s.size<count && tries<200){
-    const d=Math.floor(Math.random()*range)+1;
-    const v=Math.random()>.5?correct+d:Math.max(0,correct-d);
-    if(v!==correct) s.add(v);
-    tries++;
-  }
-  return shuffle([...s]);
-}
-
-function buildStarfield(){
-  const sf=document.getElementById('starfield');
-  for(let i=0;i<120;i++){
-    const d=document.createElement('div');
-    d.className='star';
-    const sz=Math.random()*2.5+0.5;
-    d.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${2+Math.random()*5}s;--delay:${Math.random()*6}s;--bright:${0.4+Math.random()*0.6}`;
-    sf.appendChild(d);
-  }
-}
-
-// ================================================================
-// GAME RENDERERS
-// Each game = a function(container) that renders HTML + wires events
-// To add a new game: add an entry here
-// ================================================================
-const GAME_RENDERERS = (() => {
-
-  // ── ANSWER CHECK WIRING ───────────────────────────────────
-  function wireOpts(correctVal, selector='.opt-btn') {
-    document.querySelectorAll(selector).forEach(btn => {
-      btn.addEventListener('click', function() {
-        clearInterval(APP.state.timerInt);
-        document.querySelectorAll(selector).forEach(b=>b.style.pointerEvents='none');
-        const chosen = this.dataset.val;
-        if(chosen == String(correctVal)) {
-          this.classList.add('correct');
-          APP.nav; // call internally
-          // trigger onCorrect via exposed event
-          document.dispatchEvent(new CustomEvent('lv:correct'));
-        } else {
-          this.classList.add('wrong');
-          document.querySelectorAll(selector).forEach(b=>{ if(b.dataset.val==String(correctVal)) b.classList.add('correct'); });
-          document.dispatchEvent(new CustomEvent('lv:wrong'));
-        }
-      });
-    });
-  }
-
-  // ── QUESTION CARD BUILDER ─────────────────────────────────
-  function qCard(label, qHTML, hintHTML='') {
-    return `<div class="q-card">
-      <div class="q-label">${label}</div>
-      <div class="q-text">${qHTML}</div>
-      ${hintHTML ? `<div class="q-hint">💡 ${hintHTML}</div>` : ''}
-    </div>`;
-  }
-
-  function optsHTML(opts, cls='opts-4') {
-    return `<div class="${cls}">${opts.map(o=>`<button class="opt-btn" data-val="${o}">${o}</button>`).join('')}</div>`;
-  }
-
-  // ── INDIVIDUAL GAMES ──────────────────────────────────────
-
-  // Count objects
-  const OBJECTS = ['🍎','🍌','🥥','⭐','🌻','🐸','🦋','🎈','🍕','⚽','🐘','🌈'];
-  function count_objects(el) {
-    const count = Math.floor(Math.random()*14)+2;
-    const obj   = OBJECTS[Math.floor(Math.random()*OBJECTS.length)];
-    const opts  = genOpts(count, 8, 4);
-    let items='';
-    for(let i=0;i<count;i++) items+=`<span class="obj-item" style="animation-delay:${i*0.04}s">${obj}</span>`;
-    el.innerHTML = `
-      <div style="text-align:center;margin-bottom:12px;font-size:13px;color:rgba(255,255,255,0.4);font-weight:700;letter-spacing:1px">HOW MANY ${obj} ?</div>
-      <div class="objects-display">${items}</div>
-      ${optsHTML(opts)}
-    `;
-    wireOpts(count);
-  }
-
-  // Add 1-digit
-  function quiz_add1(el) {
-    const a=Math.floor(Math.random()*9)+1, b=Math.floor(Math.random()*(10-a))+1;
-    const ans=a+b;
-    el.innerHTML = qCard('ADDITION', `${a} + ${b} = ?`, `Imagine ${a} apples, add ${b} more`) + optsHTML(genOpts(ans,8));
-    wireOpts(ans);
-  }
-
-  // Add 2-digit
-  function quiz_add2(el) {
-    const a=Math.floor(Math.random()*40)+10, b=Math.floor(Math.random()*30)+5;
-    const ans=a+b;
-    el.innerHTML = qCard('2-DIGIT ADDITION', `${a} + ${b} = ?`, `Add tens first, then units`) + optsHTML(genOpts(ans,20));
-    wireOpts(ans);
-  }
-
-  // Add 3-digit
-  function quiz_add3(el) {
-    const a=Math.floor(Math.random()*400)+100, b=Math.floor(Math.random()*300)+100;
-    const ans=a+b;
-    el.innerHTML = qCard('BIG ADDITION', `${a} + ${b} = ?`) + optsHTML(genOpts(ans,100));
-    wireOpts(ans);
-  }
-
-  // Subtract
-  function quiz_sub(el) {
-    const b=Math.floor(Math.random()*30)+1, a=b+Math.floor(Math.random()*30)+1;
-    const ans=a-b;
-    el.innerHTML = qCard('SUBTRACTION', `${a} − ${b} = ?`, `Count back from ${a}`) + optsHTML(genOpts(ans,15));
-    wireOpts(ans);
-  }
-
-  // Multiply
-  function quiz_mul(el) {
-    const t=[2,3,4,5,6,7,8,9,10][Math.floor(Math.random()*9)];
-    const n=Math.floor(Math.random()*10)+1;
-    const ans=t*n;
-    el.innerHTML = qCard('MULTIPLICATION', `${t} × ${n} = ?`, `${t} groups of ${n}`) + optsHTML(genOpts(ans,30));
-    wireOpts(ans);
-  }
-
-  // Divide
-  function quiz_div(el) {
-    const t=Math.floor(Math.random()*8)+2, n=Math.floor(Math.random()*9)+1;
-    const ans=n;
-    el.innerHTML = qCard('DIVISION', `${t*n} ÷ ${t} = ?`, `How many groups of ${t} in ${t*n}?`) + optsHTML(genOpts(ans,10));
-    wireOpts(ans);
-  }
-
-  // Compare
-  function compare_nums(el) {
-    const a=Math.floor(Math.random()*90)+1;
-    let b=Math.floor(Math.random()*90)+1;
-    while(b===a) b=Math.floor(Math.random()*90)+1;
-    const correct = a>b?'>':'<';
-    el.innerHTML = qCard('COMPARE', `${a}  __  ${b}`, 'Use &lt;, &gt;, or =') +
-      `<div class="opts-3">${['<','>','='].map(o=>`<button class="opt-btn" data-val="${o}" style="font-size:36px">${o}</button>`).join('')}</div>`;
-    wireOpts(correct);
-  }
-
-  // Missing in sequence
-  function missing_seq(el) {
-    const start=Math.floor(Math.random()*20)+1;
-    const step=[1,2,5,10][Math.floor(Math.random()*4)];
-    const seq=[0,1,2,3,4].map(i=>start+step*i);
-    const hideIdx=Math.floor(Math.random()*5);
-    const ans=seq[hideIdx];
-    const display=seq.map((n,i)=>i===hideIdx?'?':n).join('  ,  ');
-    el.innerHTML = qCard('FIND THE MISSING NUMBER', display, `Pattern: +${step} each step`) + optsHTML(genOpts(ans,step*3+3));
-    wireOpts(ans);
-  }
-
-  // Odd / Even
-  function odd_even(el) {
-    const n=Math.floor(Math.random()*99)+1;
-    const correct=n%2===0?'Even':'Odd';
-    el.innerHTML = qCard('ODD OR EVEN?', String(n), 'Even numbers end in 0,2,4,6,8') +
-      `<div class="opts-2">
-        <button class="opt-btn" data-val="Odd"  style="font-size:22px">🌙 Odd</button>
-        <button class="opt-btn" data-val="Even" style="font-size:22px">🌟 Even</button>
-      </div>`;
-    wireOpts(correct);
-  }
-
-  // Shapes
-  const SHAPES=[
-    {name:'Circle',    sym:'⭕'},
-    {name:'Triangle',  sym:'🔺'},
-    {name:'Square',    sym:'🟦'},
-    {name:'Rectangle', sym:'▬'},
-    {name:'Star',      sym:'⭐'},
-    {name:'Diamond',   sym:'🔷'},
-  ];
-  function shape_quiz(el) {
-    const s=SHAPES[Math.floor(Math.random()*SHAPES.length)];
-    const decoys=shuffle(SHAPES.filter(x=>x.name!==s.name)).slice(0,3).map(x=>x.name);
-    const opts=shuffle([s.name,...decoys]);
-    el.innerHTML=`
-      <div class="q-card" style="font-size:80px;padding:40px 0">${s.sym}</div>
-      <div class="q-label" style="text-align:center;margin-bottom:12px">WHAT SHAPE IS THIS?</div>
-      ${optsHTML(opts,'opts-2')}
-    `;
-    wireOpts(s.name);
-  }
-
-  // Place value (tens & units)
-  function place_value(el) {
-    const n=Math.floor(Math.random()*89)+11;
-    const tens=Math.floor(n/10), units=n%10;
-    const q=[
-      {q:`In ${n}, the tens digit is?`,  ans:tens,  hint:`${n} = ${tens} tens + ${units} units`},
-      {q:`In ${n}, the units digit is?`, ans:units, hint:`${n} = ${tens} tens + ${units} units`},
-      {q:`${tens} tens + ${units} units = ?`, ans:n, hint:`Combine them to get the number`},
-    ][Math.floor(Math.random()*3)];
-    el.innerHTML = qCard('PLACE VALUE', q.q, q.hint) + optsHTML(genOpts(q.ans,8));
-    wireOpts(q.ans);
-  }
-
-  // Fractions — visual pizza slices using SVG
-  function fractions(el) {
-    const denominators=[2,3,4,6,8];
-    const den=denominators[Math.floor(Math.random()*denominators.length)];
-    const num=Math.floor(Math.random()*(den-1))+1;
-    const svgSlices=buildPizzaSVG(num,den);
-    const decoys=[
-      `${num}/${den}`,
-      `${den-num}/${den}`,
-      `${Math.min(num+1,den-1)}/${den}`,
-      `${Math.max(num-1,1)}/${den}`
-    ];
-    const opts=shuffle([...new Set(decoys)]).slice(0,4);
-    if(!opts.includes(`${num}/${den}`)){opts[0]=`${num}/${den}`;}
-    const shuffled=shuffle(opts);
-    el.innerHTML=`
-      <div class="q-card" style="padding:24px 20px">
-        <div class="q-label">PIZZA FRACTIONS 🍕</div>
-        <div style="display:flex;justify-content:center;margin:12px 0">${svgSlices}</div>
-        <div class="q-text" style="font-size:20px">What fraction is <span style="color:var(--math-1)">orange</span>?</div>
-      </div>
-      <div class="opts-2">${shuffled.map(o=>`<button class="opt-btn" data-val="${o}" style="font-size:24px">${o}</button>`).join('')}</div>
-    `;
-    wireOpts(`${num}/${den}`);
-  }
-
-  function buildPizzaSVG(num,den) {
-    const cx=80,cy=80,r=70;
-    let paths='';
-    for(let i=0;i<den;i++){
-      const a1=(i/den)*2*Math.PI - Math.PI/2;
-      const a2=((i+1)/den)*2*Math.PI - Math.PI/2;
-      const x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
-      const x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);
-      const fill=i<num?'#ff6b35':'#2d2d5a';
-      const stroke=i<num?'#ff8c5a':'#3a3a7a';
-      paths+=`<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2} Z" fill="${fill}" stroke="${stroke}" stroke-width="3"/>`;
-    }
-    return `<svg width="160" height="160" viewBox="0 0 160 160" style="filter:drop-shadow(0 8px 20px rgba(255,107,53,0.4))">
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="#1a1a4a" stroke="#3a3a7a" stroke-width="3"/>
-      ${paths}
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
-    </svg>`;
-  }
-
-  // ── SUBTRACT within 20 (Class 1 specific) ───────────────
-  function quiz_sub1(el) {
-    const b=Math.floor(Math.random()*9)+1, a=b+Math.floor(Math.random()*(20-b))+1;
-    const ans=a-b;
-    el.innerHTML = qCard('SUBTRACTION', `${a} − ${b} = ?`, `Count back ${b} steps from ${a}`) + optsHTML(genOpts(ans,8));
-    wireOpts(ans);
-  }
-
-  // ── SUBTRACT 3-digit (Class 3/4) ─────────────────────────
-  function quiz_sub3(el) {
-    const b=Math.floor(Math.random()*400)+100, a=b+Math.floor(Math.random()*500)+100;
-    const ans=a-b;
-    el.innerHTML = qCard('SUBTRACTION', `${a} − ${b} = ?`, `Subtract hundreds, tens, then units`) + optsHTML(genOpts(ans,80));
-    wireOpts(ans);
-  }
-
-  // ── MULTIPLY by 2,5,10 with visual groups (Class 2) ──────
-  function multiply_groups(el) {
-    const tables=[2,5,10];
-    const t=tables[Math.floor(Math.random()*tables.length)];
-    const n=Math.floor(Math.random()*10)+1;
-    const ans=t*n;
-    const emoji=['🍌','⭐','🎈'][tables.indexOf(t)];
-    let groups='';
-    for(let g=0;g<Math.min(n,5);g++){
-      let row='';
-      for(let i=0;i<t;i++) row+=emoji;
-      groups+=`<div style="font-size:20px;margin:4px 0;letter-spacing:2px">${row}</div>`;
-    }
-    if(n>5) groups+=`<div style="color:rgba(255,255,255,0.5);font-size:13px;margin-top:4px">...and ${n-5} more groups</div>`;
-    el.innerHTML = `
-      <div class="q-card">
-        <div class="q-label">MULTIPLICATION — GROUPS OF ${t}</div>
-        <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:16px;margin:12px 0;text-align:center">${groups}</div>
-        <div class="q-text" style="font-size:28px">${n} × ${t} = ?</div>
-        <div class="q-hint">💡 ${n} groups of ${t} ${emoji}</div>
-      </div>
-      ${optsHTML(genOpts(ans,20))}`;
-    wireOpts(ans);
-  }
-
-  // ── DIVISION as fair sharing (Class 2) ───────────────────
-  function division_share(el) {
-    const shares=[2,3,4,5];
-    const s=shares[Math.floor(Math.random()*shares.length)];
-    const ans=Math.floor(Math.random()*8)+1;
-    const total=s*ans;
-    const emoji=['🍎','🌟','🎈','🍌','🏀'][Math.floor(Math.random()*5)];
-    el.innerHTML = `
-      <div class="q-card">
-        <div class="q-label">FAIR SHARE — DIVISION</div>
-        <div style="font-size:40px;margin:8px 0">${Array(Math.min(total,12)).fill(emoji).join(' ')}${total>12?'…':''}</div>
-        <div class="q-text" style="font-size:26px">${total} ÷ ${s} = ?</div>
-        <div class="q-hint">💡 Share ${total} ${emoji}s equally among ${s} friends</div>
-      </div>
-      ${optsHTML(genOpts(ans,8))}`;
-    wireOpts(ans);
-  }
-
-  // ── TIME — Easy (o'clock, half past) Class 1-2 ───────────
-  const TIME_EASY = [
-    {h:1,  m:0,  display:'1:00',  label:"1 o'clock"},
-    {h:3,  m:0,  display:'3:00',  label:"3 o'clock"},
-    {h:6,  m:0,  display:'6:00',  label:"6 o'clock"},
-    {h:9,  m:0,  display:'9:00',  label:"9 o'clock"},
-    {h:12, m:0,  display:'12:00', label:"12 o'clock"},
-    {h:2,  m:30, display:'2:30',  label:'half past 2'},
-    {h:5,  m:30, display:'5:30',  label:'half past 5'},
-    {h:7,  m:30, display:'7:30',  label:'half past 7'},
-    {h:10, m:30, display:'10:30', label:'half past 10'},
-  ];
-  function time_easy(el) {
-    const t=TIME_EASY[Math.floor(Math.random()*TIME_EASY.length)];
-    const svg=drawClock(t.h,t.m);
-    const wrongTimes=shuffle(TIME_EASY.filter(x=>x.label!==t.label)).slice(0,3);
-    const opts=shuffle([t.label,...wrongTimes.map(x=>x.label)]);
-    el.innerHTML = `
-      <div class="q-card" style="padding:20px">
-        <div class="q-label">WHAT TIME DOES THE CLOCK SHOW?</div>
-        <div style="display:flex;justify-content:center;margin:12px 0">${svg}</div>
-      </div>
-      <div class="opts-2">${opts.map(o=>`<button class="opt-btn" data-val="${o}" style="font-size:14px;padding:14px 8px">${o}</button>`).join('')}</div>`;
-    wireOpts(t.label);
-  }
-
-  function drawClock(h, m) {
-    const cx=80,cy=80,r=70;
-    const angleH=(h%12+m/60)*30-90;
-    const angleM=m*6-90;
-    const toRad=d=>d*Math.PI/180;
-    const hx=cx+38*Math.cos(toRad(angleH)), hy=cy+38*Math.sin(toRad(angleH));
-    const mx=cx+55*Math.cos(toRad(angleM)), my=cy+55*Math.sin(toRad(angleM));
-    let nums='';
-    for(let i=1;i<=12;i++){
-      const a=(i*30-90)*Math.PI/180;
-      nums+=`<text x="${cx+58*Math.cos(a)}" y="${cy+58*Math.sin(a)}" text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.8)" font-family="Nunito">${i}</text>`;
-    }
-    return `<svg width="160" height="160" viewBox="0 0 160 160" style="filter:drop-shadow(0 4px 16px rgba(99,102,241,0.4))">
-      <circle cx="${cx}" cy="${cy}" r="${r}" fill="#1a0a3c" stroke="#6366f1" stroke-width="3"/>
-      <circle cx="${cx}" cy="${cy}" r="2" fill="white"/>
-      ${nums}
-      <line x1="${cx}" y1="${cy}" x2="${hx}" y2="${hy}" stroke="white" stroke-width="4" stroke-linecap="round"/>
-      <line x1="${cx}" y1="${cy}" x2="${mx}" y2="${my}" stroke="#ffd700" stroke-width="2.5" stroke-linecap="round"/>
-    </svg>`;
-  }
-
-  // ── TIME — Medium (minutes, calendar) Class 3-4 ──────────
-  function time_medium(el) {
-    const types=['minutes','calendar','24hr'];
-    const type=types[Math.floor(Math.random()*types.length)];
-    if(type==='minutes') {
-      const t=TIME_EASY[Math.floor(Math.random()*TIME_EASY.length)];
-      const mins=t.h*60+t.m;
-      const wrongMins=[mins+30,mins-30,mins+15,mins+45].map(x=>Math.max(0,x));
-      const opts=shuffle([mins,...shuffle(wrongMins).slice(0,3)]);
-      const svg=drawClock(t.h,t.m);
-      el.innerHTML=`<div class="q-card" style="padding:20px"><div class="q-label">HOW MANY MINUTES SINCE MIDNIGHT?</div><div style="display:flex;justify-content:center;margin:12px 0">${svg}</div><div class="q-hint">💡 Hours × 60 + extra minutes</div></div>${optsHTML(opts)}`;
-      wireOpts(mins);
-    } else if(type==='calendar') {
-      const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-      const days=[31,28,31,30,31,30,31,31,30,31,30,31];
-      const idx=Math.floor(Math.random()*12);
-      const qs=[
-        {q:`Which is the ${['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th','11th','12th'][idx]} month?`, ans:months[idx], opts:shuffle([months[idx],...shuffle(months.filter(m=>m!==months[idx])).slice(0,3)])},
-        {q:`How many days in ${months[idx]}?`, ans:days[idx], opts:shuffle([days[idx],...[28,29,30,31].filter(d=>d!==days[idx]).slice(0,3)])},
-      ][Math.floor(Math.random()*2)];
-      el.innerHTML=qCard('CALENDAR CHALLENGE',qs.q,'Months: Jan(31) Feb(28) Mar(31) Apr(30)…')+`<div class="opts-2">${qs.opts.map(o=>`<button class="opt-btn" data-val="${o}" style="font-size:18px">${o}</button>`).join('')}</div>`;
-      wireOpts(qs.ans);
-    } else {
-      const h=Math.floor(Math.random()*12)+1;
-      const ampm=Math.random()>0.5?'AM':'PM';
-      const h24=ampm==='AM'?(h===12?0:h):(h===12?12:h+12);
-      el.innerHTML=qCard('24-HOUR CLOCK',`${h}:00 ${ampm} = ?`,`PM → add 12 (except 12 noon stays 12)`)+`<div class="opts-2">${genOpts(h24,3,4).map(o=>`<button class="opt-btn" data-val="${o}" style="font-size:24px">${o}:00</button>`).join('')}</div>`;
-      wireOpts(h24);
-    }
-  }
-
-  // ── MONEY — Easy (coins, simple sums) Class 1-2 ──────────
-  const COINS=[
-    {val:1,  label:'₹1',  color:'#c0c0c0'},
-    {val:2,  label:'₹2',  color:'#c0c0c0'},
-    {val:5,  label:'₹5',  color:'#ffd700'},
-    {val:10, label:'₹10', color:'#ffd700'},
-    {val:20, label:'₹20', color:'#ff9500'},
-    {val:50, label:'₹50', color:'#ff9500'},
-  ];
-  function money_easy(el) {
-    const pick=Math.floor(Math.random()*3);
-    if(pick===0) {
-      const coin=COINS[Math.floor(Math.random()*COINS.length)];
-      el.innerHTML=`<div class="q-card"><div class="q-label">IDENTIFY THE COIN / NOTE</div><div style="font-size:56px;margin:16px 0;text-align:center">💰</div><div class="q-text" style="font-size:28px">This coin is worth</div><div style="font-size:40px;font-family:var(--font-display);color:var(--gold);margin:8px 0">${coin.label}</div><div class="q-text" style="font-size:28px">How much is it in paise?</div></div>${optsHTML(genOpts(coin.val*100,200,4))}`;
-      wireOpts(coin.val*100);
-    } else if(pick===1) {
-      const c1=COINS[Math.floor(Math.random()*4)], c2=COINS[Math.floor(Math.random()*4)];
-      const total=c1.val+c2.val;
-      el.innerHTML=`<div class="q-card"><div class="q-label">ADD THE COINS</div><div style="display:flex;gap:20px;justify-content:center;margin:16px 0;font-size:40px">💰 + 💰</div><div class="q-text" style="font-size:28px">${c1.label} + ${c2.label} = ?</div></div>${optsHTML(genOpts(total,10,4).map(x=>'₹'+x),'opts-2')}`;
-      wireOpts('₹'+total);
-    } else {
-      const price=Math.floor(Math.random()*40)+5;
-      const paid=price+Math.floor(Math.random()*20)+1;
-      const change=paid-price;
-      el.innerHTML=qCard('CHANGE PLEASE!',`Paid ₹${paid}, cost ₹${price}. Change = ?`,'Change = Amount paid − Price')+optsHTML(genOpts(change,15,4).map(x=>'₹'+x),'opts-2');
-      wireOpts('₹'+change);
-    }
-  }
-
-  // ── MONEY — Medium (Rupees & Paise, bills) Class 3-4 ─────
-  function money_medium(el) {
-    const a=Math.floor(Math.random()*200)+50;
-    const b=Math.floor(Math.random()*100)+20;
-    const types=['add','subtract','change'];
-    const type=types[Math.floor(Math.random()*types.length)];
-    if(type==='add') {
-      el.innerHTML=qCard('BILL TOTAL',`₹${a} + ₹${b} = ?`,'Add the amounts')+optsHTML(genOpts(a+b,50,4).map(x=>'₹'+x),'opts-2');
-      wireOpts('₹'+(a+b));
-    } else if(type==='subtract') {
-      const big=a+b;
-      el.innerHTML=qCard('FIND THE COST',`₹${big} − ₹${b} = ?`,'Subtract to find the cost')+optsHTML(genOpts(a,30,4).map(x=>'₹'+x),'opts-2');
-      wireOpts('₹'+a);
-    } else {
-      const price=Math.floor(Math.random()*90)+10;
-      const paid=Math.ceil(price/50)*50+50;
-      const change=paid-price;
-      el.innerHTML=qCard('HOW MUCH CHANGE?',`Paid ₹${paid} for item costing ₹${price}`,'Change = Paid − Cost')+optsHTML(genOpts(change,30,4).map(x=>'₹'+x),'opts-2');
-      wireOpts('₹'+change);
-    }
-  }
-
-  // ── MEASUREMENT — Easy (compare, simple units) Class 1-2 ─
-  function measure_easy(el) {
-    const types=['longer','heavier','units'];
-    const type=types[Math.floor(Math.random()*types.length)];
-    if(type==='longer') {
-      const objects=[['🐍 snake','🐛 caterpillar'],['🚌 bus','🚗 car'],['🌴 palm tree','🌺 flower'],['✏️ pencil','🖊️ pen']];
-      const pair=objects[Math.floor(Math.random()*objects.length)];
-      el.innerHTML=`<div class="q-card"><div class="q-label">WHICH IS LONGER?</div><div style="display:flex;gap:20px;justify-content:center;font-size:40px;margin:16px 0">${pair[0].split(' ')[0]}<span style="color:rgba(255,255,255,0.3);font-size:24px">vs</span>${pair[1].split(' ')[0]}</div></div><div class="opts-2">${pair.map(p=>`<button class="opt-btn" data-val="${p}" style="font-size:16px">${p}</button>`).join('')}</div>`;
-      wireOpts(pair[0]); // first is always longer
-    } else if(type==='heavier') {
-      const things=[['🐘 elephant','🐭 mouse'],['🏋️ weights','🪶 feather'],['📚 books','🧻 tissue'],['🍉 watermelon','🍇 grapes']];
-      const pair=things[Math.floor(Math.random()*things.length)];
-      el.innerHTML=`<div class="q-card"><div class="q-label">WHICH IS HEAVIER?</div><div style="display:flex;gap:20px;justify-content:center;font-size:40px;margin:16px 0">${pair[0].split(' ')[0]}<span style="color:rgba(255,255,255,0.3);font-size:24px">vs</span>${pair[1].split(' ')[0]}</div></div><div class="opts-2">${pair.map(p=>`<button class="opt-btn" data-val="${p}" style="font-size:16px">${p}</button>`).join('')}</div>`;
-      wireOpts(pair[0]);
-    } else {
-      const qs=[
-        {q:'100 cm = __ metre(s)?', ans:1, opts:genOpts(1,4,4)},
-        {q:'1 kg = __ grams?', ans:1000, opts:genOpts(1000,200,4)},
-        {q:'1 metre = __ centimetres?', ans:100, opts:genOpts(100,50,4)},
-        {q:'Half a kilogram = __ grams?', ans:500, opts:genOpts(500,150,4)},
-      ][Math.floor(Math.random()*4)];
-      el.innerHTML=qCard('MEASUREMENT UNITS',qs.q,'Remember the conversion!')+optsHTML(qs.opts);
-      wireOpts(qs.ans);
-    }
-  }
-
-  // ── PATTERN — Easy (AB, AAB repeating patterns) Class 1 ──
-  const PATTERN_SETS=[
-    {seq:['🔴','🔵','🔴','🔵','🔴','❓'], ans:'🔵', type:'AB'},
-    {seq:['⭐','⭐','🌙','⭐','⭐','❓'],   ans:'🌙', type:'AAB'},
-    {seq:['🟦','🟥','🟩','🟦','🟥','❓'],  ans:'🟩', type:'ABC'},
-    {seq:['🐸','🐸','🦋','🐸','🐸','❓'],  ans:'🦋', type:'AAB'},
-    {seq:['🎈','🎀','🎈','🎀','🎈','❓'],  ans:'🎀', type:'AB'},
-    {seq:['🌸','🌿','🌸','🌿','🌸','❓'],  ans:'🌿', type:'AB'},
-  ];
-  function pattern_easy(el) {
-    const p=PATTERN_SETS[Math.floor(Math.random()*PATTERN_SETS.length)];
-    const allEmoji=[...new Set(p.seq.filter(x=>x!=='❓'))];
-    const opts=shuffle([p.ans,...shuffle(allEmoji.filter(x=>x!==p.ans)).concat(['🔶','💛','🟣']).slice(0,3)]);
-    el.innerHTML=`
-      <div class="q-card">
-        <div class="q-label">PATTERN ${p.type} — WHAT COMES NEXT?</div>
-        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;font-size:32px;margin:16px 0">
-          ${p.seq.map(s=>s==='❓'?`<span style="background:rgba(255,215,0,0.2);border:2px dashed var(--gold);border-radius:8px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--gold)">?</span>`:`<span>${s}</span>`).join('')}
-        </div>
-      </div>
-      <div class="opts-4">${opts.map(o=>`<button class="opt-btn" data-val="${o}" style="font-size:28px">${o}</button>`).join('')}</div>`;
-    wireOpts(p.ans);
-  }
-
-  // ── DATA HANDLING — Easy (tally, pictograph) Class 1-3 ───
-  function data_easy(el) {
-    const items=['🍎 Apples','🍌 Bananas','🍊 Oranges','🍇 Grapes'];
-    const counts=items.map(()=>Math.floor(Math.random()*8)+1);
-    const maxIdx=counts.indexOf(Math.max(...counts));
-    const minIdx=counts.indexOf(Math.min(...counts));
-    const types=['most','least','total'];
-    const type=types[Math.floor(Math.random()*types.length)];
-
-    let chart='<div style="display:grid;gap:8px;margin:12px 0">';
-    items.forEach((item,i)=>{
-      chart+=`<div style="display:flex;align-items:center;gap:8px">
-        <div style="width:90px;font-size:12px;color:rgba(255,255,255,0.6)">${item}</div>
-        <div style="display:flex;gap:2px">${Array(counts[i]).fill('').map(()=>`<span style="font-size:18px">${item.split(' ')[0]}</span>`).join('')}</div>
-        <div style="color:rgba(255,255,255,0.4);font-size:12px">(${counts[i]})</div>
-      </div>`;
-    });
-    chart+='</div>';
-
-    let q,ans,opts;
-    if(type==='most') {
-      q=`Which fruit was collected the MOST?`;
-      ans=items[maxIdx].split(' ')[1];
-      opts=shuffle(items.map(i=>i.split(' ')[1]));
-    } else if(type==='least') {
-      q=`Which fruit was collected the LEAST?`;
-      ans=items[minIdx].split(' ')[1];
-      opts=shuffle(items.map(i=>i.split(' ')[1]));
-    } else {
-      q=`How many ${items[0].split(' ')[0]} and ${items[1].split(' ')[0]} altogether?`;
-      ans=counts[0]+counts[1];
-      opts=genOpts(ans,10,4);
-    }
-    el.innerHTML=`<div class="q-card" style="padding:20px"><div class="q-label">READ THE CHART</div>${chart}<div class="q-text" style="font-size:18px">${q}</div></div>`;
-    if(type==='total') el.innerHTML+=optsHTML(opts);
-    else el.innerHTML+=`<div class="opts-2">${opts.map(o=>`<button class="opt-btn" data-val="${o}" style="font-size:18px">${o}</button>`).join('')}</div>`;
-    wireOpts(ans);
-  }
-
-  // ── PLACE VALUE — Class 3 (3-4 digit numbers) ────────────
-  function place_value3(el) {
-    const n=Math.floor(Math.random()*8999)+1000;
-    const th=Math.floor(n/1000), h=Math.floor((n%1000)/100), t=Math.floor((n%100)/10), u=n%10;
-    const qs=[
-      {q:`In ${n}, the thousands digit is?`,  ans:th,  hint:`${n} = ${th} thousands + ${h} hundreds + ${t} tens + ${u} units`},
-      {q:`In ${n}, the hundreds digit is?`,   ans:h,   hint:`Look at the third digit from right`},
-      {q:`${th} thousands + ${h} hundreds + ${t} tens + ${u} units = ?`, ans:n, hint:'Add all the place values'},
-      {q:`${n} rounded to nearest hundred = ?`, ans:Math.round(n/100)*100, hint:'Look at the tens digit: ≥5 round up, <5 round down'},
-    ][Math.floor(Math.random()*4)];
-    el.innerHTML=qCard('PLACE VALUE',qs.q,qs.hint)+optsHTML(genOpts(qs.ans,Math.max(50,qs.ans/10)));
-    wireOpts(qs.ans);
-  }
-
-  // ── PLACE VALUE — Class 4 (Lakhs) ────────────────────────
-  function place_value4(el) {
-    const n=Math.floor(Math.random()*899999)+100001;
-    const L=Math.floor(n/100000), tth=Math.floor((n%100000)/10000), th=Math.floor((n%10000)/1000);
-    const qs=[
-      {q:`Write ${n.toLocaleString('en-IN')} in words`, ans:null, hint:'Break it: Lakhs, Ten-thousands, Thousands, Hundreds, Tens, Units'},
-      {q:`${n.toLocaleString('en-IN')} — the lakhs digit is?`, ans:L, hint:`Lakhs digit is the 6th digit from right`},
-      {q:`Which is greater?\n${n.toLocaleString('en-IN')} or ${(n+Math.floor(Math.random()*50000)).toLocaleString('en-IN')}?`, ans:null, hint:'Compare digit by digit from left'},
-    ];
-    const q=qs[Math.floor(Math.random()*2)]; // first 2 have numeric answers
-    if(q.ans===null) {
-      const realAns=L;
-      el.innerHTML=qCard('LAKHS & PLACE VALUE',`${n.toLocaleString('en-IN')} — the lakhs digit is?`,'6th digit from the right = lakhs')+optsHTML(genOpts(L,5,4));
-      wireOpts(L);
-    } else {
-      el.innerHTML=qCard('LAKHS & PLACE VALUE',q.q,q.hint)+optsHTML(genOpts(q.ans,q.ans>10?q.ans/5:5));
-      wireOpts(q.ans);
-    }
-  }
-
-  // ── PERIMETER — Class 3 ───────────────────────────────────
-  function perimeter_easy(el) {
-    const shapes=[
-      {name:'Square',    sides:[4,4,4,4],     formula:'4 × side'},
-      {name:'Rectangle', sides:null,           formula:'2 × (length + width)'},
-      {name:'Triangle',  sides:null,           formula:'Add all 3 sides'},
-    ];
-    const shapeIdx=Math.floor(Math.random()*shapes.length);
-    let s,ans,question;
-    if(shapeIdx===0) {
-      s=Math.floor(Math.random()*8)+2;
-      ans=4*s;
-      question=`Square with side = ${s} cm`;
-    } else if(shapeIdx===1) {
-      const l=Math.floor(Math.random()*8)+3, w=Math.floor(Math.random()*5)+2;
-      ans=2*(l+w); s=l;
-      question=`Rectangle: length=${l} cm, width=${w} cm`;
-    } else {
-      const a=Math.floor(Math.random()*6)+2, b=Math.floor(Math.random()*6)+2, c=Math.floor(Math.random()*6)+2;
-      ans=a+b+c;
-      question=`Triangle with sides ${a} cm, ${b} cm, ${c} cm`;
-    }
-    el.innerHTML=qCard('FIND THE PERIMETER',question,`Formula: ${shapes[shapeIdx].formula}`)+optsHTML(genOpts(ans,20,4).map(x=>x+' cm'),'opts-2');
-    wireOpts(ans+' cm');
-  }
-
-  // ── ANGLES — Class 4 ──────────────────────────────────────
-  const ANGLE_DATA=[
-    {deg:90,  type:'Right angle',   emoji:'📐', hint:'Exactly 90° — like the corner of a book'},
-    {deg:45,  type:'Acute angle',   emoji:'🔺', hint:'Less than 90° — sharp and pointy'},
-    {deg:120, type:'Obtuse angle',  emoji:'📏', hint:'More than 90° but less than 180°'},
-    {deg:30,  type:'Acute angle',   emoji:'🔺', hint:'Less than 90° — sharp and pointy'},
-    {deg:150, type:'Obtuse angle',  emoji:'📏', hint:'More than 90° but less than 180°'},
-    {deg:180, type:'Straight angle',emoji:'➡️', hint:'Exactly 180° — a straight line'},
-  ];
-  function angles_quiz(el) {
-    const a=ANGLE_DATA[Math.floor(Math.random()*ANGLE_DATA.length)];
-    const types=['Right angle','Acute angle','Obtuse angle','Straight angle'];
-    const opts=shuffle(types);
-    el.innerHTML=`
-      <div class="q-card">
-        <div class="q-label">WHAT TYPE OF ANGLE IS THIS?</div>
-        <div style="display:flex;justify-content:center;margin:12px 0">
-          <svg width="160" height="120" viewBox="0 0 160 120">
-            ${buildAngleSVG(a.deg)}
-          </svg>
-        </div>
-        <div class="q-text" style="font-size:22px">${a.deg}°</div>
-        <div class="q-hint">💡 ${a.hint}</div>
-      </div>
-      <div class="opts-2">${opts.map(o=>`<button class="opt-btn" data-val="${o}" style="font-size:14px;padding:14px 8px">${o}</button>`).join('')}</div>`;
-    wireOpts(a.type);
-  }
-
-  function buildAngleSVG(deg) {
-    const r=60, cx=30, cy=90;
-    const rad=(90-deg)*Math.PI/180;
-    const x2=cx+r*Math.cos(-Math.PI/2+Math.PI/180*deg*0);
-    const x3=cx+r*Math.cos(Math.PI/180*(-90+deg)), y3=cy+r*Math.sin(Math.PI/180*(-90+deg));
-    const arcR=18;
-    const ax=cx+arcR*Math.cos(-Math.PI/2), ay=cy+arcR*Math.sin(-Math.PI/2);
-    const bx=cx+arcR*Math.cos(Math.PI/180*(-90+deg)), by=cy+arcR*Math.sin(Math.PI/180*(-90+deg));
-    const la=deg>180?1:0;
-    return `
-      <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy-r}" stroke="#818cf8" stroke-width="3" stroke-linecap="round"/>
-      <line x1="${cx}" y1="${cy}" x2="${cx+r*Math.cos(Math.PI/180*(deg-90))}" y2="${cy+r*Math.sin(Math.PI/180*(deg-90))}" stroke="#ff6b35" stroke-width="3" stroke-linecap="round"/>
-      <path d="M ${ax} ${ay} A ${arcR} ${arcR} 0 ${la} 1 ${bx} ${by}" fill="none" stroke="rgba(255,215,0,0.7)" stroke-width="2"/>
-      <text x="${cx+28}" y="${cy-20}" font-size="13" fill="rgba(255,255,255,0.6)" font-family="Nunito">${deg}°</text>`;
-  }
-
-  // ── AREA — Class 4 ────────────────────────────────────────
-  function area_easy(el) {
-    const l=Math.floor(Math.random()*7)+2, w=Math.floor(Math.random()*5)+2;
-    const ans=l*w;
-    let grid='<div style="display:inline-grid;gap:2px;margin:12px auto">';
-    for(let r=0;r<Math.min(w,6);r++) {
-      grid+='<div style="display:flex;gap:2px">';
-      for(let c=0;c<Math.min(l,8);c++) grid+=`<div style="width:22px;height:22px;background:rgba(99,102,241,0.4);border:1px solid rgba(99,102,241,0.6);border-radius:3px"></div>`;
-      grid+='</div>';
-    }
-    if(w>6) grid+=`<div style="color:rgba(255,255,255,0.4);font-size:11px;margin-top:4px">…${w-6} more rows</div>`;
-    grid+='</div>';
-    el.innerHTML=`
-      <div class="q-card" style="padding:20px">
-        <div class="q-label">FIND THE AREA</div>
-        <div style="text-align:center">${grid}</div>
-        <div class="q-text" style="font-size:22px">Rectangle: ${l} × ${w} = ?</div>
-        <div class="q-hint">💡 Area = Length × Width = ${l} × ${w} sq. units</div>
-      </div>
-      ${optsHTML(genOpts(ans,15,4).map(x=>x+' sq.units'),'opts-2')}`;
-    wireOpts(ans+' sq.units');
-  }
-
-  // ── ROMAN NUMERALS — Class 4 ─────────────────────────────
-  const ROMAN_MAP=[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
-  function toRoman(n){let r='';for(const[v,s]of ROMAN_MAP){while(n>=v){r+=s;n-=v;}}return r;}
-  function roman_nums(el) {
-    const n=Math.floor(Math.random()*39)+1; // I to XL (Class 4 scope)
-    const roman=toRoman(n);
-    const types=['toArab','toRoman'];
-    const type=types[Math.floor(Math.random()*2)];
-    if(type==='toArab') {
-      el.innerHTML=qCard('ROMAN NUMERALS',roman,'I=1, V=5, X=10, L=50, C=100')+optsHTML(genOpts(n,10,4));
-      wireOpts(n);
-    } else {
-      const opts=shuffle([roman,...[n-1,n+1,n+2].filter(x=>x>0).map(toRoman)]).slice(0,4);
-      el.innerHTML=qCard('WRITE IN ROMAN',`${n} in Roman numerals?`,'I=1 V=5 X=10 L=50')+`<div class="opts-2">${opts.map(o=>`<button class="opt-btn" data-val="${o}" style="font-size:20px">${o}</button>`).join('')}</div>`;
-      wireOpts(roman);
-    }
-  }
-
-  // ── WIRE GLOBAL EVENTS ───────────────────────────────────
-  // Bridge from renderer events to APP state handlers
-  // (avoids passing APP reference into closures)
-  document.addEventListener('lv:correct', () => {
-    APP.state.streak++; APP.state.correct++; APP.state.score += 10 + (APP.state.streak>2?5:0);
-    if(APP.state.streak>APP.state.bestStreak) APP.state.bestStreak=APP.state.streak;
-    localStorage.setItem('lv_correct',APP.state.correct);
-    localStorage.setItem('lv_streak', APP.state.bestStreak);
-    // Light dot
-    const idx=Math.min(APP.state.streak-1,4);
-    const d=document.getElementById('dot-'+idx);
-    if(d) d.classList.add('lit');
-    if(APP.state.streak>=5){
-      document.querySelectorAll('.s-dot').forEach(d=>d.classList.remove('lit'));
-      APP.state.score+=25;
-      document.getElementById('hud-score').textContent=APP.state.score;
-      const fl=document.createElement('div');fl.className='float-feedback';fl.textContent='🔥+25';fl.style.color='#ffd700';
-      document.body.appendChild(fl);setTimeout(()=>fl.remove(),950);
-    }
-    document.getElementById('hud-score').textContent=APP.state.score;
-    const fl=document.createElement('div');fl.className='float-feedback';fl.textContent='✓';fl.style.color='#2ed573';
-    document.body.appendChild(fl);setTimeout(()=>fl.remove(),950);
-    setTimeout(()=>{
-      APP.state.qNum < APP.state.maxQ ? (() => { APP.state.qNum++; document.getElementById('hud-q').textContent=`${APP.state.qNum}/${APP.state.maxQ}`; clearInterval(APP.state.timerInt); GAME_RENDERERS[APP.state.selectedGame](document.getElementById('play-content')); startTimerExt(); })()
-      : showRewardExt();
-    }, 850);
-  });
-
-  document.addEventListener('lv:wrong', () => {
-    APP.state.streak=0;
-    document.querySelectorAll('.s-dot').forEach(d=>d.classList.remove('lit'));
-    const fl=document.createElement('div');fl.className='float-feedback';fl.textContent='✗';fl.style.color='#ff4757';
-    document.body.appendChild(fl);setTimeout(()=>fl.remove(),950);
-    setTimeout(()=>{
-      APP.state.qNum < APP.state.maxQ ? (() => { APP.state.qNum++; document.getElementById('hud-q').textContent=`${APP.state.qNum}/${APP.state.maxQ}`; clearInterval(APP.state.timerInt); GAME_RENDERERS[APP.state.selectedGame](document.getElementById('play-content')); startTimerExt(); })()
-      : showRewardExt();
-    }, 1100);
-  });
-
-  function startTimerExt() {
-    clearInterval(APP.state.timerInt);
-    APP.state.timeLeft=30;
-    const fill=document.getElementById('arc-fill'), num=document.getElementById('arc-num'), C=151;
-    const subCol=SUBJECT_REGISTRY[APP.state.selectedSubject]?.timerColor||'#818cf8';
-    function tick(){
-      const r=APP.state.timeLeft/30;
-      fill.style.strokeDashoffset=C*(1-r);
-      fill.style.stroke=APP.state.timeLeft>8?subCol:'#ff4757';
-      num.textContent=APP.state.timeLeft;
-      if(APP.state.timeLeft<=0){clearInterval(APP.state.timerInt);document.dispatchEvent(new CustomEvent('lv:wrong'));}
-    }
-    tick();
-    APP.state.timerInt=setInterval(()=>{APP.state.timeLeft--;tick();},1000);
-  }
-
-  function showRewardExt() {
-    clearInterval(APP.state.timerInt);
-    APP.state.played++; APP.state.xp+=APP.state.score;
-    localStorage.setItem('lv_played',APP.state.played);
-    localStorage.setItem('lv_xp',APP.state.xp);
-    const stars=APP.state.score>=85?3:APP.state.score>=50?2:1;
-    const msgs=[['🌟 Perfect!','You are a true champion!','🏆'],['👏 Well Done!','Great effort! Keep it up!','🎊'],['💪 Good Try!','Every mistake is a lesson!','🎈']];
-    const [title,msg,emoji]=msgs[3-stars];
-    document.getElementById('r-emoji').textContent=emoji;
-    document.getElementById('r-title').textContent=title;
-    document.getElementById('r-score').textContent=`${APP.state.score} pts earned!`;
-    document.getElementById('r-msg').textContent=msg;
-    const sr=document.getElementById('r-stars');
-    sr.innerHTML=[1,2,3].map(i=>`<span class="r-star">${i<=stars?'⭐':'☆'}</span>`).join('');
-    // confetti
-    const c=document.getElementById('reward-confetti');c.innerHTML='';
-    const cols=['#ffd700','#ff6b35','#00d4aa','#a855f7','#ff6b9d','#2ed573'];
-    for(let i=0;i<70;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.cssText=`left:${Math.random()*100}%;background:${cols[i%cols.length]};width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;animation:cFall ${1.4+Math.random()*1.8}s ${Math.random()*0.8}s linear forwards;border-radius:${Math.random()>.5?'50%':'3px'}`;c.appendChild(p);}
-    document.getElementById('reward-overlay').classList.add('show');
-    document.getElementById('hdr-xp').textContent=APP.state.xp;
-    document.getElementById('st-xp').textContent=APP.state.xp;
-    document.getElementById('st-played').textContent=APP.state.played;
-    document.getElementById('st-streak').textContent=APP.state.bestStreak;
-    document.getElementById('st-correct').textContent=APP.state.correct;
-  }
-
-  // Expose startGame loader so nav can call it
-  APP.nav._loadQ = (gameId) => {
-    APP.state.qNum++;
-    document.getElementById('hud-q').textContent=`${APP.state.qNum}/${APP.state.maxQ}`;
-    startTimerExt();
-    GAME_RENDERERS[gameId](document.getElementById('play-content'));
-  };
-
-  // Override nav.startGame to use our event-based system
-  const _origStart=APP.nav.startGame.bind(APP.nav);
-  APP.nav.startGame=(gameId)=>{
-    APP.state.selectedGame=gameId;
-    APP.state.score=0; APP.state.qNum=0; APP.state.streak=0;
-    clearInterval(APP.state.timerInt);
-    document.getElementById('reward-overlay').classList.remove('show');
-    APP.nav._history_push_play();
-    document.getElementById('hud-score').textContent='0';
-    document.getElementById('hud-q').textContent=`1/${APP.state.maxQ}`;
-    document.querySelectorAll('.s-dot').forEach(d=>d.classList.remove('lit'));
-    const dots=document.getElementById('streak-dots');
-    dots.innerHTML=Array.from({length:5},(_,i)=>`<div class="s-dot" id="dot-${i}"></div>`).join('');
-    APP.state.qNum=1;
-    document.getElementById('hud-q').textContent=`1/${APP.state.maxQ}`;
-    startTimerExt();
-    GAME_RENDERERS[gameId](document.getElementById('play-content'));
-  };
-
-  APP.nav._history_push_play=()=>{
-    APP.nav.history.push('play');
-    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-    document.getElementById('scr-play').classList.add('active');
-    document.getElementById('nav-back').classList.add('show');
-  };
-
-  return {
-    // Original games
-    count_objects, quiz_add1, quiz_add2, quiz_add3, quiz_sub, quiz_mul, quiz_div,
-    compare_nums, missing_seq, odd_even, shape_quiz, place_value, fractions,
-    // New CBSE/ICSE syllabus games
-    quiz_sub1, quiz_sub3,
-    multiply_groups, division_share,
-    time_easy, time_medium,
-    money_easy, money_medium,
-    measure_easy,
-    pattern_easy,
-    data_easy,
-    place_value3, place_value4,
-    perimeter_easy,
-    angles_quiz,
-    area_easy,
-    roman_nums,
-  };
-})();
-
-// ================================================================
-// GAMIFICATION ENGINE — self-contained, wired into existing events
-// ================================================================
-
-// ── LEVELS ───────────────────────────────────────────────────
-const LEVELS=[
-  {level:1,name:'Cub',       mascot:'🦊',xp:0},    {level:2,name:'Explorer',  mascot:'🦊',xp:100},
-  {level:3,name:'Adventurer',mascot:'🦝',xp:250},  {level:4,name:'Scholar',   mascot:'🦁',xp:500},
-  {level:5,name:'Ace',       mascot:'🐯',xp:900},  {level:6,name:'Champion',  mascot:'🦅',xp:1400},
-  {level:7,name:'Legend',    mascot:'🐉',xp:2000}, {level:8,name:'Math Wizard',mascot:'🧙',xp:3000},
-];
-function getLevel(xp){let l=LEVELS[0];for(const x of LEVELS){if(xp>=x.xp)l=x;else break;}return l;}
-function getNextLevel(xp){for(const x of LEVELS){if(xp<x.xp)return x;}return null;}
-
-// ── BADGES ───────────────────────────────────────────────────
-const BADGE_DEFS=[
-  {id:'first_game',   icon:'🎮',name:'First Game',   check:s=>s.played>=1},
-  {id:'speed_five',   icon:'⚡',name:'Lightning',    check:s=>s.bestStreak>=5},
-  {id:'ten_games',    icon:'🎯',name:'Dedicated',    check:s=>s.played>=10},
-  {id:'fifty_correct',icon:'✅',name:'Half Century', check:s=>s.correct>=50},
-  {id:'perfect_game', icon:'💎',name:'Perfect!',     check:s=>(s.perfectGames||0)>=1},
-  {id:'hundred_xp',   icon:'🏅',name:'Century',      check:s=>s.xp>=100},
-  {id:'five_hundred', icon:'🏆',name:'500 Club',     check:s=>s.xp>=500},
-  {id:'level4',       icon:'🦁',name:'Scholar',      check:s=>(s.level||1)>=4},
-  {id:'level6',       icon:'🦅',name:'Champion',     check:s=>(s.level||1)>=6},
-  {id:'powerup_used', icon:'🧊',name:'Power Player', check:s=>(s.powerupsUsed||0)>=1},
-  {id:'class4_play',  icon:'🚀',name:'Class 4 Hero', check:s=>!!s.playedClass4},
-  {id:'streak_3days', icon:'🔥',name:'On Fire',      check:s=>(s.dailyStreak||0)>=3},
-];
-
-// ── SOUND (Web Audio API, no files) ──────────────────────────
-const SOUND=(()=>{
-  let ctx=null,on=JSON.parse(localStorage.getItem('zl_sound')?? 'true');
-  function gc(){if(!ctx)try{ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}return ctx;}
-  function tone(f,d=0.12,t='sine',v=0.25,delay=0){
-    const c=gc();if(!c||!on)return;
-    const o=c.createOscillator(),g=c.createGain();
-    o.connect(g);g.connect(c.destination);
-    o.type=t;o.frequency.value=f;
-    g.gain.setValueAtTime(v,c.currentTime+delay);
-    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+delay+d);
-    o.start(c.currentTime+delay);o.stop(c.currentTime+delay+d+0.02);
-  }
-  return{
-    correct(){tone(523,0.07);tone(659,0.09,undefined,undefined,0.08);tone(784,0.13,undefined,0.3,0.16);},
-    wrong()  {tone(220,0.18,'sawtooth',0.12);tone(185,0.2,'sawtooth',0.12,0.14);},
-    levelup(){[523,659,784,1047].forEach((f,i)=>tone(f,0.2,undefined,0.28,i*0.1));},
-    badge()  {tone(880,0.1);tone(1047,0.14,undefined,undefined,0.1);},
-    combo()  {tone(600+((APP?.state?.streak||0)*25),0.08);},
-    powerup(){tone(600,0.08,'triangle');tone(800,0.12,'triangle',undefined,0.08);},
-    toggle() {on=!on;localStorage.setItem('zl_sound',on);return on;},
-    isOn()   {return on;}
-  };
-})();
-
-// ── PARTICLES ────────────────────────────────────────────────
-const PARTICLES={
-  burst(x,y,n=12,cols=['#ffd700','#ff6b35','#2ed573','#818cf8','#ff6b9d']){
-    for(let i=0;i<n;i++){
-      const el=document.createElement('div');
-      el.className='burst-particle';
-      const a=(i/n)*Math.PI*2,d=40+Math.random()*60,sz=6+Math.random()*8;
-      el.style.cssText=`left:${x}px;top:${y}px;width:${sz}px;height:${sz}px;background:${cols[i%cols.length]};--tx:${Math.cos(a)*d}px;--ty:${Math.sin(a)*d-40}px;--dur:${0.5+Math.random()*0.35}s;animation-delay:${Math.random()*0.08}s;`;
-      document.body.appendChild(el);setTimeout(()=>el.remove(),900);
-    }
-  },
-  stars(x,y,n=5){
-    ['⭐','✨','💫','🌟'].forEach((em,i)=>{
-      if(i>=n)return;
-      const el=document.createElement('div');el.className='burst-star';
-      const a=(i/n)*Math.PI*2-Math.PI/2,d=50+Math.random()*40;
-      el.textContent=em;
-      el.style.cssText=`left:${x}px;top:${y}px;--tx:${Math.cos(a)*d}px;--ty:${Math.sin(a)*d-30}px;--dur:${0.8+Math.random()*0.4}s;--sz:${18+Math.random()*10}px;animation-delay:${i*0.06}s;`;
-      document.body.appendChild(el);setTimeout(()=>el.remove(),1300);
-    });
-  },
-  flash(type){
-    const f=document.getElementById('screen-flash');
-    if(!f)return;
-    f.className=`screen-flash ${type}-flash active`;
-    setTimeout(()=>f.classList.remove('active'),160);
-  }
-};
-
-// ── RESULT POPUP ─────────────────────────────────────────────
-function showResultPopup(text,color){
-  const w=document.createElement('div');w.className='result-popup';
-  w.innerHTML=`<div class="result-popup-inner" style="color:${color}">${text}</div>`;
-  document.body.appendChild(w);setTimeout(()=>w.remove(),950);
-}
-
-// ── MASCOT ───────────────────────────────────────────────────
-const MASCOT_MSGS={
-  home:   ['Let\'s go! 🎮','You can do it! 💪','Maths is fun! 🔢','Ready? ⚡'],
-  correct:['Brilliant! 🌟','Nailed it! 🎯','Superstar! ✨','So smart! 🧠'],
-  wrong:  ['Try again! 💪','Almost! 🤏','You\'ll get it! 🌟'],
-  combo:  ['COMBO! 🔥','On fire! 🔥🔥','Unstoppable! ⚡','LEGEND! 🏆'],
-};
-const MASCOT={
-  say(pool='home',custom=null){
-    const el=document.getElementById('mascot-speech-home');
-    if(!el)return;
-    const msgs=MASCOT_MSGS[pool]||MASCOT_MSGS.home;
-    el.textContent=custom||msgs[Math.floor(Math.random()*msgs.length)];
-    el.classList.add('show');
-    clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200);
-  },
-  react(id,emotion){
-    const el=document.getElementById(id);if(!el)return;
-    el.classList.remove('happy','sad','levelup');
-    void el.offsetWidth;
-    el.classList.add(emotion);
-    setTimeout(()=>el.classList.remove(emotion),800);
-  },
-  updateAll(xp){
-    const m=getLevel(xp).mascot;
-    const h=document.getElementById('mascot-home');
-    const g=document.getElementById('game-mascot');
-    if(h)h.textContent=m;if(g)g.textContent=m;
-  }
-};
-
-// ── COMBO ────────────────────────────────────────────────────
-const COMBO={count:0,mult:1,
-  inc(){
-    this.count++;
-    this.mult=Math.min(1+Math.floor(this.count/2)*0.5,3);
-    if(this.count>=2){
-      const d=document.getElementById('combo-display'),n=document.getElementById('combo-num'),c=document.getElementById('combo-chip');
-      if(n)n.textContent='x'+this.mult.toFixed(1);
-      if(d)d.classList.add('show');
-      if(c){c.style.display='block';const cv=document.getElementById('hud-combo');if(cv)cv.textContent='x'+this.mult.toFixed(1);}
-      SOUND.combo();
-      if(this.count>=3)MASCOT.say('combo');
-    }
-  },
-  reset(){
-    this.count=0;this.mult=1;
-    const d=document.getElementById('combo-display'),c=document.getElementById('combo-chip');
-    if(d)d.classList.remove('show');if(c)c.style.display='none';
-  },
-  bonus(base){return Math.round(base*this.mult);}
-};
-
-// ── POWER-UPS ────────────────────────────────────────────────
-const POWERUPS=(()=>{
-  let stock={freeze:1,fifty:1,skip:1};
-  function ui(){
-    ['freeze','fifty','skip'].forEach(id=>{
-      const btn=document.getElementById('pu-'+id),cnt=document.getElementById('pu-'+id+'-count');
-      if(!btn)return;
-      btn.classList.toggle('empty',stock[id]<=0);
-      if(cnt)cnt.textContent=stock[id];
-    });
-  }
-  function use(type){
-    if(!stock[type])return;
-    stock[type]--;ui();
-    SOUND.powerup();
-    APP.state.powerupsUsed=(APP.state.powerupsUsed||0)+1;
-    if(type==='freeze'){
-      clearInterval(APP.state.timerInt);
-      const f=document.getElementById('arc-fill');if(f)f.style.stroke='#48cae4';
-      showResultPopup('🧊 FROZEN!','#48cae4');
-      PARTICLES.burst(window.innerWidth/2,window.innerHeight/2,10,['#48cae4','#caf0f8','#00d4aa']);
-      setTimeout(()=>{if(typeof window._startTimerExt==='function')window._startTimerExt();},10000);
-    }
-    if(type==='fifty'){
-      const correct=String(APP.state._curCorrect);
-      const wrongs=[...document.querySelectorAll('.opt-btn')].filter(b=>b.dataset.val!==correct&&!b.classList.contains('correct')&&!b.classList.contains('wrong'));
-      shuffle(wrongs).slice(0,2).forEach(b=>{b.style.opacity='0.18';b.style.pointerEvents='none';b.style.transform='scale(0.85)';});
-      showResultPopup('✂️ 50/50!','#ffd700');
-    }
-    if(type==='skip'){
-      clearInterval(APP.state.timerInt);
-      showResultPopup('⏭️ SKIP!','#a78bfa');
-      GQ.markResult('s');
-      setTimeout(()=>GQ.next(),500);
-    }
-  }
-  return{use,refill(){stock={freeze:1,fifty:1,skip:1};ui();},ui};
-})();
-
-// ── QUESTION PROGRESS ─────────────────────────────────────────
-const GQ={
-  results:[],
-  init(){
-    this.results=[];
-    const w=document.getElementById('q-progress-dots');
-    if(!w)return;
-    w.innerHTML='';
-    for(let i=0;i<APP.state.maxQ;i++)w.innerHTML+=`<div class="q-dot" id="qd-${i}"></div>`;
-    this.updateDots();
-  },
-  updateDots(){
-    for(let i=0;i<APP.state.maxQ;i++){
-      const d=document.getElementById('qd-'+i);if(!d)continue;
-      d.classList.remove('correct','wrong','current');
-      if(i<APP.state.qNum-1){if(this.results[i])d.classList.add(this.results[i]==='c'?'correct':'wrong');}
-      else if(i===APP.state.qNum-1)d.classList.add('current');
-    }
-  },
-  markResult(r){this.results[APP.state.qNum-1]=r;this.updateDots();},
-  next(){
-    if(APP.state.qNum<APP.state.maxQ){
-      APP.state.qNum++;
-      const ql=document.getElementById('hud-q');if(ql)ql.textContent=`Q ${APP.state.qNum}/${APP.state.maxQ}`;
-      this.updateDots();
-      clearInterval(APP.state.timerInt);
-      GAME_RENDERERS[APP.state.selectedGame](document.getElementById('play-content'));
-      window._startTimerExt();
-    } else {
-      window._showRewardExt();
-    }
-  }
-};
-
-// ── DAILY STREAK ─────────────────────────────────────────────
-const DAILY=(()=>{
-  const K='zl_daily';
-  function today(){return new Date().toISOString().slice(0,10);}
-  function load(){return JSON.parse(localStorage.getItem(K)||'{"streak":0,"lastPlay":null,"history":[]}');}
-  function save(d){localStorage.setItem(K,JSON.stringify(d));}
-  function checkIn(){
-    const d=load(),t=today(),yest=new Date(Date.now()-86400000).toISOString().slice(0,10);
-    if(d.lastPlay===t)return d;
-    d.streak=d.lastPlay===yest?d.streak+1:1;
-    d.lastPlay=t;d.history=(d.history||[]);
-    if(!d.history.includes(t))d.history.push(t);
-    d.history=d.history.slice(-30);
-    save(d);return d;
-  }
-  function renderCal(){
-    const d=load(),row=document.getElementById('streak-days-row'),cnt=document.getElementById('streak-count-display');
-    if(!row)return;
-    const days=['M','T','W','T','F','S','S'],t=today();
-    row.innerHTML='';
-    for(let i=6;i>=0;i--){
-      const dt=new Date(Date.now()-i*86400000),ds=dt.toISOString().slice(0,10);
-      const div=document.createElement('div');
-      const dow=dt.getDay();const di=dow===0?6:dow-1;
-      div.className='streak-day'+(d.history?.includes(ds)?' played':'')+(ds===t?' today':'');
-      div.textContent=days[di];row.appendChild(div);
-    }
-    if(cnt)cnt.textContent=d.streak;
-    return d;
-  }
-  return{checkIn,renderCal,load};
-})();
-
-// ── LEVEL UI ─────────────────────────────────────────────────
-function updateLevelUI(xp){
-  const lvl=getLevel(xp),next=getNextLevel(xp);
-  APP.state.level=lvl.level;
-  const el=document.getElementById('home-level-name'),num=document.getElementById('home-level-num');
-  const fill=document.getElementById('home-level-fill'),xpEl=document.getElementById('home-xp-next');
-  if(el)el.textContent=`Level ${lvl.level} — ${lvl.name}`;
-  if(num)num.textContent=`LVL ${lvl.level}`;
-  if(fill&&next){
-    const pct=((xp-lvl.xp)/(next.xp-lvl.xp))*100;
-    fill.style.width=Math.min(100,pct)+'%';
-    if(xpEl)xpEl.textContent=`${xp-lvl.xp} / ${next.xp-lvl.xp} XP`;
-  } else if(fill){fill.style.width='100%';if(xpEl)xpEl.textContent='MAX LEVEL 🏆';}
-  MASCOT.updateAll(xp);
-}
-
-function checkLevelUp(oldXp,newXp){
-  const o=getLevel(oldXp),n=getLevel(newXp);
-  if(n.level<=o.level)return;
-  SOUND.levelup();
-  MASCOT.react('mascot-home','levelup');
-  const ov=document.getElementById('levelup-overlay');
-  document.getElementById('lu-num').textContent=n.level;
-  document.getElementById('lu-title').textContent='Level Up!';
-  document.getElementById('lu-sub').textContent=`You are now ${n.mascot} ${n.name}!`;
-  document.getElementById('lu-mascot').textContent=n.mascot;
-  PARTICLES.stars(window.innerWidth/2,window.innerHeight/3,6);
-  PARTICLES.burst(window.innerWidth/2,window.innerHeight/3,18);
-  setTimeout(()=>ov?.classList.add('show'),600);
-}
-
-// ── BADGES ───────────────────────────────────────────────────
-function renderBadges(){
-  const grid=document.getElementById('badges-grid');if(!grid)return;
-  const earned=JSON.parse(localStorage.getItem('zl_badges')||'[]');
-  grid.innerHTML=BADGE_DEFS.map(b=>`
-    <div class="badge-item ${earned.includes(b.id)?'earned':'locked'}" title="${b.name}">
-      <div class="badge-icon">${b.icon}</div>
-      <div class="badge-name">${b.name}</div>
-    </div>`).join('');
-}
-
-function checkBadges(state){
-  const earned=JSON.parse(localStorage.getItem('zl_badges')||'[]');
-  let fresh=null;
-  BADGE_DEFS.forEach(b=>{
-    if(!earned.includes(b.id)&&b.check(state)){earned.push(b.id);fresh=fresh||b;}
-  });
-  localStorage.setItem('zl_badges',JSON.stringify(earned));
-  if(fresh){SOUND.badge();showResultPopup(`🏅 ${fresh.name}!`,'#ffd700');}
-  renderBadges();
-  return fresh;
-}
-
-// ── GAME SESSION STATE ────────────────────────────────────────
-let _gameStart=0,_correctInGame=0;
-
-// ── OVERRIDE lv:correct AND lv:wrong via GAME_RENDERERS wiring
-// We patch the existing handlers by adding our own listeners FIRST
-// (they fire before the GAME_RENDERERS ones)
-
-// Store correct answer for 50/50
-const _origWireOpts=wireOpts; // not a real override — we patch via APP.state._curCorrect
-// wireOpts already sets APP.state._currentCorrect — we alias it
-Object.defineProperty(APP.state,'_curCorrect',{get(){return this._currentCorrect;},set(v){this._currentCorrect=v;}});
-
-// Patch the lv:correct / lv:wrong events by listening with capture=true (fires first)
-document.addEventListener('lv:correct',()=>{
-  _correctInGame++;
-  COMBO.inc();
-  PARTICLES.flash('correct');
-  PARTICLES.burst(window.innerWidth/2,window.innerHeight*0.45,14);
-  if(COMBO.count>=3)PARTICLES.stars(window.innerWidth/2,window.innerHeight*0.4,4);
-  SOUND.correct();
-  MASCOT.react('game-mascot','happy');
-  const msgs=MASCOT_MSGS.correct;
-  showResultPopup(msgs[Math.floor(Math.random()*msgs.length)],'#2ed573');
-  GQ.markResult('c');
-  // score bonus from combo is added by GAME_RENDERERS existing handler
-},true);
-
-document.addEventListener('lv:wrong',()=>{
-  COMBO.reset();
-  PARTICLES.flash('wrong');
-  SOUND.wrong();
-  MASCOT.react('game-mascot','sad');
-  showResultPopup('💪 Keep going!','#ff4757');
-  GQ.markResult('w');
-},true);
-
-// ── PATCH showRewardExt (called inside GAME_RENDERERS closure) ─
-// We expose a hook called _showRewardExt that GAME_RENDERERS' showRewardExt calls
-// by wrapping after it finishes
-window._showRewardExt=function(){
-  // Called AFTER the existing showRewardExt — but showRewardExt is private.
-  // Instead we listen for the reward overlay becoming visible.
-};
-// Actually: hook the reward overlay show. Use a MutationObserver.
-new MutationObserver(mutations=>{
-  for(const m of mutations){
-    if(m.target.id==='reward-overlay'&&m.target.classList.contains('show')){
-      onRewardShown();
-      break;
-    }
-  }
-}).observe(document.getElementById('reward-overlay'),{attributes:true,attributeFilter:['class']});
-
-function onRewardShown(){
-  const state=APP.state;
-  // Update summary
-  const timeSec=Math.round((Date.now()-_gameStart)/1000);
-  document.getElementById('sum-xp').textContent='+'+state.score+' XP';
-  document.getElementById('sum-correct').textContent=_correctInGame+'/'+state.maxQ;
-  document.getElementById('sum-streak').textContent=state.streak||0;
-  document.getElementById('sum-time').textContent=timeSec+'s';
-  // Perfect game tracking
-  if(_correctInGame===state.maxQ)state.perfectGames=(state.perfectGames||0)+1;
-  // Level up check
-  const oldXp=state.xp-state.score;
-  checkLevelUp(oldXp,state.xp);
-  // Badges
-  const newBadge=checkBadges(state);
-  document.getElementById('sum-badge').textContent=newBadge?`${newBadge.icon} ${newBadge.name}`:'—';
-  // Update level UI
-  updateLevelUI(state.xp);
-  DAILY.renderCal();
-}
-
-// ── PATCH nav.startGame to init gamification on each game start
-const _origNavStartGame=APP.nav.startGame?.bind(APP.nav);
-// Hook via APP.nav._history_push_play which is called inside startGame:
-const _origHistPush=APP.nav._history_push_play?.bind(APP.nav);
-if(APP.nav._history_push_play){
-  APP.nav._history_push_play=function(){
-    _origHistPush?.();
-    // Reset per-game state
-    _gameStart=Date.now();
-    _correctInGame=0;
-    COMBO.reset();
-    POWERUPS.refill();
-    GQ.init();
-    MASCOT.say('home','Let\'s go! ⚡');
-  };
-}
-
-// ── ADD SOUND TOGGLE BUTTON to header ────────────────────────
-document.addEventListener('DOMContentLoaded',()=>{
-  const hr=document.querySelector('.header-right');
-  if(hr){
-    const btn=document.createElement('button');
-    btn.className='theme-toggle';btn.title='Toggle sound';
-    btn.textContent=SOUND.isOn()?'🔊':'🔇';
-    btn.onclick=()=>{btn.textContent=SOUND.toggle()?'🔊':'🔇';};
-    const themeBtn=hr.querySelector('#theme-toggle');
-    if(themeBtn)hr.insertBefore(btn,themeBtn);else hr.appendChild(btn);
-  }
-});
-
-// ── EXPOSE _startTimerExt globally (power-ups need it) ───────
-// The original startTimerExt is defined inside GAME_RENDERERS IIFE.
-// We detect it being overridden on the APP.nav.startGame override.
-// Simpler: expose it when GAME_RENDERERS sets it via a setter.
-(()=>{
-  // We know GAME_RENDERERS assigns APP.nav._loadQ after startTimerExt is defined.
-  // Intercept that assignment:
-  let _ste=null;
-  Object.defineProperty(window,'_startTimerExt',{
-    get(){return _ste;},
-    set(v){_ste=v;},
-    configurable:true
-  });
-  // GAME_RENDERERS calls startTimerExt by name internally; we can't get that reference.
-  // Instead, make POWERUPS.use('freeze') just restart via a safe wrapper:
-  // When timer fires, timerInt already stopped — we re-invoke via APP.state
-  // The 'freeze' power-up replaces the 'startTimerExt' call with:
-  //   - the arc fill was already at some position
-  //   - we just resume the existing tick-down from APP.state.timeLeft
-  // We expose a global that GAME_RENDERERS' startTimerExt will self-register to.
-})();
-
-// ── INIT ─────────────────────────────────────────────────────
-(function initGamification(){
-  // Wait for APP to be fully initialised
-  setTimeout(()=>{
-    updateLevelUI(APP.state.xp);
-    DAILY.checkIn();
-    DAILY.renderCal();
-    renderBadges();
-    MASCOT.say('home');
-
-    // Expose startTimerExt for power-ups via a trick:
-    // After GAME_RENDERERS IIFE runs, APP.nav._loadQ is defined which calls startTimerExt.
-    // We wrap APP.nav._loadQ to also expose startTimerExt globally.
-    const origLoadQ=APP.nav._loadQ;
-    if(origLoadQ){
-      APP.nav._loadQ=function(gameId){
-        // startTimerExt is called inside GAME_RENDERERS; register a proxy
-        window._startTimerExt=function(){
-          // Re-start timer using the same mechanism — dispatch a fresh startTimerExt
-          // by triggering a zero-delay call to _loadQ equivalent
-          const fill=document.getElementById('arc-fill'),num=document.getElementById('arc-num'),C=151;
-          const subCol=SUBJECT_REGISTRY[APP.state.selectedSubject]?.timerColor||'#818cf8';
-          clearInterval(APP.state.timerInt);
-          // Reset to remaining time (for freeze) or full 30 (for new question)
-          if(!APP.state.timeLeft||APP.state.timeLeft<=0)APP.state.timeLeft=30;
-          function tick(){
-            const r=APP.state.timeLeft/30;
-            if(fill){fill.style.strokeDashoffset=C*(1-r);fill.style.stroke=APP.state.timeLeft>8?subCol:'#ff4757';}
-            if(num)num.textContent=APP.state.timeLeft;
-            if(APP.state.timeLeft<=0){clearInterval(APP.state.timerInt);document.dispatchEvent(new CustomEvent('lv:wrong'));}
-          }
-          tick();
-          APP.state.timerInt=setInterval(()=>{APP.state.timeLeft--;tick();},1000);
-        };
-        origLoadQ(gameId);
-      };
-    }
-  },200);
-})();
-
-// ================================================================
-//  THEME SYSTEM
-//  - Reads saved preference from localStorage on load
-//  - Falls back to system prefers-color-scheme
-//  - Saves user choice; updates <html data-theme>, meta theme-color,
-//    toggle button icon, and nebula colors
-// ================================================================
-const THEME = (() => {
-  const STORAGE_KEY = 'zl_theme';
-  const DARK_META   = '#1a0533';
-  const LIGHT_META  = '#f0edff';
-
-  function apply(theme) {
-    const html = document.documentElement;
-    html.setAttribute('data-theme', theme);
-
-    // Update meta theme-color (Android status bar)
-    const meta = document.getElementById('meta-theme-color');
-    if (meta) meta.setAttribute('content', theme === 'dark' ? DARK_META : LIGHT_META);
-
-    // Update toggle icon
-    const btn = document.getElementById('theme-toggle');
-    if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
-
-    // Update nebula colors dynamically
-    const nebulas = document.querySelectorAll('.nebula');
-    if (theme === 'light') {
-      const lc = ['rgba(99,102,241,0.07)','rgba(139,92,246,0.06)','rgba(236,72,153,0.05)'];
-      nebulas.forEach((n,i) => n.style.background = lc[i] || lc[0]);
-    } else {
-      const dc = ['rgba(99,102,241,0.13)','rgba(139,92,246,0.10)','rgba(236,72,153,0.08)'];
-      nebulas.forEach((n,i) => n.style.background = dc[i] || dc[0]);
-    }
-
-    // Persist
-    localStorage.setItem(STORAGE_KEY, theme);
-  }
-
-  function toggle() {
-    const current = document.documentElement.getAttribute('data-theme') || 'dark';
-    apply(current === 'dark' ? 'light' : 'dark');
-  }
-
-  // Init on load: saved pref → system pref → dark default
-  function init() {
-    const saved  = localStorage.getItem(STORAGE_KEY);
-    const system = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-    apply(saved || system);
-
-    // Also react to OS-level changes (when no user pref saved)
-    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
-      if (!localStorage.getItem(STORAGE_KEY)) apply(e.matches ? 'light' : 'dark');
-    });
-  }
-
-  init();
-  return { toggle, apply };
-})();
-
-// ================================================================
-//  PWA SERVICE WORKER — AUTO-UPDATE SYSTEM
-//  Flow:
-//    1. SW installs in background after deploy
-//    2. SW posts UPDATE_AVAILABLE message to this tab
-//    3. We show a non-intrusive toast at the bottom
-//    4. User taps "Update" → send SKIP_WAITING → reload
-//    5. On reload, new SW activates, old cache is deleted
-// ================================================================
-(function initSW() {
-  if (!('serviceWorker' in navigator)) return;
-
-  let newWorker = null;
-
-  // ── Register SW ──────────────────────────────────────────
-  navigator.serviceWorker.register('sw.js')
-    .then(registration => {
-      console.log('[App] SW registered, scope:', registration.scope);
-
-      // Check for updates every time the page gains focus
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          registration.update().catch(() => {});
-        }
-      });
-
-      // Also check every 60 minutes while tab is open
-      setInterval(() => registration.update().catch(() => {}), 60 * 60 * 1000);
-
-      // A new SW is waiting (already installed, pending activation)
-      registration.addEventListener('updatefound', () => {
-        newWorker = registration.installing;
-        if (!newWorker) return;
-
-        newWorker.addEventListener('statechange', () => {
-          // New SW has installed and is waiting — show toast
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('[App] New version ready');
-            showUpdateToast();
-          }
-        });
-      });
-
-      // If there's already a waiting SW on load (e.g. refreshed tab)
-      if (registration.waiting && navigator.serviceWorker.controller) {
-        newWorker = registration.waiting;
-        showUpdateToast();
-      }
-    })
-    .catch(err => console.warn('[App] SW registration failed:', err));
-
-  // ── Listen for messages from SW ──────────────────────────
-  navigator.serviceWorker.addEventListener('message', event => {
-    if (event.data?.type === 'UPDATE_AVAILABLE') {
-      console.log('[App] SW broadcast: update available, version', event.data.version);
-      // Small delay so the page finishes loading first
-      setTimeout(showUpdateToast, 2000);
-    }
-    if (event.data?.type === 'VERSION') {
-      console.log('[App] Current SW version:', event.data.version);
-    }
-  });
-
-  // ── After skipWaiting, reload all tabs ───────────────────
-  let reloading = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (reloading) return;
-    reloading = true;
-    console.log('[App] New SW activated — reloading');
-    window.location.reload();
-  });
-
-  // ── Update Toast UI ──────────────────────────────────────
-  function showUpdateToast() {
-    // Don't show twice
-    if (document.getElementById('update-toast')) return;
-
-    const toast = document.createElement('div');
-    toast.id = 'update-toast';
-    toast.innerHTML = `
-      <div style="
-        position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
-        z-index:9999; display:flex; align-items:center; gap:14px;
-        background:#1e0a3c; border:1px solid rgba(99,102,241,0.4);
-        border-radius:16px; padding:14px 20px;
-        box-shadow:0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.15);
-        max-width:calc(100vw - 40px);
-        animation: toastSlideUp 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
-        font-family:'Nunito',sans-serif;
-      ">
-        <span style="font-size:22px">⚡</span>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:2px">New version ready!</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.45);">Tap update to get the latest games</div>
-        </div>
-        <button id="update-btn" style="
-          background:linear-gradient(135deg,#6366f1,#8b5cf6);
-          border:none; border-radius:10px; padding:9px 18px;
-          color:#fff; font-family:'Nunito',sans-serif; font-weight:800; font-size:13px;
-          cursor:pointer; white-space:nowrap;
-          box-shadow:0 4px 12px rgba(99,102,241,0.4);
-        ">Update ↑</button>
-        <button id="dismiss-btn" style="
-          background:transparent; border:none; color:rgba(255,255,255,0.3);
-          font-size:18px; cursor:pointer; padding:0 4px; line-height:1;
-        ">×</button>
-      </div>
-      <style>
-        @keyframes toastSlideUp {
-          from { opacity:0; transform:translateX(-50%) translateY(20px); }
-          to   { opacity:1; transform:translateX(-50%) translateY(0); }
-        }
-      </style>
-    `;
-    document.body.appendChild(toast);
-
-    // Update button — tell SW to activate
-    document.getElementById('update-btn').addEventListener('click', () => {
-      toast.remove();
-      const sw = newWorker
-        || (navigator.serviceWorker.getRegistration
-            ? null  // will be resolved below
-            : null);
-
-      // Send SKIP_WAITING to the waiting SW
-      if (newWorker) {
-        newWorker.postMessage({ type: 'SKIP_WAITING' });
-      } else {
-        navigator.serviceWorker.getRegistration().then(reg => {
-          if (reg?.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        });
-      }
-    });
-
-    // Dismiss button — hide for this session (update will still apply next reload)
-    document.getElementById('dismiss-btn').addEventListener('click', () => toast.remove());
-
-    // Auto-dismiss after 15 seconds if user doesn't interact
-    setTimeout(() => toast?.remove(), 15000);
-  }
-})();
-</script>
+<!-- JS: load order matters — data → app → renderers → gamification → features -->
+<script src="js/data.js" defer></script>
+<script src="js/app.js" defer></script>
+<script src="js/renderers.js" defer></script>
+<script src="js/gamification.js" defer></script>
+<script src="js/features.js" defer></script>
 </body>
 </html>
