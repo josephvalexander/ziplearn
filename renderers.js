@@ -1219,3 +1219,396 @@ const ENG_RENDERERS = (() => {
 
 // Merge SCI and ENG renderers into GAME_RENDERERS
 Object.assign(GAME_RENDERERS, SCI_RENDERERS, ENG_RENDERERS);
+
+// ================================================================
+// MISSING RENDERER POOLS — fills every gap so no game crashes
+// ================================================================
+(function addMissingPools() {
+
+  // ── Helper shared with SCI/ENG_RENDERERS ─────────────────
+  function mcq(pc, question, options, correct, emoji) {
+    const opts = [...options].sort(() => Math.random() - 0.5);
+    pc.innerHTML = `
+      <div class="q-emoji">${emoji || '🔬'}</div>
+      <div class="q-text">${question}</div>
+      <div class="opts-grid opts-2">${opts.map(o =>
+        `<button class="opt-btn" data-ans="${o}" data-correct="${o===correct}">${o}</button>`
+      ).join('')}</div>`;
+    wireOpts(pc, correct);
+  }
+
+  const EXTRA_POOLS = {
+
+    // ── Science missing pools ────────────────────────────────
+    sci_body2: [
+      {q:'How many bones are in an adult human body?', opts:['206','100','150','250'], correct:'206', emoji:'🦴'},
+      {q:'Which teeth help us grind food?', opts:['Molars','Incisors','Canines','Wisdom teeth'], correct:'Molars', emoji:'🦷'},
+      {q:'Food is digested mainly in the ___', opts:['Small intestine','Stomach only','Mouth','Large intestine'], correct:'Small intestine', emoji:'🫀'},
+      {q:'Bones meet at a ___', opts:['Joint','Muscle','Tendon','Ligament'], correct:'Joint', emoji:'💪'},
+      {q:'The largest bone in the body is the ___', opts:['Femur (thigh)','Skull','Spine','Ribs'], correct:'Femur (thigh)', emoji:'🦵'},
+    ],
+    sci_growth: [
+      {q:'A caterpillar grows into a ___', opts:['Butterfly','Moth only','Spider','Beetle'], correct:'Butterfly', emoji:'🦋'},
+      {q:'A seed grows into a ___', opts:['Plant','Fruit directly','Flower only','Root'], correct:'Plant', emoji:'🌱'},
+      {q:'A tadpole grows into a ___', opts:['Frog','Fish','Lizard','Toad only'], correct:'Frog', emoji:'🐸'},
+      {q:'Which animal hatches from an egg?', opts:['Hen','Cat','Dog','Cow'], correct:'Hen', emoji:'🐣'},
+      {q:'Complete metamorphosis has ___ stages', opts:['4 — egg, larva, pupa, adult','2','3','5'], correct:'4 — egg, larva, pupa, adult', emoji:'🔄'},
+    ],
+    sci_light1: [
+      {q:'The sun, bulb and fire are sources of ___', opts:['Light','Sound','Heat only','Electricity'], correct:'Light', emoji:'💡'},
+      {q:'A shadow is formed when an object ___ light', opts:['Blocks','Reflects','Bends','Absorbs completely'], correct:'Blocks', emoji:'🌑'},
+      {q:'Light travels in a ___ line', opts:['Straight','Curved','Zigzag','Circular'], correct:'Straight', emoji:'➡️'},
+      {q:'The moon produces ___ own light', opts:['No — it reflects sunlight','Yes, all planets do','Only sometimes','Only at full moon'], correct:'No — it reflects sunlight', emoji:'🌕'},
+      {q:'Which material lets light pass through fully?', opts:['Glass','Wood','Brick','Cloth'], correct:'Glass', emoji:'🪟'},
+    ],
+    sci_sound1: [
+      {q:'Sound is produced by ___', opts:['Vibrations','Light','Pressure only','Heat'], correct:'Vibrations', emoji:'🔊'},
+      {q:'Sound travels fastest through ___', opts:['Solids','Liquids','Gases','Vacuum'], correct:'Solids', emoji:'🔩'},
+      {q:'Sound cannot travel through a ___', opts:['Vacuum','Liquid','Gas','Solid'], correct:'Vacuum', emoji:'🌌'},
+      {q:'The unit of loudness is ___', opts:['Decibel (dB)','Hertz (Hz)','Watt','Metre'], correct:'Decibel (dB)', emoji:'📢'},
+      {q:'An echo is sound being ___', opts:['Reflected','Absorbed','Created','Destroyed'], correct:'Reflected', emoji:'🏔️'},
+    ],
+    sci_seasons: [
+      {q:'How many seasons does India mainly have?', opts:['3 — Summer, Monsoon, Winter','4','2','6'], correct:'3 — Summer, Monsoon, Winter', emoji:'🌦️'},
+      {q:'Days are longest in ___', opts:['Summer','Winter','Monsoon','Spring'], correct:'Summer', emoji:'☀️'},
+      {q:'Deciduous trees shed leaves in ___', opts:['Autumn/Winter','Spring','Summer','Monsoon'], correct:'Autumn/Winter', emoji:'🍂'},
+      {q:'Which season brings the most rainfall to India?', opts:['Monsoon (June–September)','Winter','Summer','Spring'], correct:'Monsoon (June–September)', emoji:'🌧️'},
+      {q:'Earth\'s seasons are caused by its ___', opts:['Tilt on its axis','Distance from the sun','Rotation speed','Size'], correct:'Tilt on its axis', emoji:'🌍'},
+    ],
+    sci_soil: [
+      {q:'Which type of soil is best for growing crops?', opts:['Loamy soil','Sandy soil','Clay soil','Rocky soil'], correct:'Loamy soil', emoji:'🌱'},
+      {q:'Soil is formed from the breaking down of ___', opts:['Rocks and dead organisms','Only rocks','Only dead plants','Water and air'], correct:'Rocks and dead organisms', emoji:'🪨'},
+      {q:'Sandy soil has ___ particles', opts:['Large','Small','Medium','No'], correct:'Large', emoji:'🏖️'},
+      {q:'Earthworms are helpful because they ___', opts:['Loosen and enrich soil','Damage roots','Eat crops','Dry the soil'], correct:'Loosen and enrich soil', emoji:'🪱'},
+      {q:'Clay soil holds ___ water', opts:['More','Less','No','Hot'], correct:'More', emoji:'💧'},
+    ],
+    sci_air: [
+      {q:'Air is a mixture of ___', opts:['Gases (mainly nitrogen & oxygen)','Only oxygen','Only nitrogen','Only carbon dioxide'], correct:'Gases (mainly nitrogen & oxygen)', emoji:'🌬️'},
+      {q:'Oxygen in air is about ___', opts:['21%','78%','1%','50%'], correct:'21%', emoji:'💨'},
+      {q:'Plants need ___ from air to make food', opts:['Carbon dioxide','Oxygen','Nitrogen','Hydrogen'], correct:'Carbon dioxide', emoji:'🌿'},
+      {q:'Moving air is called ___', opts:['Wind','Breeze only','Storm only','Oxygen'], correct:'Wind', emoji:'💨'},
+      {q:'Air pollution is mainly caused by ___', opts:['Burning fossil fuels','Breathing','Plants','Rain'], correct:'Burning fossil fuels', emoji:'🏭'},
+    ],
+    sci_save: [
+      {q:'The 3 Rs of conservation are ___', opts:['Reduce, Reuse, Recycle','Read, Rest, Run','Rain, River, Rock','Remove, Replace, Refill'], correct:'Reduce, Reuse, Recycle', emoji:'♻️'},
+      {q:'Cutting down too many trees is called ___', opts:['Deforestation','Afforestation','Conservation','Pollution'], correct:'Deforestation', emoji:'🌳'},
+      {q:'Planting more trees is called ___', opts:['Afforestation','Deforestation','Pollution','Mining'], correct:'Afforestation', emoji:'🌱'},
+      {q:'Biodegradable waste ___', opts:['Breaks down naturally','Stays forever','Causes pollution always','Is all plastic'], correct:'Breaks down naturally', emoji:'🍌'},
+      {q:'Which energy source does NOT pollute?', opts:['Solar energy','Coal','Petrol','Wood burning'], correct:'Solar energy', emoji:'☀️'},
+    ],
+    sci_ecosystem: [
+      {q:'A community of living things and their environment is called ___', opts:['Ecosystem','Habitat','Population','Biome'], correct:'Ecosystem', emoji:'🌿'},
+      {q:'Producers in an ecosystem are ___', opts:['Plants','Animals','Fungi','Bacteria'], correct:'Plants', emoji:'🌱'},
+      {q:'Decomposers break down ___', opts:['Dead organisms','Living plants','Water','Rocks'], correct:'Dead organisms', emoji:'🍄'},
+      {q:'A food web shows ___', opts:['Multiple overlapping food chains','One food chain','Just predators','Just prey'], correct:'Multiple overlapping food chains', emoji:'🕸️'},
+      {q:'Removing one species from an ecosystem can ___', opts:['Affect all others','Have no effect','Only affect predators','Only affect plants'], correct:'Affect all others', emoji:'⚠️'},
+    ],
+    sci_matter2: [
+      {q:'Melting is a ___ change', opts:['Physical','Chemical','Biological','Nuclear'], correct:'Physical', emoji:'🧊'},
+      {q:'Burning wood is a ___ change', opts:['Chemical','Physical','Reversible','Simple'], correct:'Chemical', emoji:'🔥'},
+      {q:'A physical change is ___', opts:['Reversible','Irreversible','Always chemical','Permanent'], correct:'Reversible', emoji:'🔄'},
+      {q:'Rusting of iron is a ___ change', opts:['Chemical','Physical','Reversible','Harmless'], correct:'Chemical', emoji:'🪝'},
+      {q:'Dissolving sugar in water is a ___ change', opts:['Physical','Chemical','Biological','Permanent'], correct:'Physical', emoji:'☕'},
+    ],
+    sci_simple_machines: [
+      {q:'A see-saw is an example of a ___', opts:['Lever','Pulley','Wheel','Inclined plane'], correct:'Lever', emoji:'⚖️'},
+      {q:'A ramp (slope) is an ___', opts:['Inclined plane','Lever','Pulley','Screw'], correct:'Inclined plane', emoji:'📐'},
+      {q:'A wheel and axle make it easier to ___', opts:['Turn and move heavy loads','Lift objects straight up','Cut things','Pull ropes'], correct:'Turn and move heavy loads', emoji:'🎡'},
+      {q:'A pulley is used to ___', opts:['Lift heavy objects using a rope','Slice through material','Roll things','Hold things together'], correct:'Lift heavy objects using a rope', emoji:'🪤'},
+      {q:'A wedge is used to ___', opts:['Split or cut things','Lift things','Roll things','Hold bolts'], correct:'Split or cut things', emoji:'🪓'},
+    ],
+    sci_skeleton: [
+      {q:'The skull protects the ___', opts:['Brain','Heart','Lungs','Stomach'], correct:'Brain', emoji:'💀'},
+      {q:'The ribcage protects the ___', opts:['Heart and lungs','Brain','Stomach','Kidneys'], correct:'Heart and lungs', emoji:'🫁'},
+      {q:'Muscles are attached to bones by ___', opts:['Tendons','Ligaments','Nerves','Cartilage'], correct:'Tendons', emoji:'💪'},
+      {q:'Bones and muscles together form the ___ system', opts:['Musculoskeletal','Nervous','Digestive','Circulatory'], correct:'Musculoskeletal', emoji:'🦴'},
+      {q:'Which bone protects the spinal cord?', opts:['Vertebral column (spine)','Ribcage','Skull','Pelvis'], correct:'Vertebral column (spine)', emoji:'🦴'},
+    ],
+    sci_human: [
+      {q:'The heart pumps blood around the body through ___', opts:['Blood vessels','Nerves','Bones','Lymph nodes'], correct:'Blood vessels', emoji:'❤️'},
+      {q:'We breathe oxygen INTO our lungs and breathe OUT ___', opts:['Carbon dioxide','Nitrogen','Hydrogen','Water vapour only'], correct:'Carbon dioxide', emoji:'🫁'},
+      {q:'The brain is part of the ___ system', opts:['Nervous','Circulatory','Digestive','Respiratory'], correct:'Nervous', emoji:'🧠'},
+      {q:'Blood is pumped by the ___', opts:['Heart','Liver','Lungs','Kidneys'], correct:'Heart', emoji:'💓'},
+      {q:'The stomach is part of the ___ system', opts:['Digestive','Circulatory','Nervous','Respiratory'], correct:'Digestive', emoji:'🫀'},
+    ],
+    sci_human2: [
+      {q:'The nervous system controls ___', opts:['All body functions and responses','Only movement','Only thinking','Only breathing'], correct:'All body functions and responses', emoji:'🧠'},
+      {q:'A reflex action is ___', opts:['Automatic, without thinking','Planned','Learned','Slow'], correct:'Automatic, without thinking', emoji:'⚡'},
+      {q:'Neurons are cells in the ___', opts:['Brain and nerves','Muscles','Blood','Skin'], correct:'Brain and nerves', emoji:'🔬'},
+      {q:'The spinal cord connects the brain to ___', opts:['The rest of the body','The heart only','The lungs','The stomach'], correct:'The rest of the body', emoji:'🦴'},
+      {q:'Which sense organ connects to the brain via the optic nerve?', opts:['Eyes','Ears','Nose','Tongue'], correct:'Eyes', emoji:'👁️'},
+    ],
+    sci_animals2: [
+      {q:'A camel stores water/fat in its ___', opts:['Hump','Stomach','Legs','Neck'], correct:'Hump', emoji:'🐪'},
+      {q:'Fish have ___ to breathe underwater', opts:['Gills','Lungs','Both gills and lungs','Skin only'], correct:'Gills', emoji:'🐟'},
+      {q:'Birds have ___ to help them fly', opts:['Hollow bones','Dense bones','No bones','Stone bones'], correct:'Hollow bones', emoji:'🦅'},
+      {q:'Which animal can survive in both water and land?', opts:['Frog','Fish','Eagle','Camel'], correct:'Frog', emoji:'🐸'},
+      {q:'Polar bears have ___ fur to stay warm', opts:['Thick white','Thin','Colourful','No'], correct:'Thick white', emoji:'🐻‍❄️'},
+    ],
+    sci_electricity2: [
+      {q:'A conductor allows ___ to flow', opts:['Electricity','Water only','Heat only','Sound'], correct:'Electricity', emoji:'⚡'},
+      {q:'Which is the best conductor?', opts:['Copper','Rubber','Plastic','Wood'], correct:'Copper', emoji:'🔩'},
+      {q:'A fuse protects a circuit from ___', opts:['Too much current','Too little current','Short circuits only','Water'], correct:'Too much current', emoji:'🔌'},
+      {q:'Current flows from ___ terminal of a battery', opts:['Positive (+)','Negative (–)','Either terminal','Neither'], correct:'Positive (+)', emoji:'🔋'},
+      {q:'LED stands for ___', opts:['Light Emitting Diode','Large Electric Device','Low Energy Device','Laser Emitting Display'], correct:'Light Emitting Diode', emoji:'💡'},
+    ],
+    sci_pollution: [
+      {q:'Air pollution is measured in ___', opts:['AQI (Air Quality Index)','Decibels','pH levels','Lumens'], correct:'AQI (Air Quality Index)', emoji:'🏭'},
+      {q:'Which gas causes the greenhouse effect?', opts:['Carbon dioxide (CO₂)','Oxygen','Nitrogen','Hydrogen'], correct:'Carbon dioxide (CO₂)', emoji:'🌍'},
+      {q:'Water pollution is mainly caused by ___', opts:['Factory waste and sewage','Rain','Fish','Boats'], correct:'Factory waste and sewage', emoji:'🏭'},
+      {q:'Soil pollution is caused by ___', opts:['Excessive pesticides and chemicals','Planting trees','Irrigation','Compost'], correct:'Excessive pesticides and chemicals', emoji:'🌱'},
+      {q:'Global warming leads to ___', opts:['Rising sea levels','Lower temperatures','Less rain','Larger ice caps'], correct:'Rising sea levels', emoji:'🌊'},
+    ],
+    sci_rocks2: [
+      {q:'Rocks formed from cooled lava are ___', opts:['Igneous','Sedimentary','Metamorphic','Composite'], correct:'Igneous', emoji:'🌋'},
+      {q:'Rocks formed from layers of sediment are ___', opts:['Sedimentary','Igneous','Metamorphic','Crystal'], correct:'Sedimentary', emoji:'🏔️'},
+      {q:'Rocks changed by heat and pressure are ___', opts:['Metamorphic','Igneous','Sedimentary','Basic'], correct:'Metamorphic', emoji:'💎'},
+      {q:'Fossils are mainly found in ___ rocks', opts:['Sedimentary','Igneous','Metamorphic','Crystal'], correct:'Sedimentary', emoji:'🦕'},
+      {q:'Marble is a ___ rock', opts:['Metamorphic','Igneous','Sedimentary','Volcanic'], correct:'Metamorphic', emoji:'🏛️'},
+    ],
+    sci_weather2: [
+      {q:'A thermometer measures ___', opts:['Temperature','Rainfall','Wind speed','Humidity'], correct:'Temperature', emoji:'🌡️'},
+      {q:'A barometer measures ___', opts:['Air pressure','Temperature','Wind','Humidity'], correct:'Air pressure', emoji:'📊'},
+      {q:'Climate is the ___ weather of a region', opts:['Average long-term','Daily','Weekly','Monthly only'], correct:'Average long-term', emoji:'🌍'},
+      {q:'The tropical climate zone is near the ___', opts:['Equator','North Pole','South Pole','Arctic Circle'], correct:'Equator', emoji:'🌴'},
+      {q:'El Niño affects ___', opts:['Global weather patterns','Only South America','Only the ocean','Only rainfall'], correct:'Global weather patterns', emoji:'🌊'},
+    ],
+    sci_reproduction: [
+      {q:'Plants that reproduce by seeds include ___', opts:['Mango tree','Fern','Mushroom','Moss'], correct:'Mango tree', emoji:'🌳'},
+      {q:'Asexual reproduction needs ___ parent(s)', opts:['1','2','3','4'], correct:'1', emoji:'🔬'},
+      {q:'Budding is seen in ___', opts:['Yeast and hydra','Humans','Fish','Birds'], correct:'Yeast and hydra', emoji:'🌱'},
+      {q:'Pollination is the transfer of ___ to a flower', opts:['Pollen','Seeds','Water','Nutrients'], correct:'Pollen', emoji:'🌸'},
+      {q:'A fertilised egg in animals develops into ___', opts:['An embryo','A seed','A bud','A spore'], correct:'An embryo', emoji:'🐣'},
+    ],
+    sci_environment: [
+      {q:'Biodiversity means ___', opts:['Variety of life forms on Earth','Only animal diversity','Plant diversity only','Ocean life'], correct:'Variety of life forms on Earth', emoji:'🌍'},
+      {q:'An endangered species is one that ___', opts:['May become extinct','Is very common','Lives in zoos','Was never wild'], correct:'May become extinct', emoji:'🐼'},
+      {q:'Conservation means ___', opts:['Protecting and preserving nature','Destroying forests','Building dams','Burning forests'], correct:'Protecting and preserving nature', emoji:'🌱'},
+      {q:'Climate change is mainly caused by ___', opts:['Human activities releasing CO₂','Natural events only','The sun getting hotter','Ocean currents'], correct:'Human activities releasing CO₂', emoji:'🏭'},
+      {q:'Ozone layer protects Earth from ___', opts:['Harmful UV radiation','Gravity','Sound','Earthquakes'], correct:'Harmful UV radiation', emoji:'☀️'},
+    ],
+
+    // ── English missing pools ────────────────────────────────
+    eng_abc_order: [
+      {q:'Which comes first in alphabetical order?', opts:['Apple, Banana, Cherry','Cherry, Banana, Apple','Banana, Apple, Cherry','Cherry, Apple, Banana'], correct:'Apple, Banana, Cherry', emoji:'🔡'},
+      {q:'Arrange: Dog, Cat, Elephant', opts:['Cat, Dog, Elephant','Dog, Cat, Elephant','Elephant, Dog, Cat','Dog, Elephant, Cat'], correct:'Cat, Dog, Elephant', emoji:'📚'},
+      {q:'Which letter comes before "P" in the alphabet?', opts:['O','Q','R','N'], correct:'O', emoji:'🔤'},
+      {q:'Words in a dictionary are arranged ___', opts:['Alphabetically','By length','By importance','Randomly'], correct:'Alphabetically', emoji:'📖'},
+      {q:'Arrange: Mango, Apple, Orange', opts:['Apple, Mango, Orange','Mango, Apple, Orange','Orange, Apple, Mango','Apple, Orange, Mango'], correct:'Apple, Mango, Orange', emoji:'🍎'},
+    ],
+    eng_blends: [
+      {q:'Which word starts with a consonant blend?', opts:['Bread','Dog','Apple','Egg'], correct:'Bread', emoji:'🍞'},
+      {q:'"ST" + "ar" = ___', opts:['Star','Scar','Tar','Bar'], correct:'Star', emoji:'⭐'},
+      {q:'Which has the blend "CL"?', opts:['Clock','Lock','Dock','Rock'], correct:'Clock', emoji:'🕐'},
+      {q:'"TR" + "ain" = ___', opts:['Train','Rain','Gain','Pain'], correct:'Train', emoji:'🚂'},
+      {q:'Which starts with "SP"?', opts:['Spider','Rider','Cider','Tiger'], correct:'Spider', emoji:'🕷️'},
+    ],
+    eng_colours: [
+      {q:'What colour is the sky on a clear day?', opts:['Blue','Red','Green','Yellow'], correct:'Blue', emoji:'🌤️'},
+      {q:'Which colour do you get by mixing red and yellow?', opts:['Orange','Purple','Green','Brown'], correct:'Orange', emoji:'🎨'},
+      {q:'The colour of grass is ___', opts:['Green','Brown','Yellow','Blue'], correct:'Green', emoji:'🌿'},
+      {q:'Red + Blue = ___', opts:['Purple','Orange','Green','Brown'], correct:'Purple', emoji:'🟣'},
+      {q:'Which colour represents danger on a traffic light?', opts:['Red','Green','Yellow','Blue'], correct:'Red', emoji:'🚦'},
+    ],
+    eng_picture: [
+      {q:'In a picture story, what helps you understand what is happening?', opts:['The actions shown','Only the colours','Only the background','The frame size'], correct:'The actions shown', emoji:'🖼️'},
+      {q:'Which question word asks WHAT is happening?', opts:['What','Who','Where','When'], correct:'What', emoji:'❓'},
+      {q:'A picture shows a dog running. What is the dog doing?', opts:['Running','Sleeping','Eating','Swimming'], correct:'Running', emoji:'🐕'},
+      {q:'Looking at a picture and writing about it is called ___', opts:['Picture composition','Story writing','Poetry','Grammar'], correct:'Picture composition', emoji:'✍️'},
+      {q:'In a picture, the main character is usually ___', opts:['In the centre or most prominent','Hidden at the back','Very small','Outside the frame'], correct:'In the centre or most prominent', emoji:'🎭'},
+    ],
+    eng_question1: [
+      {q:'"___ is your name?" Use:', opts:['What','Where','Why','How'], correct:'What', emoji:'❓'},
+      {q:'"___ do you live?" Use:', opts:['Where','When','Who','What'], correct:'Where', emoji:'🏠'},
+      {q:'"___ is your birthday?" Use:', opts:['When','Where','Who','Why'], correct:'When', emoji:'🎂'},
+      {q:'"___ are you crying?" Use:', opts:['Why','What','Who','Which'], correct:'Why', emoji:'😢'},
+      {q:'"___ is at the door?" Use:', opts:['Who','What','Where','How'], correct:'Who', emoji:'🚪'},
+    ],
+    eng_question2: [
+      {q:'Reading a passage carefully to find specific information is called ___', opts:['Scanning','Skimming','Inferring','Summarising'], correct:'Scanning', emoji:'🔍'},
+      {q:'The main idea of a paragraph is usually in the ___', opts:['Topic sentence','Last sentence','Middle sentence','Title'], correct:'Topic sentence', emoji:'📄'},
+      {q:'An inference is ___', opts:['A conclusion based on clues','A direct quote','A question','A definition'], correct:'A conclusion based on clues', emoji:'🔍'},
+      {q:'A synonym for "comprehension" is ___', opts:['Understanding','Confusion','Question','Summary'], correct:'Understanding', emoji:'📖'},
+      {q:'After reading, you should be able to answer ___', opts:['Who, What, Where, When, Why','Only "what"','Only "who"','Only "where"'], correct:'Who, What, Where, When, Why', emoji:'❓'},
+    ],
+    eng_sentence1: [
+      {q:'A sentence must have a ___ and a verb', opts:['Subject','Object','Adjective','Adverb'], correct:'Subject', emoji:'📝'},
+      {q:'"The dog barks." This is a ___ sentence.', opts:['Simple','Compound','Complex','Fragment'], correct:'Simple', emoji:'🐕'},
+      {q:'A sentence always starts with a ___', opts:['Capital letter','Lowercase letter','Number','Symbol'], correct:'Capital letter', emoji:'🔠'},
+      {q:'Which is a complete sentence?', opts:['The cat sat on the mat.','The cat','Sat on','On the mat.'], correct:'The cat sat on the mat.', emoji:'🐱'},
+      {q:'A sentence ends with a ___, ! or ?', opts:['.','#','@','&'], correct:'.', emoji:'🔚'},
+    ],
+    eng_sentence2: [
+      {q:'In "She ate the apple," the subject is ___', opts:['She','Ate','Apple','The'], correct:'She', emoji:'🍎'},
+      {q:'The object in "He kicked the ball" is ___', opts:['Ball','He','Kicked','The'], correct:'Ball', emoji:'⚽'},
+      {q:'A compound sentence has ___ main clauses', opts:['Two or more','One','Three only','Four'], correct:'Two or more', emoji:'🔗'},
+      {q:'"The girl who won was my friend" — this is ___', opts:['Complex','Simple','Compound','Fragment'], correct:'Complex', emoji:'🏆'},
+      {q:'Which conjunction joins two sentences of equal importance?', opts:['And','Because','Although','Since'], correct:'And', emoji:'➕'},
+    ],
+    eng_sight2: [
+      {q:'Choose the correct spelling:', opts:['Because','Becaus','Becuase','Becouse'], correct:'Because', emoji:'📝'},
+      {q:'Which is a sight word?', opts:['Their','Caterpillar','Dictionary','Multiplication'], correct:'Their', emoji:'👀'},
+      {q:'"___ going to the park." Fill in:', opts:['They\'re','Their','There','Thier'], correct:'They\'re', emoji:'🌳'},
+      {q:'"___ is my bag." Fill in:', opts:['Where','Were','Wear','We\'re'], correct:'Where', emoji:'👜'},
+      {q:'Which is spelled correctly?', opts:['Enough','Enuff','Inough','Enouf'], correct:'Enough', emoji:'✅'},
+    ],
+    eng_spell2: [
+      {q:'How do you spell the sound "sh" + "oo" + "l"?', opts:['School','Skhool','Scool','Skool'], correct:'School', emoji:'🏫'},
+      {q:'Which is the correct spelling?', opts:['Beautiful','Beautifull','Beautifal','Beutiful'], correct:'Beautiful', emoji:'🌸'},
+      {q:'Correct spelling of the opposite of "come"?', opts:['Go','Goo','Goe','Gow'], correct:'Go', emoji:'👣'},
+      {q:'Which word is spelled incorrectly?', opts:['Tomato vs Tomarto — "Tomarto" is wrong','Banana','Potato','Mango'], correct:'Tomato vs Tomarto — "Tomarto" is wrong', emoji:'🍅'},
+      {q:'Correct spelling:', opts:['Wednesday','Wednessday','Wendsday','Wensday'], correct:'Wednesday', emoji:'📅'},
+    ],
+    eng_spell3: [
+      {q:'Correct spelling:', opts:['Necessary','Neccesary','Necesary','Neccessary'], correct:'Necessary', emoji:'✅'},
+      {q:'Correct spelling:', opts:['Accommodation','Accomodation','Acommodation','Accommodaton'], correct:'Accommodation', emoji:'🏨'},
+      {q:'Correct spelling:', opts:['Occurrence','Occurence','Occurrance','Occurince'], correct:'Occurrence', emoji:'📅'},
+      {q:'Correct spelling:', opts:['Separate','Seperate','Separrate','Seperrate'], correct:'Separate', emoji:'✂️'},
+      {q:'Correct spelling:', opts:['Definitely','Definately','Definitly','Definitley'], correct:'Definitely', emoji:'👍'},
+    ],
+    eng_spell4: [
+      {q:'Correct spelling:', opts:['Miscellaneous','Miscelaneous','Miscellanious','Miscellaneus'], correct:'Miscellaneous', emoji:'📦'},
+      {q:'Correct spelling:', opts:['Conscientious','Consciencious','Concientious','Consientious'], correct:'Conscientious', emoji:'🧠'},
+      {q:'Correct spelling:', opts:['Bureaucracy','Beurocracy','Burocracy','Bureocracy'], correct:'Bureaucracy', emoji:'🏛️'},
+      {q:'Correct spelling:', opts:['Rhythm','Rythm','Rhytm','Rhythum'], correct:'Rhythm', emoji:'🎵'},
+      {q:'Correct spelling:', opts:['Millennium','Millenium','Milenium','Milennium'], correct:'Millennium', emoji:'🎆'},
+    ],
+    eng_vowels: [
+      {q:'In "cake", the "a" makes a ___ vowel sound', opts:['Long','Short','Silent','Blended'], correct:'Long', emoji:'🎂'},
+      {q:'In "cat", the "a" makes a ___ vowel sound', opts:['Short','Long','Silent','Double'], correct:'Short', emoji:'🐱'},
+      {q:'"Kite" has a ___ "i" sound', opts:['Long','Short','Silent','Blended'], correct:'Long', emoji:'🪁'},
+      {q:'Which word has a short "o" sound?', opts:['Hot','Hole','Hope','Home'], correct:'Hot', emoji:'🌡️'},
+      {q:'A silent "e" at the end of a word makes the vowel ___', opts:['Long','Short','Disappear','Double'], correct:'Long', emoji:'🔤'},
+    ],
+    eng_pronouns: [
+      {q:'"___  is a good student." (referring to a girl)', opts:['She','He','They','It'], correct:'She', emoji:'👧'},
+      {q:'Replace "The dog" with a pronoun:', opts:['It','He','She','They'], correct:'It', emoji:'🐕'},
+      {q:'"___ and I went to school." Use:', opts:['He','Him','His','Himself'], correct:'He', emoji:'👦'},
+      {q:'"Give the book to ___." (referring to a boy)', opts:['him','he','his','himself'], correct:'him', emoji:'📚'},
+      {q:'Which is a possessive pronoun?', opts:['Mine','I','Me','Myself'], correct:'Mine', emoji:'👐'},
+    ],
+    eng_punctuation: [
+      {q:'A sentence that asks a question ends with ___', opts:['?','!','.', ','], correct:'?', emoji:'❓'},
+      {q:'A sentence showing strong feeling ends with ___', opts:['!','?','.', ','], correct:'!', emoji:'😲'},
+      {q:'A comma is used to ___', opts:['Separate items in a list','End a sentence','Ask a question','Show possession'], correct:'Separate items in a list', emoji:'📝'},
+      {q:'An apostrophe in "it\'s" means ___', opts:['It is (contraction)','Belonging to it','Plural of it','Nothing'], correct:'It is (contraction)', emoji:'✏️'},
+      {q:'Quotation marks are used for ___', opts:['Direct speech','Titles only','Emphasis only','Questions'], correct:'Direct speech', emoji:'💬'},
+    ],
+    eng_story1: [
+      {q:'What is the correct order of a story?', opts:['Beginning, Middle, End','End, Middle, Beginning','Middle, End, Beginning','End, Beginning, Middle'], correct:'Beginning, Middle, End', emoji:'📚'},
+      {q:'The problem in a story is called the ___', opts:['Conflict','Setting','Theme','Climax'], correct:'Conflict', emoji:'⚔️'},
+      {q:'Where and when a story takes place is the ___', opts:['Setting','Character','Plot','Theme'], correct:'Setting', emoji:'🌍'},
+      {q:'The most exciting part of a story is the ___', opts:['Climax','Resolution','Introduction','Setting'], correct:'Climax', emoji:'🎭'},
+      {q:'The lesson of a story is its ___', opts:['Theme/moral','Plot','Character','Setting'], correct:'Theme/moral', emoji:'💡'},
+    ],
+    eng_story2: [
+      {q:'Round characters in a story are ___', opts:['Complex and change over time','Flat and unchanged','Only villains','Only heroes'], correct:'Complex and change over time', emoji:'🎭'},
+      {q:'The narrator tells the story from a ___ of view', opts:['Point','Story','Character','Theme'], correct:'Point', emoji:'📖'},
+      {q:'First-person narration uses ___', opts:['"I" and "we"','"He" and "she"','"You"','"They"'], correct:'"I" and "we"', emoji:'✍️'},
+      {q:'The resolution of a story ___', opts:['Solves the conflict','Introduces characters','Creates the problem','Sets the scene'], correct:'Solves the conflict', emoji:'✅'},
+      {q:'Foreshadowing is when the author ___', opts:['Hints at future events','Explains the past','Describes a character','Sets the scene'], correct:'Hints at future events', emoji:'🔮'},
+    ],
+    eng_story3: [
+      {q:'A good story opening should ___', opts:['Hook the reader immediately','List all characters','Explain the ending','Be very long'], correct:'Hook the reader immediately', emoji:'🎣'},
+      {q:'Show don\'t tell means ___', opts:['Describe actions to show feelings','Tell readers how to feel','Always use dialogue','Avoid description'], correct:'Describe actions to show feelings', emoji:'🎭'},
+      {q:'Dialogue in a story ___', opts:['Shows character personality','Is always unnecessary','Must rhyme','Must be formal'], correct:'Shows character personality', emoji:'💬'},
+      {q:'A story with a circular narrative ___', opts:['Ends where it began','Has no plot','Is non-fiction','Has no characters'], correct:'Ends where it began', emoji:'🔄'},
+      {q:'The protagonist is the ___', opts:['Main character','Villain','Narrator','Author'], correct:'Main character', emoji:'🦸'},
+    ],
+    eng_suffixes: [
+      {q:'"Hope" + "-ful" = ___', opts:['Hopeful','Hopefull','Hopful','Hopefully'], correct:'Hopeful', emoji:'🌟'},
+      {q:'"Care" + "-less" = ___', opts:['Careless','Carefull','Carful','Caring'], correct:'Careless', emoji:'⚠️'},
+      {q:'"-er" added to "teach" = ___', opts:['Teacher','Teaching','Teaches','Teachful'], correct:'Teacher', emoji:'👩‍🏫'},
+      {q:'"-est" makes a word ___', opts:['Superlative (most extreme)','Comparative','Negative','Plural'], correct:'Superlative (most extreme)', emoji:'🏆'},
+      {q:'"-tion" changes a verb to a ___', opts:['Noun','Adjective','Adverb','Verb still'], correct:'Noun', emoji:'📝'},
+    ],
+    eng_synonym1: [
+      {q:'Synonym for "happy" is ___', opts:['Joyful','Sad','Angry','Tired'], correct:'Joyful', emoji:'😊'},
+      {q:'Synonym for "big" is ___', opts:['Large','Tiny','Small','Little'], correct:'Large', emoji:'🐘'},
+      {q:'Synonym for "fast" is ___', opts:['Quick','Slow','Lazy','Heavy'], correct:'Quick', emoji:'⚡'},
+      {q:'Synonym for "cold" is ___', opts:['Chilly','Hot','Warm','Boiling'], correct:'Chilly', emoji:'❄️'},
+      {q:'Synonym for "brave" is ___', opts:['Courageous','Cowardly','Fearful','Timid'], correct:'Courageous', emoji:'🦁'},
+    ],
+    eng_idioms1: [
+      {q:'"Break a leg!" means ___', opts:['Good luck!','Hurt yourself','Run fast','Jump high'], correct:'Good luck!', emoji:'🎭'},
+      {q:'"It\'s raining cats and dogs" means ___', opts:['It\'s raining heavily','Animals are falling','It\'s stormy','It\'s cold'], correct:'It\'s raining heavily', emoji:'🌧️'},
+      {q:'"A piece of cake" means ___', opts:['Very easy','Delicious','Expensive','Difficult'], correct:'Very easy', emoji:'🎂'},
+      {q:'"The ball is in your court" means ___', opts:['It\'s your decision to make','Play tennis','Go to court','Throw the ball'], correct:'It\'s your decision to make', emoji:'⚽'},
+      {q:'"Hit the books" means ___', opts:['Study hard','Throw books','Buy books','Read slowly'], correct:'Study hard', emoji:'📚'},
+    ],
+    eng_idioms2: [
+      {q:'"Bite the bullet" means ___', opts:['Endure pain or hardship bravely','Literally bite a bullet','Eat metal','Be brave in a fight'], correct:'Endure pain or hardship bravely', emoji:'💪'},
+      {q:'"Burning the midnight oil" means ___', opts:['Working late into the night','Setting fire to oil','Wasting energy','Studying during a fire'], correct:'Working late into the night', emoji:'🌙'},
+      {q:'"The tip of the iceberg" means ___', opts:['A small visible part of a big problem','A cold climate','The top of a mountain','Arctic travel'], correct:'A small visible part of a big problem', emoji:'🧊'},
+      {q:'"Costing an arm and a leg" means ___', opts:['Very expensive','Physically painful','A body part injury','Free of charge'], correct:'Very expensive', emoji:'💰'},
+      {q:'"Every cloud has a silver lining" means ___', opts:['Every bad situation has something positive','Clouds are always shiny','Weather improves','Lightning is silver'], correct:'Every bad situation has something positive', emoji:'☁️'},
+    ],
+    eng_direct: [
+      {q:'In direct speech, the speaker\'s exact words are in ___', opts:['Inverted commas " "','Brackets ( )','Italics','Bold'], correct:'Inverted commas " "', emoji:'💬'},
+      {q:'Change to indirect: "She said, \'I am happy.\'"', opts:['She said she was happy.','She said I am happy.','She says I was happy.','She told I am happy.'], correct:'She said she was happy.', emoji:'🗣️'},
+      {q:'In reported speech, the tense usually shifts ___', opts:['One step back in time','Forward in time','Stays the same','Becomes future'], correct:'One step back in time', emoji:'⏰'},
+      {q:'Which is correct direct speech punctuation?', opts:['"Come here," she said.','Come here she said.','She said come here.','She said, come here.'], correct:'"Come here," she said.', emoji:'✅'},
+      {q:'He asked, "___ is your name?" — fill in:', opts:['What','Where','Why','How'], correct:'What', emoji:'❓'},
+    ],
+    eng_passive: [
+      {q:'"The cat chased the mouse." Change to passive:', opts:['The mouse was chased by the cat.','The mouse chased the cat.','The cat was chased by the mouse.','The mouse is chasing the cat.'], correct:'The mouse was chased by the cat.', emoji:'🐱'},
+      {q:'In passive voice, the ___ receives the action', opts:['Object becomes subject','Subject stays same','Verb disappears','Tense changes only'], correct:'Object becomes subject', emoji:'🔄'},
+      {q:'Passive voice uses ___ + past participle', opts:['To be (is/was/were)','To do','To have','To make'], correct:'To be (is/was/were)', emoji:'📝'},
+      {q:'"A cake was baked by her." The doer is ___', opts:['Her','Cake','Baked','A'], correct:'Her', emoji:'🎂'},
+      {q:'Which is passive voice?', opts:['The letter was written by him.','He wrote the letter.','He is writing.','He writes letters.'], correct:'The letter was written by him.', emoji:'✉️'},
+    ],
+    eng_formal: [
+      {q:'A formal letter begins with ___', opts:['Dear Sir/Madam,','Hi there!','Hey,','To whom it may concern' ], correct:'Dear Sir/Madam,', emoji:'📧'},
+      {q:'A formal letter ends with ___', opts:['Yours sincerely/faithfully,','Love,','Bye!','See you,'], correct:'Yours sincerely/faithfully,', emoji:'✍️'},
+      {q:'The subject line in a letter tells ___', opts:['What the letter is about','Who wrote it','Where it was sent','When it was written'], correct:'What the letter is about', emoji:'📋'},
+      {q:'An informal letter is written to ___', opts:['Friends and family','Officials','Companies','Authorities'], correct:'Friends and family', emoji:'👫'},
+      {q:'Which is a formal sentence?', opts:['I am writing to request information.','Hey, I need info.','Can u send me stuff?','Gimme the details pls.'], correct:'I am writing to request information.', emoji:'📝'},
+    ],
+    eng_essay: [
+      {q:'An essay introduction should ___', opts:['State the topic and thesis','List all points','Give the conclusion','Be very long'], correct:'State the topic and thesis', emoji:'📄'},
+      {q:'The body of an essay contains ___', opts:['Supporting arguments with evidence','The introduction','The conclusion','The title'], correct:'Supporting arguments with evidence', emoji:'📝'},
+      {q:'A conclusion should ___', opts:['Summarise and restate the thesis','Introduce new ideas','Ask questions','List examples'], correct:'Summarise and restate the thesis', emoji:'✅'},
+      {q:'A thesis statement tells ___', opts:['The main argument of the essay','A fact','An example','The title'], correct:'The main argument of the essay', emoji:'🎯'},
+      {q:'Transition words like "Furthermore" are used to ___', opts:['Connect ideas smoothly','End paragraphs','Start introductions','List examples only'], correct:'Connect ideas smoothly', emoji:'🔗'},
+    ],
+    eng_paragraph: [
+      {q:'A paragraph usually begins with a ___', opts:['Topic sentence','Conclusion','Question','Quotation'], correct:'Topic sentence', emoji:'📄'},
+      {q:'All sentences in a paragraph should be about ___', opts:['One main idea','Many different topics','Only facts','Only opinions'], correct:'One main idea', emoji:'🎯'},
+      {q:'How do you show a new paragraph?', opts:['Indent or skip a line','Use a capital letter only','Use a comma','Use an exclamation mark'], correct:'Indent or skip a line', emoji:'↩️'},
+      {q:'A concluding sentence in a paragraph ___', opts:['Wraps up the main idea','Introduces a new idea','Asks a question','Gives an example'], correct:'Wraps up the main idea', emoji:'✅'},
+      {q:'Supporting sentences in a paragraph ___', opts:['Give evidence for the topic sentence','Introduce a new topic','Ask questions','End the essay'], correct:'Give evidence for the topic sentence', emoji:'📋'},
+    ],
+    eng_poem: [
+      {q:'Two consecutive lines that rhyme are called a ___', opts:['Couplet','Stanza','Verse','Sonnet'], correct:'Couplet', emoji:'🎵'},
+      {q:'A simile compares using "like" or ___', opts:['As','Is','Are','Was'], correct:'As', emoji:'🔍'},
+      {q:'The pattern of stressed and unstressed syllables in poetry is ___', opts:['Metre/Rhythm','Rhyme','Stanza','Alliteration'], correct:'Metre/Rhythm', emoji:'🎼'},
+      {q:'An onomatopoeia is a word that ___', opts:['Sounds like what it means (buzz, splash)','Has no meaning','Rhymes with everything','Is very long'], correct:'Sounds like what it means (buzz, splash)', emoji:'💥'},
+      {q:'A haiku has ___ lines', opts:['3','4','2','5'], correct:'3', emoji:'🌸'},
+    ],
+    eng_debate: [
+      {q:'In a debate, you must support your argument with ___', opts:['Evidence and reasons','Personal feelings only','Made-up facts','Emotions only'], correct:'Evidence and reasons', emoji:'⚖️'},
+      {q:'The side arguing FOR a motion is called ___', opts:['Proposition','Opposition','Neutral','Chair'], correct:'Proposition', emoji:'👍'},
+      {q:'The side arguing AGAINST a motion is ___', opts:['Opposition','Proposition','Neutral','Judge'], correct:'Opposition', emoji:'👎'},
+      {q:'A rebuttal in a debate means ___', opts:['Countering the opponent\'s argument','Agreeing with the opponent','Leaving the debate','Asking a question'], correct:'Countering the opponent\'s argument', emoji:'🗣️'},
+      {q:'A good debater listens carefully to ___', opts:['The opponent, to find weaknesses','Only their own team','The audience only','The judge only'], correct:'The opponent, to find weaknesses', emoji:'👂'},
+    ],
+    eng_comprehension: [
+      {q:'Skimming a text means ___', opts:['Reading quickly for the main idea','Reading every word carefully','Reading only the first line','Reading backwards'], correct:'Reading quickly for the main idea', emoji:'📖'},
+      {q:'An explicit answer is ___', opts:['Stated directly in the text','Inferred from clues','Your own opinion','Not in the text'], correct:'Stated directly in the text', emoji:'🔍'},
+      {q:'An implicit answer requires you to ___', opts:['Read between the lines','Only read the text','Guess randomly','Use a dictionary'], correct:'Read between the lines', emoji:'💭'},
+      {q:'The author\'s purpose can be to ___', opts:['Inform, entertain or persuade','Only to inform','Only to entertain','Only to persuade'], correct:'Inform, entertain or persuade', emoji:'✍️'},
+      {q:'A summary should be ___', opts:['Shorter than the original and in your own words','The same length as the original','Longer with more detail','A copy of the text'], correct:'Shorter than the original and in your own words', emoji:'📋'},
+    ],
+  };
+
+  // Build a renderer function for each missing pool
+  Object.entries(EXTRA_POOLS).forEach(([id, pool]) => {
+    if (!GAME_RENDERERS[id]) {
+      GAME_RENDERERS[id] = function(pc) {
+        const q = pool[Math.floor(Math.random() * pool.length)];
+        mcq(pc, q.q, q.opts, q.correct, q.emoji);
+      };
+    }
+  });
+
+})();
