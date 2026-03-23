@@ -275,15 +275,7 @@ body {
 .theme-toggle:hover { transform:scale(1.12) rotate(-8deg); background:var(--bg-card-hover); border-color:var(--border-hover); }
 .theme-toggle:active { transform:scale(0.93); }
 
-.nav-back {
-  display:none; align-items:center; gap:6px;
-  background:var(--bg-card); border:1px solid var(--border);
-  border-radius:var(--r-sm); padding:8px 14px;
-  color:var(--text-secondary); font-family:var(--font-body); font-weight:700; font-size:13px;
-  cursor:pointer; transition:all 0.2s;
-}
-.nav-back:hover { background:var(--bg-card-hover); color:var(--text-primary); border-color:var(--border-hover); }
-.nav-back.show { display:flex; }
+/* nav-back defined in responsive block below */
 
 /* ── HERO ── */
 .home-hero { text-align:center; padding:20px 24px 24px; }
@@ -861,33 +853,36 @@ body {
 }
 #scr-home .home-scroll { padding-bottom: 8px; }
 
-/* Back button — mobile: bottom-left floating pill */
+/* Back button — fixed floating pill, bottom-left, above bottom-nav */
 .nav-back {
-  display: none !important; /* hidden in header */
-}
-.nav-back.show {
-  display: inline-flex !important;
+  display: none;
   position: fixed;
-  bottom: 80px;           /* above bottom-nav */
-  left: 16px;
+  bottom: 76px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 600;
-  background: var(--bg-card);
-  border: 1.5px solid var(--border-hover);
-  border-radius: 24px;
-  padding: 10px 18px;
-  font-size: 14px;
+  background: var(--indigo);
+  border: none;
+  border-radius: 28px;
+  padding: 12px 24px;
+  font-size: 15px;
   font-weight: 800;
-  color: var(--text-primary);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  backdrop-filter: blur(12px);
+  color: #fff;
+  box-shadow: 0 4px 24px rgba(99,102,241,0.5);
   cursor: pointer;
   align-items: center;
-  gap: 6px;
-  animation: backBtnIn 0.25s var(--bounce) both;
+  gap: 8px;
+  letter-spacing: 0.3px;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+.nav-back.show {
+  display: inline-flex;
+  animation: backBtnIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 @keyframes backBtnIn {
-  from { opacity:0; transform:translateY(12px) scale(0.9); }
-  to   { opacity:1; transform:translateY(0) scale(1); }
+  from { opacity:0; transform:translateX(-50%) translateY(16px) scale(0.9); }
+  to   { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
 }
 
 /* Bottom nav — compact on very small screens */
@@ -1081,6 +1076,128 @@ body {
   from { width: 0%; }
 }
 
+
+/* ── Compact Home Hero ──────────────────────────────────────── */
+.home-hero-compact {
+  padding: 14px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.home-mascot-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.home-mascot-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.home-mascot-sm {
+  font-size: 44px !important;
+  animation: mascotFloat 3s ease-in-out infinite;
+}
+.home-level-col {
+  flex: 1;
+  min-width: 0;
+}
+.home-greeting {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--indigo);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.home-level-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.home-xp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+}
+.home-level-track {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-hud);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.home-level-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--indigo), #a78bfa);
+  border-radius: 3px;
+  transition: width 0.8s var(--smooth);
+}
+.home-xp-next {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.home-streak-pill {
+  flex-shrink: 0;
+  background: rgba(255,107,53,0.15);
+  border: 1.5px solid rgba(255,107,53,0.3);
+  border-radius: 20px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #ff6b35;
+  white-space: nowrap;
+}
+
+/* Mini stats strip */
+.home-stats-mini {
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.home-stats-mini::-webkit-scrollbar { display: none; }
+.hsm-chip {
+  flex-shrink: 0;
+  background: var(--bg-hud);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Section heading tighter */
+.section-heading {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.5px !important;
+  color: var(--text-muted) !important;
+  text-transform: uppercase !important;
+  padding: 0 16px !important;
+  margin: 0 0 0 0 !important;
+}
+
+/* Companion cards fill available height on home */
+.subj-companion-grid {
+  padding: 0 12px 8px !important;
+  gap: 8px !important;
+}
+.scc-card {
+  padding: 12px !important;
+}
+
 </style>
 
 <body>
@@ -1119,55 +1236,38 @@ body {
 ============================================================ -->
 <section class="screen active" id="scr-home">
   <div class="home-scroll">
-    <div class="home-hero">
-    <div class="hero-eyebrow">⚡ For Every Kid • Classes 1–4</div>
-    <div class="mascot-wrap">
-      <div class="mascot-speech" id="mascot-speech-home"></div>
-      <span class="mascot" id="mascot-home">🦊</span>
-    </div>
-    <h1 class="hero-title">Learning at<br/><span class="accent">Lightning Speed</span></h1>
-    <p class="hero-sub">Level up your pet, explore the map, and become a Maths Champion! ⚡</p>
-    <div class="level-bar-wrap">
-      <div class="level-row">
-        <div class="level-label">
-          <span id="home-level-name">Level 1 — Cub</span>
-          <span class="level-badge-sm" id="home-level-num">LVL 1</span>
+
+    <!-- Compact hero: mascot + level bar -->
+    <div class="home-hero-compact">
+      <div class="home-mascot-row">
+        <div class="home-mascot-wrap">
+          <div class="mascot-speech" id="mascot-speech-home"></div>
+          <span class="mascot home-mascot-sm" id="mascot-home">🦊</span>
         </div>
-        <div class="xp-to-next" id="home-xp-next">0 / 100 XP</div>
+        <div class="home-level-col">
+          <div class="home-greeting">⚡ Zipplearn</div>
+          <div class="home-level-name" id="home-level-name">Level 1 — Cub</div>
+          <div class="home-xp-row">
+            <div class="home-level-track"><div class="home-level-fill" id="home-level-fill" style="width:0%"></div></div>
+            <div class="home-xp-next" id="home-xp-next">0/100</div>
+          </div>
+        </div>
+        <div class="home-streak-pill">
+          🔥 <span id="streak-count-display">0</span>
+        </div>
       </div>
-      <div class="level-track"><div class="level-fill" id="home-level-fill" style="width:0%"></div></div>
+
+      <!-- Stats mini row -->
+      <div class="home-stats-mini">
+        <div class="hsm-chip">⭐ <span id="st-xp">0</span></div>
+        <div class="hsm-chip">🎮 <span id="st-played">0</span></div>
+        <div class="hsm-chip">✅ <span id="st-correct">0</span></div>
+        <div class="hsm-chip">🏆 <span id="st-streak">0</span></div>
+      </div>
     </div>
-  </div>
 
-  <div style="padding:0 20px;max-width:420px;margin:0 auto">
-    <div class="streak-cal">
-      <div class="streak-cal-title">🔥 DAILY STREAK</div>
-      <div class="streak-days" id="streak-days-row"></div>
-      <div class="streak-fire">Streak: <span id="streak-count-display">0</span> days 🔥</div>
-    </div>
-  </div>
-
-  <div class="stats-row">
-    <div class="stat-chip"><div class="stat-val" id="st-xp">0</div><div class="stat-lbl">⭐ Total XP</div></div>
-    <div class="stat-chip"><div class="stat-val" id="st-played">0</div><div class="stat-lbl">🎮 Played</div></div>
-    <div class="stat-chip"><div class="stat-val" id="st-streak">0</div><div class="stat-lbl">🔥 Best Streak</div></div>
-    <div class="stat-chip"><div class="stat-val" id="st-correct">0</div><div class="stat-lbl">✅ Correct</div></div>
-  </div>
-
-  <p class="section-heading" style="margin-top:4px">Quick shortcuts</p>
-  <div class="class-orbit">
-    <div class="class-orb c1" onclick="nav.openClass(1)"><div class="orb-ring"></div><div class="orb-num">1st</div><div class="orb-label">BEGINNER</div></div>
-    <div class="class-orb c2" onclick="nav.openClass(2)"><div class="orb-ring"></div><div class="orb-num">2nd</div><div class="orb-label">BUILDER</div></div>
-    <div class="class-orb c3" onclick="nav.openClass(3)"><div class="orb-ring"></div><div class="orb-num">3rd</div><div class="orb-label">EXPLORER</div></div>
-    <div class="class-orb c4" onclick="nav.openClass(4)"><div class="orb-ring"></div><div class="orb-num">4th</div><div class="orb-label">CHAMPION</div></div>
-  </div>
-
-  <p class="section-heading">My Badges</p>
-  <div class="badges-section">
-    <div class="badges-grid" id="badges-grid"></div>
-  </div>
-
-  <p class="section-heading" style="margin-top:8px">Subjects &amp; Companions</p>
+    <!-- Subject + companion cards — THE MAIN CONTENT -->
+    <p class="section-heading" style="margin-top:4px;margin-bottom:8px">Choose Your Subject</p>
   <div class="subj-companion-grid" id="subj-companion-grid">
 
     <!-- MATHS — Pet -->
@@ -1248,6 +1348,8 @@ body {
 
   </div>
 
+  <div id="badges-grid" style="display:none"></div>
+  <div id="streak-days-row" style="display:none"></div>
   </div><!-- /.home-scroll -->
 
   <!-- Bottom nav -->
@@ -2040,7 +2142,7 @@ const APP = (() => {
     });
     document.getElementById('scr-'+id)?.classList.add('active');
     const back = document.getElementById('nav-back');
-    if (back) { back.style.display=id!=='home'?'inline-flex':'none'; back.classList.toggle('show',id!=='home'); }
+    if (back) { back.classList.toggle('show', id!=='home'); }
     if (id==='home') { const t=document.querySelector('.logo-tagline'); if(t) t.textContent='FAST · FUN · SMART'; }
   }
 
