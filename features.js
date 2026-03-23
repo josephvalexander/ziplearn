@@ -5,8 +5,8 @@
 // TABS — tab router for home / map / pet / castle / lab screens
 // ================================================================
 const TABS = (() => {
-  const SCREENS  = { home:'scr-home', map:'scr-map', pet:'scr-pet', castle:'scr-castle', lab:'scr-lab' };
-  const TAGLINES = { home:'FAST · FUN · SMART', map:'ADVENTURE MAP', pet:'MY PET 🐣', castle:'CASTLE BUILDER 🏰', lab:'SCIENCE LAB 🔬' };
+  const SCREENS  = { home:'scr-home', map:'scr-map', pet:'scr-pet', castle:'scr-castle', lab:'scr-lab', garden:'scr-garden' };
+  const TAGLINES = { home:'FAST · FUN · SMART', map:'ADVENTURE MAP', pet:'MY PET 🐣', castle:'CASTLE BUILDER 🏰', lab:'SCIENCE LAB 🔬', garden:'MY GARDEN 🌿' };
   let current = 'home';
 
   function show(tab) {
@@ -32,6 +32,7 @@ const TABS = (() => {
     if (tab === 'pet')    PET.render();
     if (tab === 'castle') CASTLE.render();
     if (tab === 'lab')    LAB.render();
+    if (tab === 'garden') GARDEN.render();
   }
 
   APP.nav.goHome = function() { show('home'); if(typeof APP.refreshStats==='function') APP.refreshStats(); };
@@ -62,6 +63,12 @@ const ADVENTURE_MAP = (() => {
       { class:2, name:'Story Forest',       region:'ENGLISH · CLASS 2', icon:'📚', color:'#bf7fff', desc:'Every tree holds a tale!' },
       { class:3, name:'Grammar Peaks',      region:'ENGLISH · CLASS 3', icon:'✍️', color:'#c084fc', desc:'Master tenses and clauses!' },
       { class:4, name:'Author\'s Citadel',  region:'ENGLISH · CLASS 4', icon:'🏰', color:'#ffd700', desc:'Write your own epic story!', badge:'new' },
+    ],
+    evs: [
+      { class:1, name:'Community Garden',   region:'EVS/GK · CLASS 1', icon:'🌻', color:'#22c55e', desc:'Plants, animals and helpers around us!' },
+      { class:2, name:'Discovery Park',     region:'EVS/GK · CLASS 2', icon:'🦁', color:'#4ade80', desc:'India, the world and wild wonders!' },
+      { class:3, name:'Knowledge Forest',   region:'EVS/GK · CLASS 3', icon:'🌳', color:'#16a34a', desc:'Geography, history and science GK!' },
+      { class:4, name:'World Explorer HQ',  region:'EVS/GK · CLASS 4', icon:'🌍', color:'#ffd700', desc:'Master GK champion of the world!', badge:'new' },
     ],
   };
 
@@ -134,7 +141,7 @@ const ADVENTURE_MAP = (() => {
     // Tab pills for subject selection
     const activeSubject = ADVENTURE_MAP._activeSubject || 'math';
     let html = `<div class="map-tab-row">
-      ${['math','sci','eng'].map(s => {
+      ${['math','sci','eng','evs'].map(s => {
         const d = SUBJECT_REGISTRY[s];
         return `<button class="map-tab-btn ${s===activeSubject?'mta-active':''}" onclick="ADVENTURE_MAP.setSubject('${s}')"
                   style="${s===activeSubject?`background:${d.color}22;border-color:${d.color};color:${d.color}`:''}">
@@ -738,6 +745,7 @@ new MutationObserver(mutations => {
       if (subj === 'math') PET.onXPEarned();
       if (subj === 'eng')  CASTLE.onEngXP();
       if (subj === 'sci')  LAB.onSciXP();
+      if (subj === 'evs')  GARDEN.onEvsXP();
       ADVENTURE_MAP.render();
       break;
     }
@@ -749,5 +757,219 @@ setTimeout(() => {
   PET.render();
   CASTLE.render();
   LAB.render();
+  GARDEN.render();
   ADVENTURE_MAP.render();
 }, 300);
+
+// ================================================================
+// GARDEN — EVS/GK companion  (grow a garden, plant by plant)
+// ================================================================
+const GARDEN = (() => {
+  const KEY = 'zl_garden';
+  const XP_PER_SEED = 16;
+
+  const STAGES = [
+    { xp:0,   name:'Bare Soil',      label:'Start planting!',        color:'#22c55e', icon:'🌱', desc:'Your garden journey begins…' },
+    { xp:40,  name:'First Sprout',   label:'Something is growing!',  color:'#4ade80', icon:'🌿', desc:'A tiny green shoot appears!' },
+    { xp:100, name:'Flower Patch',   label:'Colours blooming!',      color:'#86efac', icon:'🌼', desc:'Your garden bursts into colour!' },
+    { xp:200, name:'Veggie Plot',    label:'Food is growing!',        color:'#16a34a', icon:'🥦', desc:'Vegetables fill your garden!' },
+    { xp:380, name:'Fruit Trees',    label:'Trees are fruiting!',     color:'#15803d', icon:'🌳', desc:'A small orchard takes shape!' },
+    { xp:600, name:'Butterfly Garden',label:'Wildlife arrives!',     color:'#22c55e', icon:'🦋', desc:'Butterflies and bees have moved in!' },
+    { xp:900, name:'Nature Reserve', label:'Almost complete!',        color:'#ffd700', icon:'🌺', desc:'A thriving mini nature reserve!' },
+    { xp:1300,name:'World Garden',   label:'GK CHAMPION!',           color:'#ffd700', icon:'🌍', desc:'You know the whole wide world!', badge:'🏆' },
+  ];
+
+  const PHRASES = {
+    grow:    ['A new plant sprouts! 🌱','Your garden grows! 🌸','Knowledge blooms! 🌼','Great GK! 🌿'],
+    seed:    ['Seed planted! 🌱','Growing knowledge! 🌸','Garden expanding! 🌻','Nature thrives! 🦋'],
+    complete:['WORLD GARDEN COMPLETE! 🌍','GK CHAMPION! 🏆','ALL KNOWLEDGE GROWN! 🌟'],
+  };
+
+  function load(){const d={xp:0,seedsAvail:0,totalSeedsPlanted:0};try{return{...d,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return d}}
+  function save(d){localStorage.setItem(KEY,JSON.stringify(d))}
+  function getStage(xp){let s=STAGES[0];for(const st of STAGES){if(xp>=st.xp)s=st;else break;}return s;}
+  function syncSeeds(d){const fe=Math.floor((APP.state.evsXp||0)/XP_PER_SEED);d.seedsAvail=Math.max(0,fe-(d.totalSeedsPlanted||0));return d;}
+
+  function drawGarden(stage) {
+    const svg = document.getElementById('garden-svg');
+    if (!svg) return;
+    const c = stage.color, lt = c+'33', idx = STAGES.indexOf(stage);
+    let parts = '';
+
+    // Sky gradient backdrop
+    parts += `<rect x="0" y="0" width="150" height="155" fill="#0f0520" rx="8" opacity="0.3"/>`;
+
+    // Ground
+    parts += `<rect x="5" y="120" width="140" height="30" rx="6" fill="${lt}" stroke="${c}" stroke-width="1"/>`;
+
+    // Sun (always)
+    parts += `<circle cx="125" cy="22" r="14" fill="#ffd700" opacity="0.8"/>`;
+    parts += `<line x1="125" y1="4" x2="125" y2="10" stroke="#ffd700" stroke-width="2"/>`;
+    parts += `<line x1="143" y1="22" x2="137" y2="22" stroke="#ffd700" stroke-width="2"/>`;
+    parts += `<line x1="137" y1="10" x2="133" y2="14" stroke="#ffd700" stroke-width="2"/>`;
+
+    // Stage 0: just soil
+    if (idx === 0) {
+      parts += `<text x="75" y="115" text-anchor="middle" font-size="10" fill="${c}" opacity="0.6">Plant a seed to begin!</text>`;
+    }
+
+    // Stage 1: first sprout
+    if (idx >= 1) {
+      parts += `<line x1="75" y1="120" x2="75" y2="95" stroke="#22c55e" stroke-width="3"/>`;
+      parts += `<ellipse cx="65" cy="102" rx="10" ry="6" fill="#4ade80" opacity="0.9" transform="rotate(-30,65,102)"/>`;
+      parts += `<ellipse cx="85" cy="108" rx="10" ry="6" fill="#4ade80" opacity="0.9" transform="rotate(30,85,108)"/>`;
+    }
+
+    // Stage 2: flowers
+    if (idx >= 2) {
+      // Left flower
+      parts += `<line x1="35" y1="120" x2="35" y2="85" stroke="#22c55e" stroke-width="2.5"/>`;
+      parts += `<circle cx="35" cy="80" r="10" fill="#ffd700" opacity="0.8"/>`;
+      parts += `<circle cx="35" cy="80" r="5" fill="#ff9500"/>`;
+      // Right flower
+      parts += `<line x1="115" y1="120" x2="115" y2="88" stroke="#22c55e" stroke-width="2.5"/>`;
+      parts += `<circle cx="115" cy="83" r="9" fill="#e879f9" opacity="0.8"/>`;
+      parts += `<circle cx="115" cy="83" r="4" fill="#ffd700"/>`;
+    }
+
+    // Stage 3: vegetables
+    if (idx >= 3) {
+      // Carrot
+      parts += `<polygon points="55,120 60,120 57.5,100" fill="#ff9500"/>`;
+      parts += `<path d="M53,102 Q57.5,98 62,102" fill="#22c55e"/>`;
+      // Tomato
+      parts += `<circle cx="95" cy="112" r="8" fill="#ff4757" opacity="0.9"/>`;
+      parts += `<line x1="95" y1="104" x2="95" y2="99" stroke="#22c55e" stroke-width="2"/>`;
+      parts += `<path d="M90,102 Q95,99 100,102" fill="none" stroke="#22c55e" stroke-width="1.5"/>`;
+    }
+
+    // Stage 4: fruit trees
+    if (idx >= 4) {
+      // Tree left
+      parts += `<rect x="18" y="88" width="8" height="32" fill="#8b5e3c" rx="2"/>`;
+      parts += `<circle cx="22" cy="82" r="18" fill="#22c55e" opacity="0.85"/>`;
+      parts += `<circle cx="16" cy="78" r="6" fill="#ff4757" opacity="0.8"/>`;
+      parts += `<circle cx="28" cy="75" r="5" fill="#ff9500" opacity="0.8"/>`;
+      // Tree right
+      parts += `<rect x="120" y="88" width="8" height="32" fill="#8b5e3c" rx="2"/>`;
+      parts += `<circle cx="124" cy="82" r="16" fill="#4ade80" opacity="0.85"/>`;
+      parts += `<circle cx="118" cy="78" r="5" fill="#ffd700" opacity="0.9"/>`;
+      parts += `<circle cx="130" cy="76" r="5" fill="#ffd700" opacity="0.8"/>`;
+    }
+
+    // Stage 5: butterflies
+    if (idx >= 5) {
+      parts += `<path d="M58,55 C50,45 40,48 45,58 C50,65 58,62 58,55 Z" fill="#a855f7" opacity="0.8"/>`;
+      parts += `<path d="M58,55 C66,45 76,48 71,58 C66,65 58,62 58,55 Z" fill="#c084fc" opacity="0.8"/>`;
+      parts += `<line x1="58" y1="52" x2="58" y2="60" stroke="#1a0533" stroke-width="1.5"/>`;
+      // Bee
+      parts += `<ellipse cx="95" cy="48" rx="7" ry="4" fill="#ffd700"/>`;
+      parts += `<line x1="88" y1="48" x2="88" y2="48" stroke="#1a0533" stroke-width="3"/>`;
+      parts += `<ellipse cx="91" cy="45" rx="5" ry="3" fill="white" opacity="0.6"/>`;
+    }
+
+    // Stage 6: rainbow & birds
+    if (idx >= 6) {
+      parts += `<path d="M5,50 Q75,10 145,50" fill="none" stroke="url(#gRainbow)" stroke-width="5" opacity="0.4"/>`;
+      parts += `<path d="M25,38 Q30,33 35,38" fill="none" stroke="${c}" stroke-width="2"/>`;
+      parts += `<path d="M45,28 Q50,23 55,28" fill="none" stroke="${c}" stroke-width="2"/>`;
+      parts += `<defs><linearGradient id="gRainbow" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff0"/><stop offset="50%" stop-color="#0f0"/><stop offset="100%" stop-color="#00f"/></linearGradient></defs>`;
+    }
+
+    // Stage 7: globe overlay
+    if (idx >= 7) {
+      parts = `<circle cx="75" cy="75" r="65" fill="${c}" opacity="0.07"/>` + parts;
+      parts += `<text x="75" y="18" text-anchor="middle" font-size="16">🌍</text>`;
+    }
+
+    svg.innerHTML = parts;
+  }
+
+  function render() {
+    let d = load(); d = syncSeeds(d); save(d);
+    const xp = APP.state.evsXp || 0;
+    const stage = getStage(xp);
+    const idx = STAGES.indexOf(stage);
+    const next = STAGES[idx + 1];
+
+    ['garden-stage-lbl','garden-name-el'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = id.includes('stage') ? stage.name.toUpperCase() : '🌿 My Garden';
+    });
+    const evoTxt = document.getElementById('garden-evo-txt');
+    if (evoTxt) evoTxt.textContent = stage.label;
+    const xpHdr = document.getElementById('garden-xp-hdr');
+    if (xpHdr) xpHdr.textContent = xp;
+
+    drawGarden(stage);
+
+    const xBar = document.getElementById('garden-pbar-xp'), xLbl = document.getElementById('garden-pbar-xp-lbl');
+    if (xBar && next) {
+      const pct = ((xp - stage.xp) / (next.xp - stage.xp)) * 100;
+      xBar.style.width = Math.min(100, Math.round(pct)) + '%';
+      xBar.style.background = stage.color;
+      if (xLbl) xLbl.textContent = `${xp - stage.xp}/${next.xp - stage.xp} to ${next.name}`;
+    } else if (xBar) {
+      xBar.style.width = '100%';
+      if (xLbl) xLbl.textContent = '🌍 WORLD GARDEN!';
+    }
+
+    const row = document.getElementById('garden-evo-row');
+    if (row) {
+      row.innerHTML = STAGES.map((s, i) => {
+        const reached = xp >= s.xp, isCur = s === stage;
+        return `<div class="evo-pip ${reached?'ep-reached':''} ${isCur?'ep-current':''}">
+          <div class="evo-pip-dot">${reached ? s.icon : '?'}</div>
+          <div class="evo-pip-lbl">${s.name.split(' ')[0]}</div>
+        </div>`;
+      }).join('');
+    }
+
+    const btn = document.getElementById('garden-seed-btn');
+    const avail = d.seedsAvail || 0;
+    if (btn) {
+      btn.disabled = avail <= 0;
+      btn.textContent = avail > 0 ? `🌱 Plant Seed (${avail} left)` : '🌱 Play EVS/GK to earn seeds!';
+    }
+
+    const tipT = document.getElementById('garden-tip-title'), tipB = document.getElementById('garden-tip-body');
+    if (avail > 0 && tipT) {
+      tipT.textContent = `🌱 ${avail} seed${avail>1?'s':''} ready to plant!`;
+      if (tipB) tipB.textContent = 'Tap "Plant Seed" to grow your garden!';
+    } else if (tipT) {
+      tipT.textContent = '🌿 Play EVS/GK games to earn seeds!';
+      if (tipB) tipB.textContent = stage.desc;
+    }
+
+    setTimeout(() => gardenSpeak(idx >= 7 ? 'complete' : 'grow'), 600);
+  }
+
+  function gardenSpeak(pool) {
+    const msgs = PHRASES[pool] || PHRASES.grow;
+    const b = document.getElementById('garden-speech'); if (!b) return;
+    b.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    b.classList.add('show'); clearTimeout(b._t); b._t = setTimeout(() => b.classList.remove('show'), 2400);
+  }
+
+  function plantSeed() {
+    let d = load(); d = syncSeeds(d);
+    if ((d.seedsAvail || 0) <= 0) return;
+    d.seedsAvail--;
+    d.totalSeedsPlanted = (d.totalSeedsPlanted || 0) + 1;
+    APP.state.evsXp = (APP.state.evsXp || 0) + XP_PER_SEED;
+    save(d);
+    PARTICLES.burst(window.innerWidth/2, window.innerHeight*0.4, 14, ['#22c55e','#4ade80','#ffd700','#86efac']);
+    SOUND.correct();
+    gardenSpeak('seed');
+    render();
+  }
+
+  function onEvsXP() {
+    if ((APP.state.selectedSubject || 'math') !== 'evs') return;
+    let d = load(); d = syncSeeds(d); save(d);
+    const dot = document.getElementById('garden-seed-dot');
+    if (dot) dot.style.display = d.seedsAvail > 0 ? 'flex' : 'none';
+  }
+
+  return { render, plantSeed, onEvsXP, gardenSpeak, getStage, load };
+})();

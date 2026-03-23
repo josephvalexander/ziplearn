@@ -11,6 +11,7 @@ const APP = (() => {
     // Per-subject XP (Science & English companions)
     sciXp:      +localStorage.getItem('lv_sci_xp')  || 0,
     engXp:      +localStorage.getItem('lv_eng_xp')  || 0,
+    evsXp:      +localStorage.getItem('lv_evs_xp')  || 0,
     // session
     selectedClass:   1,
     selectedSubject: 'math',
@@ -25,6 +26,7 @@ const APP = (() => {
     localStorage.setItem('lv_streak',  S.bestStreak);
     localStorage.setItem('lv_sci_xp',  S.sciXp);
     localStorage.setItem('lv_eng_xp',  S.engXp);
+    localStorage.setItem('lv_evs_xp',  S.evsXp);
   }
 
   function refreshStats() {
@@ -84,7 +86,7 @@ const APP = (() => {
 
   // ── SCREEN RENDERER ─────────────────────────────────────────
   function showScreen(id) {
-    ['scr-home','scr-games','scr-play','scr-map','scr-pet','scr-castle','scr-lab'].forEach(s => {
+    ['scr-home','scr-games','scr-play','scr-map','scr-pet','scr-castle','scr-lab','scr-garden'].forEach(s => {
       document.getElementById(s)?.classList.remove('active');
     });
     document.getElementById('scr-'+id)?.classList.add('active');
@@ -167,6 +169,7 @@ const APP = (() => {
     // Route XP to the right subject bucket
     if (S.selectedSubject === 'sci') S.sciXp += 5;
     else if (S.selectedSubject === 'eng') S.engXp += 5;
+    else if (S.selectedSubject === 'evs') S.evsXp += 5;
     save(); lightDot(); floatFeedback('✓','#2ed573'); setTimeout(()=>nextOrFinish(),850);
   }
   function onWrong() {

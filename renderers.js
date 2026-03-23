@@ -1612,3 +1612,373 @@ Object.assign(GAME_RENDERERS, SCI_RENDERERS, ENG_RENDERERS);
   });
 
 })();
+
+// ================================================================
+// EVS / GK RENDERERS — NCERT Looking Around / Aas Paas Classes 1-4
+// ================================================================
+(function addEVSPools() {
+  function mcq(pc, question, options, correct, emoji) {
+    const opts = [...options].sort(() => Math.random() - 0.5);
+    pc.innerHTML = `
+      <div class="q-emoji">${emoji || '🌿'}</div>
+      <div class="q-text">${question}</div>
+      <div class="opts-grid opts-2">${opts.map(o =>
+        `<button class="opt-btn" data-ans="${o}" data-correct="${o===correct}">${o}</button>`
+      ).join('')}</div>`;
+    wireOpts(pc, correct);
+  }
+
+  const EVS_POOLS = {
+    evs_family1: [
+      {q:'Your mother\'s brother is your ___', opts:['Uncle','Cousin','Nephew','Grandpa'], correct:'Uncle', emoji:'👨‍👩‍👧'},
+      {q:'Which family member is usually the oldest?', opts:['Grandparent','Parent','Sibling','Cousin'], correct:'Grandparent', emoji:'👴'},
+      {q:'A family where grandparents live with parents is ___', opts:['Joint family','Nuclear family','Single family','Extended family'], correct:'Joint family', emoji:'🏘️'},
+      {q:'Your sibling is your ___', opts:['Brother or sister','Cousin','Friend','Neighbour'], correct:'Brother or sister', emoji:'👫'},
+      {q:'Who takes care of children and teaches them at home?', opts:['Parents','Strangers','Shopkeepers','Bus drivers'], correct:'Parents', emoji:'❤️'},
+    ],
+    evs_home1: [
+      {q:'Which room is food cooked in?', opts:['Kitchen','Bedroom','Bathroom','Hall'], correct:'Kitchen', emoji:'🍳'},
+      {q:'Where do we sleep at night?', opts:['Bedroom','Kitchen','Garden','Garage'], correct:'Bedroom', emoji:'🛏️'},
+      {q:'Which material keeps a house cool in hot weather?', opts:['Mud/clay','Glass','Metal','Plastic'], correct:'Mud/clay', emoji:'🏡'},
+      {q:'A house built on a boat is called a ___', opts:['Houseboat','Tent','Igloo','Cottage'], correct:'Houseboat', emoji:'⛵'},
+      {q:'An igloo is made of ___', opts:['Ice and snow','Wood','Brick','Mud'], correct:'Ice and snow', emoji:'🏔️'},
+    ],
+    evs_community1: [
+      {q:'Who treats sick people?', opts:['Doctor','Teacher','Farmer','Engineer'], correct:'Doctor', emoji:'👨‍⚕️'},
+      {q:'Who grows food for everyone?', opts:['Farmer','Baker','Chef','Shopkeeper'], correct:'Farmer', emoji:'👨‍🌾'},
+      {q:'Who puts out fires?', opts:['Firefighter','Police officer','Soldier','Doctor'], correct:'Firefighter', emoji:'🚒'},
+      {q:'Who teaches children in school?', opts:['Teacher','Doctor','Nurse','Driver'], correct:'Teacher', emoji:'👩‍🏫'},
+      {q:'Who delivers letters and parcels?', opts:['Postman','Policeman','Milkman','Baker'], correct:'Postman', emoji:'📬'},
+    ],
+    evs_plants_gk1: [
+      {q:'Which part of the plant do we eat in carrots?', opts:['Root','Leaf','Flower','Fruit'], correct:'Root', emoji:'🥕'},
+      {q:'We eat the ___ of a spinach plant', opts:['Leaf','Root','Flower','Seed'], correct:'Leaf', emoji:'🥬'},
+      {q:'Cotton comes from the ___ of the cotton plant', opts:['Fruit/boll','Stem','Root','Leaf'], correct:'Fruit/boll', emoji:'🧵'},
+      {q:'Which plant is used as medicine for colds?', opts:['Tulsi','Rose','Mango','Neem'], correct:'Tulsi', emoji:'🌿'},
+      {q:'Rubber is obtained from the ___ of a rubber tree', opts:['Latex (sap)','Leaves','Roots','Bark'], correct:'Latex (sap)', emoji:'🌳'},
+    ],
+    evs_animals_gk1: [
+      {q:'Which animal is called the ship of the desert?', opts:['Camel','Horse','Elephant','Donkey'], correct:'Camel', emoji:'🐪'},
+      {q:'The national animal of India is the ___', opts:['Tiger','Lion','Elephant','Leopard'], correct:'Tiger', emoji:'🐅'},
+      {q:'Which animal gives us wool?', opts:['Sheep','Cow','Hen','Goat'], correct:'Sheep', emoji:'🐑'},
+      {q:'A silkworm produces ___', opts:['Silk','Cotton','Wool','Jute'], correct:'Silk', emoji:'🦋'},
+      {q:'Which animal is known for its excellent memory?', opts:['Elephant','Dog','Horse','Parrot'], correct:'Elephant', emoji:'🐘'},
+    ],
+    evs_food_gk1: [
+      {q:'Which vitamin do we get from sunlight?', opts:['Vitamin D','Vitamin C','Vitamin A','Vitamin B'], correct:'Vitamin D', emoji:'☀️'},
+      {q:'Which food is rich in protein?', opts:['Eggs and pulses','Rice','Sugar','Oil'], correct:'Eggs and pulses', emoji:'🥚'},
+      {q:'Which fruit is rich in Vitamin C?', opts:['Orange','Banana','Apple','Mango'], correct:'Orange', emoji:'🍊'},
+      {q:'Milk is good for ___ because it has calcium', opts:['Bones and teeth','Eyes only','Skin only','Hair only'], correct:'Bones and teeth', emoji:'🥛'},
+      {q:'Which is a junk food we should eat less of?', opts:['Chips and soda','Fruits','Vegetables','Whole grains'], correct:'Chips and soda', emoji:'🍟'},
+    ],
+    evs_water_gk1: [
+      {q:'The largest source of fresh water on Earth is ___', opts:['Glaciers and ice caps','Oceans','Lakes','Rivers'], correct:'Glaciers and ice caps', emoji:'🧊'},
+      {q:'We should drink about ___ glasses of water a day', opts:['8','2','15','1'], correct:'8', emoji:'💧'},
+      {q:'Water is cleaned at a ___', opts:['Water treatment plant','Lake','River','Pond'], correct:'Water treatment plant', emoji:'🏭'},
+      {q:'Rainwater harvesting means ___', opts:['Collecting and storing rainwater','Wasting rainwater','Polluting water','Selling water'], correct:'Collecting and storing rainwater', emoji:'🌧️'},
+      {q:'The water cycle is powered by ___', opts:['The sun','The moon','Wind only','Gravity only'], correct:'The sun', emoji:'☀️'},
+    ],
+    evs_transport_gk: [
+      {q:'The national vehicle of India is the ___', opts:['Elephant','Camel','Bullock cart','Horse'], correct:'Elephant', emoji:'🐘'},
+      {q:'Which is the fastest mode of transport?', opts:['Aeroplane','Train','Ship','Car'], correct:'Aeroplane', emoji:'✈️'},
+      {q:'A submarine travels ___', opts:['Underwater','Underground','In air','On rails'], correct:'Underwater', emoji:'🌊'},
+      {q:'The first railway in India ran from ___ to ___', opts:['Mumbai to Thane','Delhi to Agra','Chennai to Bangalore','Kolkata to Howrah'], correct:'Mumbai to Thane', emoji:'🚂'},
+      {q:'A helicopter can ___', opts:['Take off and land vertically','Only fly forward','Only fly over water','Only carry cargo'], correct:'Take off and land vertically', emoji:'🚁'},
+    ],
+    evs_safety1: [
+      {q:'At a red traffic light, you should ___', opts:['Stop','Go fast','Slow down only','Honk'], correct:'Stop', emoji:'🚦'},
+      {q:'You should always cross the road at a ___', opts:['Zebra crossing','Middle of the road','Near a bend','Between cars'], correct:'Zebra crossing', emoji:'🦓'},
+      {q:'In case of a fire, you should ___', opts:['Evacuate calmly and call for help','Hide under the bed','Open windows','Use elevator'], correct:'Evacuate calmly and call for help', emoji:'🔥'},
+      {q:'You should not talk to ___', opts:['Strangers who offer gifts','Teachers','Parents','Friends'], correct:'Strangers who offer gifts', emoji:'⚠️'},
+      {q:'The emergency phone number in India is ___', opts:['112','100','101','999'], correct:'112', emoji:'📞'},
+    ],
+    evs_festivals1: [
+      {q:'Diwali is the festival of ___', opts:['Lights','Colours','Harvest','New Year'], correct:'Lights', emoji:'🪔'},
+      {q:'Holi is the festival of ___', opts:['Colours','Lights','Fasting','Lanterns'], correct:'Colours', emoji:'🎨'},
+      {q:'Eid-ul-Fitr comes after the month of ___', opts:['Ramadan','Diwali','Christmas','Navratri'], correct:'Ramadan', emoji:'🌙'},
+      {q:'Christmas is celebrated on ___', opts:['25 December','1 January','15 August','26 January'], correct:'25 December', emoji:'🎄'},
+      {q:'Pongal is a harvest festival celebrated in ___', opts:['Tamil Nadu','Punjab','Gujarat','Rajasthan'], correct:'Tamil Nadu', emoji:'🌾'},
+    ],
+    evs_india_gk1: [
+      {q:'The national flag of India has ___ colours', opts:['3 — saffron, white, green','2','4','5'], correct:'3 — saffron, white, green', emoji:'🇮🇳'},
+      {q:'The national animal of India is the ___', opts:['Tiger','Peacock','Elephant','Cow'], correct:'Tiger', emoji:'🐅'},
+      {q:'The national bird of India is the ___', opts:['Peacock','Sparrow','Eagle','Parrot'], correct:'Peacock', emoji:'🦚'},
+      {q:'India\'s Independence Day is on ___', opts:['15 August','26 January','2 October','14 November'], correct:'15 August', emoji:'🎉'},
+      {q:'The national flower of India is the ___', opts:['Lotus','Rose','Sunflower','Marigold'], correct:'Lotus', emoji:'🪷'},
+    ],
+    evs_body_gk1: [
+      {q:'Which organ pumps blood through the body?', opts:['Heart','Brain','Lungs','Kidney'], correct:'Heart', emoji:'❤️'},
+      {q:'Which organ controls breathing?', opts:['Lungs','Heart','Liver','Kidney'], correct:'Lungs', emoji:'🫁'},
+      {q:'Which organ filters waste from the blood?', opts:['Kidney','Heart','Lungs','Liver'], correct:'Kidney', emoji:'🫘'},
+      {q:'The largest organ of the body is ___', opts:['Skin','Liver','Lungs','Stomach'], correct:'Skin', emoji:'🧴'},
+      {q:'Which organ controls all body functions?', opts:['Brain','Heart','Lungs','Kidney'], correct:'Brain', emoji:'🧠'},
+    ],
+    evs_family2: [
+      {q:'People living near your house are called ___', opts:['Neighbours','Strangers','Relatives','Friends only'], correct:'Neighbours', emoji:'🏘️'},
+      {q:'A post office is a place where ___', opts:['Letters and parcels are handled','Food is sold','People are treated','Students study'], correct:'Letters and parcels are handled', emoji:'📮'},
+      {q:'A bank is a place to ___', opts:['Save money and get loans','Buy food','Study','Worship'], correct:'Save money and get loans', emoji:'🏦'},
+      {q:'A library is a place to ___', opts:['Borrow and read books','Watch movies','Buy clothes','Eat food'], correct:'Borrow and read books', emoji:'📚'},
+      {q:'A market is a place to ___', opts:['Buy and sell goods','Study','Pray','Exercise'], correct:'Buy and sell goods', emoji:'🛒'},
+    ],
+    evs_food_gk2: [
+      {q:'From field to plate, who grows our food?', opts:['Farmer','Chef','Shopkeeper','Driver'], correct:'Farmer', emoji:'👨‍🌾'},
+      {q:'Rice is grown mainly in ___', opts:['Wet paddy fields','Dry deserts','Cold mountains','Forests'], correct:'Wet paddy fields', emoji:'🌾'},
+      {q:'Which state is known as the "Wheat Bowl" of India?', opts:['Punjab','Kerala','Tamil Nadu','Gujarat'], correct:'Punjab', emoji:'🌾'},
+      {q:'Pasteurisation of milk kills ___', opts:['Harmful bacteria','Vitamins','Proteins','All nutrients'], correct:'Harmful bacteria', emoji:'🥛'},
+      {q:'Which food is preserved by pickling (adding salt/vinegar)?', opts:['Mango pickle','Fresh fruits','Hot food','Boiled rice'], correct:'Mango pickle', emoji:'🥭'},
+    ],
+    evs_plants_gk2: [
+      {q:'The Amazon rainforest is called the "lungs of the Earth" because it ___', opts:['Produces huge amounts of oxygen','Is very large','Has many animals','Is very old'], correct:'Produces huge amounts of oxygen', emoji:'🌳'},
+      {q:'Deforestation means ___', opts:['Cutting down forests','Planting trees','Growing forests','Protecting trees'], correct:'Cutting down forests', emoji:'🪓'},
+      {q:'Neem is used as a natural ___', opts:['Pesticide and medicine','Food','Building material','Fuel only'], correct:'Pesticide and medicine', emoji:'🌿'},
+      {q:'The banyan tree is the national tree of ___', opts:['India','USA','China','Brazil'], correct:'India', emoji:'🌳'},
+      {q:'Mangrove forests grow in ___', opts:['Coastal/swampy areas','Deserts','Mountains','Arctic'], correct:'Coastal/swampy areas', emoji:'🌊'},
+    ],
+    evs_animals_gk2: [
+      {q:'Project Tiger was launched in India to save ___', opts:['Bengal tiger','African lion','Snow leopard','One-horned rhino'], correct:'Bengal tiger', emoji:'🐅'},
+      {q:'One-horned rhinoceros is found mainly in ___', opts:['Kaziranga, Assam','Sundarbans','Gir Forest','Corbett Park'], correct:'Kaziranga, Assam', emoji:'🦏'},
+      {q:'The Asiatic lion is found only in ___', opts:['Gir Forest, Gujarat','Sundarbans, WB','Corbett, UK','Ranthambore, RJ'], correct:'Gir Forest, Gujarat', emoji:'🦁'},
+      {q:'Migratory birds travel to India in ___', opts:['Winter from colder regions','Summer','Monsoon only','All year round'], correct:'Winter from colder regions', emoji:'🦢'},
+      {q:'An animal that is extinct no longer ___', opts:['Exists anywhere on Earth','Lives in forests','Eats plants','Has young ones'], correct:'Exists anywhere on Earth', emoji:'🦕'},
+    ],
+    evs_earth1: [
+      {q:'How many continents are there on Earth?', opts:['7','5','6','8'], correct:'7', emoji:'🌍'},
+      {q:'The largest continent is ___', opts:['Asia','Africa','North America','Europe'], correct:'Asia', emoji:'🗺️'},
+      {q:'The largest ocean is the ___', opts:['Pacific','Atlantic','Indian','Arctic'], correct:'Pacific', emoji:'🌊'},
+      {q:'The equator divides Earth into ___', opts:['Northern and Southern hemispheres','Eastern and Western halves','Two countries','Two time zones'], correct:'Northern and Southern hemispheres', emoji:'🌐'},
+      {q:'India is located in the ___ hemisphere', opts:['Northern','Southern','Both','Western only'], correct:'Northern', emoji:'🇮🇳'},
+    ],
+    evs_seasons_gk: [
+      {q:'India\'s monsoon season is from ___', opts:['June to September','December to February','March to May','October to November'], correct:'June to September', emoji:'🌧️'},
+      {q:'Which state receives the highest rainfall in India?', opts:['Meghalaya (Cherrapunji)','Rajasthan','Gujarat','Punjab'], correct:'Meghalaya (Cherrapunji)', emoji:'☔'},
+      {q:'The Thar Desert in Rajasthan is very ___', opts:['Hot and dry','Cold and wet','Cold and dry','Hot and wet'], correct:'Hot and dry', emoji:'🏜️'},
+      {q:'In winter, the Himalayas get heavy ___', opts:['Snowfall','Rainfall','Heatwaves','Cyclones'], correct:'Snowfall', emoji:'❄️'},
+      {q:'A cyclone is a powerful ___', opts:['Rotating storm','Type of rain','Type of cloud','Mountain wind'], correct:'Rotating storm', emoji:'🌀'},
+    ],
+    evs_india_gk2: [
+      {q:'The capital of India is ___', opts:['New Delhi','Mumbai','Kolkata','Chennai'], correct:'New Delhi', emoji:'🏛️'},
+      {q:'The capital of Maharashtra is ___', opts:['Mumbai','Pune','Nagpur','Nashik'], correct:'Mumbai', emoji:'🌆'},
+      {q:'The Taj Mahal is in ___', opts:['Agra, UP','Delhi','Jaipur','Lucknow'], correct:'Agra, UP', emoji:'🕌'},
+      {q:'The longest river in India is ___', opts:['Ganga','Yamuna','Brahmaputra','Godavari'], correct:'Ganga', emoji:'🌊'},
+      {q:'Which state has the longest coastline in India?', opts:['Gujarat','Tamil Nadu','Kerala','Maharashtra'], correct:'Gujarat', emoji:'🌊'},
+    ],
+    evs_sports1: [
+      {q:'The national sport of India is ___', opts:['Hockey','Cricket','Kabaddi','Football'], correct:'Hockey', emoji:'🏑'},
+      {q:'Chess was invented in ___', opts:['India','China','Greece','Egypt'], correct:'India', emoji:'♟️'},
+      {q:'Sachin Tendulkar is famous for ___', opts:['Cricket','Hockey','Football','Tennis'], correct:'Cricket', emoji:'🏏'},
+      {q:'The Olympic Games are held every ___ years', opts:['4','2','5','10'], correct:'4', emoji:'🏅'},
+      {q:'Badminton was invented in ___', opts:['India (British era)','England','China','Japan'], correct:'India (British era)', emoji:'🏸'},
+    ],
+    evs_space_gk1: [
+      {q:'ISRO stands for ___', opts:['Indian Space Research Organisation','International Space Research Office','India Space Rocket Organisation','Indian Satellite Research Operations'], correct:'Indian Space Research Organisation', emoji:'🚀'},
+      {q:'India\'s first satellite was ___', opts:['Aryabhata','Chandrayaan','Mangalyaan','INSAT'], correct:'Aryabhata', emoji:'🛰️'},
+      {q:'Chandrayaan-3 successfully landed on the Moon in ___', opts:['2023','2019','2021','2024'], correct:'2023', emoji:'🌕'},
+      {q:'The first Indian in space was ___', opts:['Rakesh Sharma','Kalpana Chawla','Sunita Williams','A P J Abdul Kalam'], correct:'Rakesh Sharma', emoji:'👨‍🚀'},
+      {q:'MOM (Mangalyaan) was India\'s mission to ___', opts:['Mars','Moon','Venus','Jupiter'], correct:'Mars', emoji:'🔴'},
+    ],
+    evs_gk_inventions1: [
+      {q:'Who invented the telephone?', opts:['Alexander Graham Bell','Thomas Edison','Marconi','Newton'], correct:'Alexander Graham Bell', emoji:'📞'},
+      {q:'Who invented the light bulb?', opts:['Thomas Edison','Bell','Watt','Tesla'], correct:'Thomas Edison', emoji:'💡'},
+      {q:'The wheel was one of the first great inventions. It was first used ___', opts:['Over 5,000 years ago','100 years ago','1,000 years ago','500 years ago'], correct:'Over 5,000 years ago', emoji:'🔵'},
+      {q:'Who invented the printing press?', opts:['Johannes Gutenberg','Newton','Einstein','Archimedes'], correct:'Johannes Gutenberg', emoji:'📰'},
+      {q:'The internet was developed mainly in ___', opts:['USA (ARPANET)','UK','India','Germany'], correct:'USA (ARPANET)', emoji:'🌐'},
+    ],
+    evs_health_gk1: [
+      {q:'We should wash our hands before ___', opts:['Eating and after using the toilet','Only after playing','Only before sleeping','Only in the morning'], correct:'Eating and after using the toilet', emoji:'🤲'},
+      {q:'Brushing teeth ___ a day is recommended', opts:['Twice','Once','Three times','Four times'], correct:'Twice', emoji:'🦷'},
+      {q:'Exercise helps keep our ___ healthy', opts:['Heart, lungs and muscles','Only muscles','Only lungs','Only bones'], correct:'Heart, lungs and muscles', emoji:'🏃'},
+      {q:'Which disease is spread by mosquitoes?', opts:['Malaria and dengue','Common cold','Typhoid','Cholera'], correct:'Malaria and dengue', emoji:'🦟'},
+      {q:'Vaccines protect us by ___', opts:['Training our immune system','Killing all germs immediately','Making us sleep','Cooling our body'], correct:'Training our immune system', emoji:'💉'},
+    ],
+    evs_env1: [
+      {q:'Reducing plastic waste is important because plastic ___', opts:['Does not decompose easily','Is very expensive','Is hard to make','Has no use'], correct:'Does not decompose easily', emoji:'♻️'},
+      {q:'Which gas causes acid rain?', opts:['Sulphur dioxide','Oxygen','Nitrogen','Carbon dioxide'], correct:'Sulphur dioxide', emoji:'🌧️'},
+      {q:'Organic farming avoids use of ___', opts:['Chemical pesticides','Water','Sunlight','Seeds'], correct:'Chemical pesticides', emoji:'🌱'},
+      {q:'The "Green Belt" movement is about ___', opts:['Planting trees to protect environment','Building parks','Painting walls green','Using green energy'], correct:'Planting trees to protect environment', emoji:'🌳'},
+      {q:'World Environment Day is on ___', opts:['5 June','22 April','16 September','21 March'], correct:'5 June', emoji:'🌍'},
+    ],
+    evs_india_gk3: [
+      {q:'The Himalayas are in ___', opts:['Northern India','Southern India','Eastern coast','Western coast'], correct:'Northern India', emoji:'🏔️'},
+      {q:'The Deccan Plateau covers most of ___', opts:['Peninsular India','Northern plains','North-East','Islands'], correct:'Peninsular India', emoji:'🗺️'},
+      {q:'The Ganga Plain is known for its ___ soil', opts:['Fertile alluvial','Rocky','Sandy','Clay'], correct:'Fertile alluvial', emoji:'🌾'},
+      {q:'The Western Ghats are famous for ___', opts:['Biodiversity and rainfall','Desert wildlife','Glaciers','Coal mines'], correct:'Biodiversity and rainfall', emoji:'🌿'},
+      {q:'The Brahmaputra river flows mainly through ___', opts:['Assam','Punjab','UP','MP'], correct:'Assam', emoji:'🌊'},
+    ],
+    evs_govt1: [
+      {q:'The head of the Indian government is the ___', opts:['Prime Minister','President','Chief Minister','Governor'], correct:'Prime Minister', emoji:'🏛️'},
+      {q:'The President of India is elected by ___', opts:['Elected members of Parliament and state legislatures','All citizens directly','Only the PM','Only Parliament'], correct:'Elected members of Parliament and state legislatures', emoji:'🗳️'},
+      {q:'India\'s Parliament has ___ houses', opts:['2 — Lok Sabha and Rajya Sabha','1','3','4'], correct:'2 — Lok Sabha and Rajya Sabha', emoji:'🏛️'},
+      {q:'The Lok Sabha has a maximum of ___ elected members', opts:['543','250','100','800'], correct:'543', emoji:'🗳️'},
+      {q:'India is a ___', opts:['Democratic republic','Monarchy','Dictatorship','Colony'], correct:'Democratic republic', emoji:'🇮🇳'},
+    ],
+    evs_freedom1: [
+      {q:'India became independent on ___', opts:['15 August 1947','26 January 1950','2 October 1869','30 January 1948'], correct:'15 August 1947', emoji:'🕊️'},
+      {q:'Mahatma Gandhi was known as the ___', opts:['Father of the Nation','Prime Minister','President','General'], correct:'Father of the Nation', emoji:'🕊️'},
+      {q:'The Dandi March (Salt March) was led by ___', opts:['Mahatma Gandhi','Nehru','Bose','Tilak'], correct:'Mahatma Gandhi', emoji:'🚶'},
+      {q:'Jawaharlal Nehru was India\'s ___ Prime Minister', opts:['First','Second','Third','Fourth'], correct:'First', emoji:'🌹'},
+      {q:'Subhas Chandra Bose formed the ___', opts:['Indian National Army (INA)','Indian National Congress','Quit India Movement','Non-cooperation movement'], correct:'Indian National Army (INA)', emoji:'⚔️'},
+    ],
+    evs_culture1: [
+      {q:'Bharatanatyam is a classical dance from ___', opts:['Tamil Nadu','Manipur','Kerala','Odisha'], correct:'Tamil Nadu', emoji:'💃'},
+      {q:'India has ___ official languages recognised by the Constitution', opts:['22','14','18','30'], correct:'22', emoji:'🗣️'},
+      {q:'The Taj Mahal was built by Mughal emperor ___', opts:['Shah Jahan','Akbar','Humayun','Aurangzeb'], correct:'Shah Jahan', emoji:'🕌'},
+      {q:'Yoga originated in ___', opts:['India','China','Egypt','Greece'], correct:'India', emoji:'🧘'},
+      {q:'The word "Namaste" is from which language?', opts:['Sanskrit','Hindi','Tamil','Bengali'], correct:'Sanskrit', emoji:'🙏'},
+    ],
+    evs_earth2: [
+      {q:'The North Pole is covered by ___', opts:['Arctic Ocean with ice','Land (Antarctica)','Tropical forest','Desert'], correct:'Arctic Ocean with ice', emoji:'🧊'},
+      {q:'The South Pole is on the continent of ___', opts:['Antarctica','Australia','Africa','South America'], correct:'Antarctica', emoji:'🐧'},
+      {q:'The Tropic of Cancer passes through ___', opts:['India','Brazil only','Australia','Europe'], correct:'India', emoji:'🌐'},
+      {q:'Australia is both a country and a ___', opts:['Continent','Ocean','Island only','Peninsula'], correct:'Continent', emoji:'🦘'},
+      {q:'The Prime Meridian (0° longitude) passes through ___', opts:['Greenwich, UK','New Delhi','New York','Tokyo'], correct:'Greenwich, UK', emoji:'🌍'},
+    ],
+    evs_animals_gk3: [
+      {q:'The Snow Leopard is found in ___', opts:['Himalayas','Sundarbans','Western Ghats','Deccan Plateau'], correct:'Himalayas', emoji:'🐆'},
+      {q:'The Gangetic Dolphin is the national aquatic animal of ___', opts:['India','Nepal','Bangladesh','China'], correct:'India', emoji:'🐬'},
+      {q:'IUCN stands for ___', opts:['International Union for Conservation of Nature','Indian Union for Conservation of Nature','International Unit for Climate News','Indian Union for Conservation of Nations'], correct:'International Union for Conservation of Nature', emoji:'🌿'},
+      {q:'A sanctuary is a place where animals are ___', opts:['Protected from hunting','Hunted','Sold','Trained'], correct:'Protected from hunting', emoji:'🦁'},
+      {q:'Corbett National Park is in ___', opts:['Uttarakhand','Rajasthan','Madhya Pradesh','Gujarat'], correct:'Uttarakhand', emoji:'🌳'},
+    ],
+    evs_env2: [
+      {q:'Solar panels convert sunlight into ___', opts:['Electricity','Heat only','Water','Air'], correct:'Electricity', emoji:'☀️'},
+      {q:'The Paris Agreement is about ___', opts:['Reducing greenhouse gas emissions','Trade between countries','Space exploration','Nuclear weapons'], correct:'Reducing greenhouse gas emissions', emoji:'🌍'},
+      {q:'Which gas is most responsible for global warming?', opts:['CO₂ (Carbon dioxide)','Oxygen','Nitrogen','Hydrogen'], correct:'CO₂ (Carbon dioxide)', emoji:'🏭'},
+      {q:'Biodegradable waste can be turned into ___ for plants', opts:['Compost','Plastic','Metal','Glass'], correct:'Compost', emoji:'🌱'},
+      {q:'Wind turbines generate ___', opts:['Electricity from wind','Water from air','Solar power','Fuel'], correct:'Electricity from wind', emoji:'💨'},
+    ],
+    evs_science_gk1: [
+      {q:'A rainbow has ___ colours', opts:['7','5','6','8'], correct:'7', emoji:'🌈'},
+      {q:'The loudness of sound is measured in ___', opts:['Decibels','Hertz','Watts','Metres'], correct:'Decibels', emoji:'🔊'},
+      {q:'Ice melts at ___ °C', opts:['0','100','37','-10'], correct:'0', emoji:'🧊'},
+      {q:'Water boils at ___ °C at sea level', opts:['100','0','50','75'], correct:'100', emoji:'♨️'},
+      {q:'The speed of light is approximately ___', opts:['300,000 km/s','300 km/s','3,000 km/s','30,000 km/s'], correct:'300,000 km/s', emoji:'💡'},
+    ],
+    evs_gk_records: [
+      {q:'The tallest mountain in the world is ___', opts:['Mount Everest','K2','Kangchenjunga','Lhotse'], correct:'Mount Everest', emoji:'🏔️'},
+      {q:'The largest country by area is ___', opts:['Russia','Canada','USA','China'], correct:'Russia', emoji:'🌍'},
+      {q:'The longest river in the world is ___', opts:['Nile','Amazon','Yangtze','Mississippi'], correct:'Nile', emoji:'🌊'},
+      {q:'The smallest country in the world is ___', opts:['Vatican City','Monaco','San Marino','Liechtenstein'], correct:'Vatican City', emoji:'🏙️'},
+      {q:'The largest desert in the world is ___', opts:['Sahara','Arabian','Gobi','Thar'], correct:'Sahara', emoji:'🏜️'},
+    ],
+    evs_health_gk2: [
+      {q:'Scurvy is caused by a lack of ___', opts:['Vitamin C','Vitamin D','Vitamin A','Iron'], correct:'Vitamin C', emoji:'🍊'},
+      {q:'Night blindness is caused by a lack of ___', opts:['Vitamin A','Vitamin D','Vitamin C','Calcium'], correct:'Vitamin A', emoji:'👁️'},
+      {q:'Anaemia is caused by a lack of ___', opts:['Iron','Calcium','Vitamin C','Protein'], correct:'Iron', emoji:'🩸'},
+      {q:'Rickets is caused by a lack of ___', opts:['Vitamin D and calcium','Vitamin C','Iron','Protein'], correct:'Vitamin D and calcium', emoji:'🦴'},
+      {q:'Iodine deficiency causes ___', opts:['Goitre','Scurvy','Rickets','Anaemia'], correct:'Goitre', emoji:'🧪'},
+    ],
+    evs_sports2: [
+      {q:'India won the first Olympic gold medal in hockey in ___', opts:['1928','1948','1952','1936'], correct:'1928', emoji:'🥇'},
+      {q:'Abhinav Bindra won a gold medal in ___', opts:['10m Air Rifle (shooting)','Boxing','Wrestling','Weightlifting'], correct:'10m Air Rifle (shooting)', emoji:'🎯'},
+      {q:'PV Sindhu is famous for ___', opts:['Badminton','Tennis','Table tennis','Squash'], correct:'Badminton', emoji:'🏸'},
+      {q:'India\'s first individual Olympic gold was won by ___', opts:['Abhinav Bindra (2008)','Karnam Malleswari','Leander Paes','Saina Nehwal'], correct:'Abhinav Bindra (2008)', emoji:'🏆'},
+      {q:'The ICC Cricket World Cup is organised by ___', opts:['ICC (International Cricket Council)','BCCI','FIFA','IOC'], correct:'ICC (International Cricket Council)', emoji:'🏏'},
+    ],
+    evs_gk_currency: [
+      {q:'The currency of Japan is ___', opts:['Yen','Dollar','Pound','Euro'], correct:'Yen', emoji:'💴'},
+      {q:'The currency of the USA is ___', opts:['Dollar','Pound','Euro','Yen'], correct:'Dollar', emoji:'💵'},
+      {q:'The currency of the UK is ___', opts:['Pound Sterling','Euro','Dollar','Franc'], correct:'Pound Sterling', emoji:'💷'},
+      {q:'The capital of Japan is ___', opts:['Tokyo','Beijing','Seoul','Bangkok'], correct:'Tokyo', emoji:'🗾'},
+      {q:'The capital of Australia is ___', opts:['Canberra','Sydney','Melbourne','Brisbane'], correct:'Canberra', emoji:'🦘'},
+    ],
+    evs_india_gk4: [
+      {q:'The Indian Constitution came into effect on ___', opts:['26 January 1950','15 August 1947','2 October 1869','26 November 1949'], correct:'26 January 1950', emoji:'📜'},
+      {q:'B R Ambedkar is known as the ___', opts:['Father of the Indian Constitution','Father of the Nation','Father of Indian Science','First PM'], correct:'Father of the Indian Constitution', emoji:'⚖️'},
+      {q:'The highest civilian award in India is the ___', opts:['Bharat Ratna','Padma Vibhushan','Arjuna Award','Gallantry Medal'], correct:'Bharat Ratna', emoji:'🏅'},
+      {q:'The national motto of India is ___', opts:['"Satyameva Jayate" (Truth alone triumphs)','Jai Hind','Vande Mataram','Unity in Diversity'], correct:'"Satyameva Jayate" (Truth alone triumphs)', emoji:'🇮🇳'},
+      {q:'The Supreme Court of India is in ___', opts:['New Delhi','Mumbai','Kolkata','Chennai'], correct:'New Delhi', emoji:'⚖️'},
+    ],
+    evs_world_gk1: [
+      {q:'The Great Wall of China was built to ___', opts:['Protect against invasions','Mark a border','As a tourist attraction','For trade routes'], correct:'Protect against invasions', emoji:'🏯'},
+      {q:'The Statue of Liberty is in ___', opts:['New York, USA','Paris, France','London, UK','Sydney, Australia'], correct:'New York, USA', emoji:'🗽'},
+      {q:'The longest wall in the world is in ___', opts:['China','India','Russia','USA'], correct:'China', emoji:'🧱'},
+      {q:'Which country has the most spoken languages?', opts:['Papua New Guinea','India','Nigeria','Indonesia'], correct:'Papua New Guinea', emoji:'🌍'},
+      {q:'The Amazon River flows through ___', opts:['South America (mainly Brazil)','Africa','Asia','North America'], correct:'South America (mainly Brazil)', emoji:'🌿'},
+    ],
+    evs_science_gk2: [
+      {q:'Who discovered gravity when an apple fell?', opts:['Isaac Newton','Einstein','Galileo','Archimedes'], correct:'Isaac Newton', emoji:'🍎'},
+      {q:'Who developed the theory of relativity?', opts:['Albert Einstein','Newton','Darwin','Pasteur'], correct:'Albert Einstein', emoji:'🧠'},
+      {q:'Marie Curie was the first woman to win a ___', opts:['Nobel Prize','Olympic medal','Space mission','Engineering degree'], correct:'Nobel Prize', emoji:'🏅'},
+      {q:'Archimedes\' principle is about ___', opts:['Buoyancy (floating and sinking)','Gravity','Light','Sound'], correct:'Buoyancy (floating and sinking)', emoji:'🛁'},
+      {q:'DNA was discovered by ___', opts:['Watson and Crick','Newton','Einstein','Pasteur'], correct:'Watson and Crick', emoji:'🔬'},
+    ],
+    evs_history1: [
+      {q:'The Indus Valley Civilisation was located in ___', opts:['Present-day Pakistan and NW India','South India','East India','Central India'], correct:'Present-day Pakistan and NW India', emoji:'🏺'},
+      {q:'Ashoka the Great was from the ___ dynasty', opts:['Maurya','Gupta','Mughal','Chola'], correct:'Maurya', emoji:'☸️'},
+      {q:'The Golden Age of India is associated with the ___ dynasty', opts:['Gupta','Maurya','Mughal','Maratha'], correct:'Gupta', emoji:'🌟'},
+      {q:'Akbar the Great was a famous ___ emperor', opts:['Mughal','Maurya','Gupta','Chola'], correct:'Mughal', emoji:'🏯'},
+      {q:'The Battle of Plassey (1757) was won by ___', opts:['British East India Company','Nawab of Bengal','Maratha Empire','Tipu Sultan'], correct:'British East India Company', emoji:'⚔️'},
+    ],
+    evs_govt2: [
+      {q:'The Indian Constitution guarantees ___ Fundamental Rights', opts:['6 categories','5','10','8'], correct:'6 categories', emoji:'📜'},
+      {q:'The Right to Education (RTE) ensures free schooling for children aged ___', opts:['6–14 years','5–18 years','4–16 years','3–14 years'], correct:'6–14 years', emoji:'📚'},
+      {q:'Panchayati Raj is the system of ___ governance', opts:['Local (village level)','State level','National level','International'], correct:'Local (village level)', emoji:'🏘️'},
+      {q:'The Election Commission of India ensures ___', opts:['Free and fair elections','Collection of taxes','Defence of the country','Making of laws'], correct:'Free and fair elections', emoji:'🗳️'},
+      {q:'The Fundamental Duty of every citizen includes ___', opts:['Respecting the Constitution and national symbols','Paying no taxes','Ignoring traffic rules','Only voting'], correct:'Respecting the Constitution and national symbols', emoji:'🇮🇳'},
+    ],
+    evs_space_gk2: [
+      {q:'The International Space Station orbits Earth every ___', opts:['~90 minutes','24 hours','7 days','1 hour'], correct:'~90 minutes', emoji:'🛸'},
+      {q:'India\'s Mars Orbiter Mission (Mangalyaan) was launched in ___', opts:['2013','2008','2019','2023'], correct:'2013', emoji:'🔴'},
+      {q:'Neil Armstrong was the first person to walk on the Moon in ___', opts:['1969','1972','1965','1975'], correct:'1969', emoji:'🌕'},
+      {q:'The Milky Way is a ___', opts:['Galaxy','Solar system','Star','Planet'], correct:'Galaxy', emoji:'🌌'},
+      {q:'A light year is a measure of ___', opts:['Distance','Time','Speed','Weight'], correct:'Distance', emoji:'💡'},
+    ],
+    evs_tech_gk: [
+      {q:'WWW stands for ___', opts:['World Wide Web','World Wide Wire','World Web Wireless','Wide World Web'], correct:'World Wide Web', emoji:'🌐'},
+      {q:'AI stands for ___', opts:['Artificial Intelligence','Advanced Internet','Automated Input','Automatic Interface'], correct:'Artificial Intelligence', emoji:'🤖'},
+      {q:'The first computer was called ___', opts:['ENIAC','UNIVAC','IBM PC','Apple I'], correct:'ENIAC', emoji:'💻'},
+      {q:'UPI in India stands for ___', opts:['Unified Payments Interface','Universal Payment Index','Unified Public Internet','United Payments Institute'], correct:'Unified Payments Interface', emoji:'📱'},
+      {q:'GPS helps us ___', opts:['Find our location using satellites','Send emails','Make calls','Store data'], correct:'Find our location using satellites', emoji:'📍'},
+    ],
+    evs_env3: [
+      {q:'The carbon footprint measures ___', opts:['Amount of CO₂ released by our activities','Size of our feet','Amount of plastic used','Water consumed'], correct:'Amount of CO₂ released by our activities', emoji:'👣'},
+      {q:'Which international agreement aims to limit global warming to 1.5°C?', opts:['Paris Agreement (2015)','Kyoto Protocol (1997)','Rio Summit (1992)','Copenhagen Accord (2009)'], correct:'Paris Agreement (2015)', emoji:'🌍'},
+      {q:'Sea levels rise because of ___', opts:['Melting glaciers and thermal expansion','More rain','River flooding','Ocean pollution'], correct:'Melting glaciers and thermal expansion', emoji:'🌊'},
+      {q:'Coral bleaching is caused by ___', opts:['Rising ocean temperatures','Oil spills only','Fishing','Shipping'], correct:'Rising ocean temperatures', emoji:'🐠'},
+      {q:'Sustainable development means meeting needs ___', opts:['Without compromising future generations\' ability to meet theirs','Only for current people','Only for rich countries','Without any technology'], correct:'Without compromising future generations\' ability to meet theirs', emoji:'♻️'},
+    ],
+    evs_freedom2: [
+      {q:'The First War of Indian Independence was in ___', opts:['1857','1905','1919','1942'], correct:'1857', emoji:'⚔️'},
+      {q:'The Quit India Movement was launched in ___', opts:['1942','1930','1919','1947'], correct:'1942', emoji:'🕊️'},
+      {q:'Jallianwala Bagh massacre took place in ___', opts:['Amritsar, 1919','Delhi, 1905','Mumbai, 1942','Kolkata, 1857'], correct:'Amritsar, 1919', emoji:'😢'},
+      {q:'The Indian National Congress was founded in ___', opts:['1885','1857','1905','1920'], correct:'1885', emoji:'🏛️'},
+      {q:'Bhagat Singh was hanged on ___', opts:['23 March 1931','15 August 1947','30 January 1948','26 January 1950'], correct:'23 March 1931', emoji:'✊'},
+    ],
+    evs_world_gk2: [
+      {q:'Mount Everest is in ___', opts:['Nepal/Tibet border','India','China','Bhutan'], correct:'Nepal/Tibet border', emoji:'🏔️'},
+      {q:'The Amazon rainforest is mainly in ___', opts:['Brazil','Colombia','Peru','Venezuela'], correct:'Brazil', emoji:'🌳'},
+      {q:'The Sahara Desert is in ___', opts:['North Africa','Middle East','Central Asia','Southern Africa'], correct:'North Africa', emoji:'🏜️'},
+      {q:'The Great Barrier Reef is in ___', opts:['Australia','New Zealand','Indonesia','Philippines'], correct:'Australia', emoji:'🐠'},
+      {q:'Victoria Falls is on the border of ___', opts:['Zambia and Zimbabwe','Kenya and Tanzania','Egypt and Sudan','Nigeria and Ghana'], correct:'Zambia and Zimbabwe', emoji:'💧'},
+    ],
+    evs_sports3: [
+      {q:'FIFA World Cup is held every ___ years', opts:['4','2','5','3'], correct:'4', emoji:'⚽'},
+      {q:'Wimbledon is a famous tournament for ___', opts:['Tennis','Cricket','Golf','Swimming'], correct:'Tennis', emoji:'🎾'},
+      {q:'The Nobel Prize is awarded in ___', opts:['Stockholm (Physics, Chemistry, Medicine, Literature, Economics) and Oslo (Peace)', 'Only London','Only New York','Only Geneva'], correct:'Stockholm (Physics, Chemistry, Medicine, Literature, Economics) and Oslo (Peace)', emoji:'🏅'},
+      {q:'The first Academy Award (Oscar) ceremony was in ___', opts:['1929','1950','1945','1960'], correct:'1929', emoji:'🏆'},
+      {q:'Neeraj Chopra won an Olympic gold in ___ at Tokyo 2020', opts:['Javelin throw','100m sprint','Long jump','Shot put'], correct:'Javelin throw', emoji:'🥇'},
+    ],
+    evs_gk_mixed: [
+      {q:'Which planet is closest to the Sun?', opts:['Mercury','Venus','Earth','Mars'], correct:'Mercury', emoji:'☀️'},
+      {q:'What is 2 + 2 × 2?', opts:['6','8','4','10'], correct:'6', emoji:'🔢'},
+      {q:'The chemical symbol for water is ___', opts:['H₂O','O₂','CO₂','H₂'], correct:'H₂O', emoji:'💧'},
+      {q:'Who wrote the Indian National Anthem "Jana Gana Mana"?', opts:['Rabindranath Tagore','Bankim Chandra Chatterjee','Subramania Bharati','Mahatma Gandhi'], correct:'Rabindranath Tagore', emoji:'🎵'},
+      {q:'Which is the hardest natural substance?', opts:['Diamond','Gold','Iron','Quartz'], correct:'Diamond', emoji:'💎'},
+    ],
+  };
+
+  Object.entries(EVS_POOLS).forEach(([id, pool]) => {
+    GAME_RENDERERS[id] = function(pc) {
+      const q = pool[Math.floor(Math.random() * pool.length)];
+      const opts = [...q.opts].sort(() => Math.random() - 0.5);
+      pc.innerHTML = `
+        <div class="q-emoji">${q.emoji || '🌿'}</div>
+        <div class="q-text">${q.q}</div>
+        <div class="opts-grid opts-2">${opts.map(o =>
+          `<button class="opt-btn" data-ans="${o}" data-correct="${o===q.correct}">${o}</button>`
+        ).join('')}</div>`;
+      wireOpts(pc, q.correct);
+    };
+  });
+
+})();

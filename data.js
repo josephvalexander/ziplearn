@@ -251,3 +251,88 @@ const GAME_REGISTRY = {
 };
 
 // STATE (runtime — not game data)
+
+// Append EVS to GAME_REGISTRY and EVS to SUBJECT_REGISTRY
+SUBJECT_REGISTRY.evs = {
+  id: 'evs', name: 'EVS / GK', icon: '🌿', iconClass: 'evs',
+  color: 'var(--evs-1)', gradientFill: 'linear-gradient(90deg,#22c55e,#4ade80)',
+  timerColor: '#22c55e',
+  companion: 'garden',
+};
+
+GAME_REGISTRY.evs = {
+  // ── CLASS 1 ──────────────────────────────────────────────────
+  // NCERT: Aas Paas / Looking Around | My Family, Community,
+  // Plants & Animals around us, Food, Water, Sky, Safety
+  1: {
+    tip: { title:'EVS Tip 🌿', body:'A walk around your neighbourhood teaches more EVS than any book! Point out plants, workers, buildings and ask "Why is this here?"' },
+    games: [
+      { id:'evs_family1',    icon:'👨‍👩‍👧', bg:'rgba(34,197,94,0.18)',  name:'My Family',          desc:'Family members and their roles',   diff:'easy' },
+      { id:'evs_home1',      icon:'🏠', bg:'rgba(74,222,128,0.15)',  name:'Parts of My Home',   desc:'Rooms, furniture, uses',           diff:'easy' },
+      { id:'evs_community1', icon:'👩‍🚒', bg:'rgba(34,197,94,0.15)',  name:'Community Helpers',  desc:'Doctor, teacher, farmer & more',   diff:'easy' },
+      { id:'evs_plants_gk1', icon:'🌻', bg:'rgba(74,222,128,0.15)',  name:'Plants We Use',       desc:'Food, shade, medicine from plants',diff:'easy' },
+      { id:'evs_animals_gk1',icon:'🐄', bg:'rgba(34,197,94,0.12)',  name:'Animals & Us',        desc:'Pets, farm & wild animals',        diff:'easy' },
+      { id:'evs_food_gk1',   icon:'🥗', bg:'rgba(74,222,128,0.12)',  name:'Food & Health',       desc:'Healthy vs junk food choices',     diff:'easy' },
+      { id:'evs_water_gk1',  icon:'💧', bg:'rgba(34,197,94,0.12)',  name:'Water Around Us',    desc:'Sources & uses of water',          diff:'easy' },
+      { id:'evs_transport_gk',icon:'🚌',bg:'rgba(74,222,128,0.12)', name:'How We Travel',      desc:'Land, water & air transport',      diff:'easy' },
+      { id:'evs_safety1',    icon:'🚦', bg:'rgba(34,197,94,0.12)',  name:'Stay Safe!',          desc:'Road safety, fire safety basics',  diff:'easy' },
+      { id:'evs_festivals1', icon:'🪔', bg:'rgba(74,222,128,0.12)',  name:'Festivals of India', desc:'Diwali, Eid, Christmas & more',    diff:'easy' },
+      { id:'evs_india_gk1',  icon:'🇮🇳', bg:'rgba(34,197,94,0.12)',  name:'Know India',          desc:'Flag, national animal, bird',      diff:'easy' },
+      { id:'evs_body_gk1',   icon:'🧠', bg:'rgba(74,222,128,0.12)',  name:'My Amazing Body',    desc:'Major organs and their jobs',      diff:'medium'},
+    ]
+  },
+  // ── CLASS 2 ──────────────────────────────────────────────────
+  2: {
+    tip: { title:'GK Habit 📰', body:'5 minutes of kids\' news daily builds GK faster than any book. Ask: "What happened today?" at dinner!' },
+    games: [
+      { id:'evs_family2',    icon:'🏘️', bg:'rgba(34,197,94,0.18)',  name:'Neighbourhood',      desc:'Our neighbourhood & its buildings',diff:'easy' },
+      { id:'evs_food_gk2',   icon:'🌾', bg:'rgba(74,222,128,0.15)',  name:'Farm to Table',      desc:'How food reaches our plate',       diff:'medium'},
+      { id:'evs_plants_gk2', icon:'🌳', bg:'rgba(34,197,94,0.15)',  name:'Trees Matter',        desc:'Forest, timber & medicinal trees', diff:'easy' },
+      { id:'evs_animals_gk2',icon:'🦁', bg:'rgba(74,222,128,0.15)',  name:'Wild India',          desc:'Endangered animals of India',      diff:'medium'},
+      { id:'evs_earth1',     icon:'🌍', bg:'rgba(34,197,94,0.12)',  name:'Our Planet Earth',   desc:'Land, water, continents basics',   diff:'easy' },
+      { id:'evs_seasons_gk', icon:'🌦️', bg:'rgba(74,222,128,0.12)',  name:'Seasons & Weather',  desc:'India\'s seasons & their effects', diff:'easy' },
+      { id:'evs_india_gk2',  icon:'🗺️', bg:'rgba(34,197,94,0.12)',  name:'States of India',     desc:'States, capitals, famous places',  diff:'medium'},
+      { id:'evs_sports1',    icon:'🏏', bg:'rgba(74,222,128,0.12)',  name:'Sports of India',    desc:'Cricket, hockey, chess & Olympics',diff:'easy' },
+      { id:'evs_space_gk1',  icon:'🚀', bg:'rgba(34,197,94,0.12)',  name:'Space & ISRO',        desc:'Moon, planets, ISRO missions',     diff:'medium'},
+      { id:'evs_gk_inventions1',icon:'💡',bg:'rgba(74,222,128,0.12)',name:'Great Inventions',   desc:'Wheel, telephone, electricity',    diff:'easy' },
+      { id:'evs_health_gk1', icon:'🏥', bg:'rgba(34,197,94,0.12)',  name:'Health & Hygiene',   desc:'Hand washing, healthy habits',     diff:'easy' },
+      { id:'evs_env1',       icon:'♻️', bg:'rgba(74,222,128,0.12)',  name:'Environment Care',   desc:'Pollution, conservation, 3Rs',     diff:'medium'},
+    ]
+  },
+  // ── CLASS 3 ──────────────────────────────────────────────────
+  3: {
+    tip: { title:'Map Magic 🗺️', body:'Hang a map of India in the room. Point to a state and ask capital, language, or famous food each week. GK becomes visual!' },
+    games: [
+      { id:'evs_india_gk3',  icon:'🏛️', bg:'rgba(34,197,94,0.18)',  name:'India Geography',    desc:'Rivers, mountains, plains of India',diff:'medium'},
+      { id:'evs_govt1',      icon:'⚖️', bg:'rgba(74,222,128,0.15)',  name:'How India is Governed', desc:'President, PM, Parliament basics',diff:'medium'},
+      { id:'evs_freedom1',   icon:'🕊️', bg:'rgba(34,197,94,0.15)',  name:'Freedom Fighters',   desc:'Gandhi, Nehru, Bose & more',       diff:'medium'},
+      { id:'evs_culture1',   icon:'🎭', bg:'rgba(74,222,128,0.15)',  name:'Culture of India',   desc:'Dance, music, food, languages',    diff:'medium'},
+      { id:'evs_earth2',     icon:'🌏', bg:'rgba(34,197,94,0.12)',  name:'World Geography',    desc:'Continents, oceans, poles',        diff:'medium'},
+      { id:'evs_animals_gk3',icon:'🐯', bg:'rgba(74,222,128,0.12)',  name:'Animals in Danger',  desc:'Endangered species & conservation',diff:'medium'},
+      { id:'evs_env2',       icon:'🌱', bg:'rgba(34,197,94,0.12)',  name:'Environment & Us',   desc:'Climate change, renewable energy', diff:'hard'  },
+      { id:'evs_science_gk1',icon:'🔬', bg:'rgba(74,222,128,0.12)',  name:'Science in Daily Life',desc:'How everyday things work',       diff:'medium'},
+      { id:'evs_gk_records', icon:'🏆', bg:'rgba(34,197,94,0.12)',  name:'World Records & GK', desc:'Tallest, longest, biggest & more', diff:'medium'},
+      { id:'evs_health_gk2', icon:'🥦', bg:'rgba(74,222,128,0.12)',  name:'Nutrition & Disease',desc:'Vitamins, deficiency diseases',    diff:'hard'  },
+      { id:'evs_sports2',    icon:'🏅', bg:'rgba(34,197,94,0.12)',  name:'India at Olympics',  desc:'Olympic history, Indian medals',   diff:'medium'},
+      { id:'evs_gk_currency',icon:'💱', bg:'rgba(74,222,128,0.12)',  name:'Countries & Currency',desc:'Capital, currency, flag quiz',     diff:'hard'  },
+    ]
+  },
+  // ── CLASS 4 ──────────────────────────────────────────────────
+  4: {
+    tip: { title:'World Quiz Night 🌍', body:'A 10-question GK quiz at dinner on Fridays — take turns asking. Kids who set the questions learn twice as much!' },
+    games: [
+      { id:'evs_india_gk4',  icon:'🗺️', bg:'rgba(34,197,94,0.18)',  name:'India: Deep Dive',   desc:'History, geography, constitution',  diff:'hard' },
+      { id:'evs_world_gk1',  icon:'🌐', bg:'rgba(74,222,128,0.15)',  name:'World GK',            desc:'Countries, capitals, wonders',     diff:'hard' },
+      { id:'evs_science_gk2',icon:'⚗️', bg:'rgba(34,197,94,0.15)',  name:'Science GK',          desc:'Scientists, inventions, discoveries',diff:'hard'},
+      { id:'evs_history1',   icon:'🏺', bg:'rgba(74,222,128,0.15)',  name:'Ancient India',       desc:'Indus Valley, Gupta, Maurya',      diff:'hard' },
+      { id:'evs_govt2',      icon:'📜', bg:'rgba(34,197,94,0.12)',  name:'Constitution & Rights',desc:'Fundamental rights & duties',     diff:'hard' },
+      { id:'evs_space_gk2',  icon:'🪐', bg:'rgba(74,222,128,0.12)',  name:'Space Exploration',  desc:'NASA, ISRO, Chandrayaan, ISS',     diff:'hard' },
+      { id:'evs_tech_gk',    icon:'💻', bg:'rgba(34,197,94,0.12)',  name:'Technology & AI',     desc:'Internet, AI, digital world',      diff:'hard' },
+      { id:'evs_env3',       icon:'🌊', bg:'rgba(74,222,128,0.12)',  name:'Climate Crisis',     desc:'Global warming, carbon footprint', diff:'hard' },
+      { id:'evs_freedom2',   icon:'🧑‍🤝‍🧑', bg:'rgba(34,197,94,0.12)',  name:'Indian History',     desc:'Mughal, British & independence era',diff:'hard'},
+      { id:'evs_world_gk2',  icon:'🏔️', bg:'rgba(74,222,128,0.12)',  name:'Natural Wonders',    desc:'Everest, Amazon, Sahara & more',   diff:'hard' },
+      { id:'evs_sports3',    icon:'⚽', bg:'rgba(34,197,94,0.12)',  name:'World Sports GK',    desc:'FIFA, Wimbledon, Nobel, Oscar',    diff:'hard' },
+      { id:'evs_gk_mixed',   icon:'🎯', bg:'rgba(74,222,128,0.12)',  name:'GK Challenge',       desc:'Mixed topics — test everything!',  diff:'hard',  badge:'new'},
+    ]
+  }
+};
