@@ -55,23 +55,23 @@
 
 /* ── DARK THEME (default) ── */
 [data-theme="dark"] {
-  /* Backgrounds */
-  --bg-void:    #0f0520;
-  --bg-base:    #0f0520;
-  --bg-surface: #160830;
-  --bg-card:    rgba(255,255,255,0.05);
-  --bg-card-hover: rgba(255,255,255,0.09);
-  --bg-header:  rgba(15,5,32,0.92);
-  --bg-game-header: rgba(15,5,32,0.75);
-  --bg-overlay: rgba(15,5,32,0.97);
-  --bg-hud:     rgba(255,255,255,0.07);
-  --bg-input:   rgba(255,255,255,0.06);
+  /* Backgrounds — true deep dark */
+  --bg-void:    #0a0118;
+  --bg-base:    #0a0118;
+  --bg-surface: #110224;
+  --bg-card:    #1a0a30;
+  --bg-card-hover: #231040;
+  --bg-header:  rgba(10,1,24,0.97);
+  --bg-game-header: rgba(10,1,24,0.85);
+  --bg-overlay: rgba(10,1,24,0.98);
+  --bg-hud:     #1a0a30;
+  --bg-input:   #150820;
 
   /* Borders */
-  --border:       rgba(255,255,255,0.07);
-  --border-hover: rgba(255,255,255,0.18);
-  --border-header: rgba(255,255,255,0.06);
-  --border-hud:   rgba(255,255,255,0.10);
+  --border:       rgba(255,255,255,0.10);
+  --border-hover: rgba(255,255,255,0.25);
+  --border-header: rgba(255,255,255,0.08);
+  --border-hud:   rgba(255,255,255,0.13);
 
   /* Text */
   --text-primary:   #ffffff;
@@ -181,7 +181,7 @@
 html { scroll-behavior: smooth; }
 body {
   font-family: var(--font-body);
-  background: var(--bg-void);
+  background: var(--bg-void); /* #0a0118 in dark, #f4f0ff in light */
   color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
@@ -208,8 +208,7 @@ body {
 .screen {
   display:none;
   position:fixed;
-  top:0; left:0; right:0; bottom:0;  /* occupy full viewport, block all clicks behind */
-  padding-top:57px;                   /* clear the fixed app-header */
+  top:54px; left:0; right:0; bottom:0;  /* start below fixed 54px header */
   z-index:10;
   background:var(--bg-void);          /* opaque — nothing bleeds through */
   flex-direction:column;
@@ -218,7 +217,7 @@ body {
 }
 .screen.active { display:flex; }
 /* Home / Map / Pet tabs: exactly viewport height, internal scroll */
-/* height/overflow handled by .screen { position:fixed; inset:0 } */
+/* height/overflow handled by  */
 /* Home scrollable content (everything between header and bottom-nav) */
 #scr-home .home-scroll { flex:1; overflow-y:auto; }
 /* Play screen: viewport height, no outer scroll */
@@ -840,10 +839,7 @@ body {
 *, *::before, *::after { box-sizing: border-box; }
 
 /* Screen layout: header is 57px fixed; bottom-nav ~65px; content fills between */
-.screen {
-  top: 57px !important;        /* start below fixed header */
-  padding-top: 0 !important;   /* remove old padding-top hack */
-}
+
 
 /* Scrollable screen content fills height between header and bottom-nav */
 .screen-scroll {
@@ -901,7 +897,7 @@ body {
   padding: 10px 14px;
   height: 54px;
 }
-.screen { top: 54px !important; }
+
 
 /* Home hero — stack on tiny screens */
 @media (max-width: 380px) {
@@ -981,13 +977,13 @@ body {
 }
 .scc-card {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 0;
   background: var(--bg-card);
   border: 1.5px solid var(--border);
   border-radius: 16px;
-  padding: 14px 14px;
-  cursor: pointer;
+  padding: 14px;
+  cursor: default;
   transition: all 0.2s var(--smooth);
   position: relative;
   overflow: hidden;
@@ -999,6 +995,7 @@ body {
   opacity: 0;
   transition: opacity 0.2s;
   border-radius: 16px;
+  pointer-events: none;  /* never block clicks */
 }
 .scc-card:hover { transform: translateY(-2px); border-color: var(--border-hover); }
 .scc-card:hover::before { opacity: 0.06; }
@@ -1765,13 +1762,6 @@ body {
     <button class="btn btn-gold" onclick="document.getElementById('levelup-overlay').classList.remove('show')" style="min-width:180px;margin-top:8px">Awesome! 🚀</button>
   </div>
 </div>
-
-
-<!-- JS loaded at end of body — executes after DOM is ready, no defer needed -->
-
-</script>
-
-</script>
 <script>
 // ── data.js ──
 
