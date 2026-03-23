@@ -1105,7 +1105,11 @@ body {
 
 
 <!-- JS loaded at end of body — executes after DOM is ready, no defer needed -->
+
+</script>
 <script>
+// ── js/data.js ──────────────────────────────────────────
+
 // data.js — SUBJECT_REGISTRY and GAME_REGISTRY (pure data, no DOM)
 /* jshint esversion:6 */
 
@@ -1244,8 +1248,9 @@ const GAME_REGISTRY = {
 // STATE
 // ================================================================
 
-</script>
-<script>
+
+// ── js/app.js ──────────────────────────────────────────
+
 // app.js — APP module, nav, buildStarfield, THEME, Service Worker
 /* jshint esversion:6 */
 
@@ -1724,8 +1729,9 @@ const THEME = (() => {
   }
 })();
 
-</script>
-<script>
+
+// ── js/renderers.js ──────────────────────────────────────────
+
 // renderers.js — helpers, GAME_RENDERERS, answer event bridge
 /* jshint esversion:6 */
 
@@ -2543,8 +2549,9 @@ const GAME_RENDERERS = (() => {
 
 // ── LEVELS ───────────────────────────────────────────────────
 
-</script>
-<script>
+
+// ── js/gamification.js ──────────────────────────────────────────
+
 // gamification.js — LEVELS, BADGE_DEFS, SOUND, PARTICLES, MASCOT,
 //                    COMBO, POWERUPS, GQ, DAILY, level/badge helpers, init
 /* jshint esversion:6 */
@@ -3021,8 +3028,9 @@ document.addEventListener('DOMContentLoaded',()=>{
 //    toggle button icon, and nebula colors
 // ================================================================
 
-</script>
-<script>
+
+// ── js/features.js ──────────────────────────────────────────
+
 // features.js — TABS (tab router), ADVENTURE_MAP, PET (growing companion)
 /* jshint esversion:6 */
 
