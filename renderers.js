@@ -34,6 +34,30 @@ function buildStarfield(){
 // Each game = a function(container) that renders HTML + wires events
 // To add a new game: add an entry here
 // ================================================================
+
+// ================================================================
+// wireOpts — TOP-LEVEL (used by SCI, ENG, EVS renderers)
+// Buttons built with data-correct="true|false"
+// ================================================================
+function wireOpts(container, correctLabel) {
+  const btns = (container || document).querySelectorAll('.opt-btn');
+  btns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      clearInterval(APP.state.timerInt);
+      btns.forEach(b => b.style.pointerEvents = 'none');
+      const isCorrect = this.dataset.correct === 'true';
+      if (isCorrect) {
+        this.classList.add('correct');
+        document.dispatchEvent(new CustomEvent('lv:correct'));
+      } else {
+        this.classList.add('wrong');
+        btns.forEach(b => { if (b.dataset.correct === 'true') b.classList.add('correct'); });
+        document.dispatchEvent(new CustomEvent('lv:wrong'));
+      }
+    });
+  });
+}
+
 const GAME_RENDERERS = (() => {
 
   // ── ANSWER CHECK WIRING ───────────────────────────────────

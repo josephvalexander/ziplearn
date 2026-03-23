@@ -1301,7 +1301,7 @@ body {
 
 </script>
 <script>
-// ── js/data.js ──────────────────────────────
+// ── js/data.js ──
 
 // data.js — SUBJECT_REGISTRY and GAME_REGISTRY (pure data, no DOM)
 /* jshint esversion:6 */
@@ -1643,7 +1643,7 @@ GAME_REGISTRY.evs = {
 };
 
 
-// ── js/app.js ──────────────────────────────
+// ── js/app.js ──
 
 // app.js — APP module, nav, buildStarfield, THEME, Service Worker
 /* jshint esversion:6 */
@@ -1921,7 +1921,7 @@ const THEME = (() => {
 })();
 
 
-// ── js/renderers.js ──────────────────────────────
+// ── js/renderers.js ──
 
 // renderers.js — helpers, GAME_RENDERERS, answer event bridge
 /* jshint esversion:6 */
@@ -1959,6 +1959,30 @@ function buildStarfield(){
 // Each game = a function(container) that renders HTML + wires events
 // To add a new game: add an entry here
 // ================================================================
+
+// ================================================================
+// wireOpts — TOP-LEVEL (used by SCI, ENG, EVS renderers)
+// Buttons built with data-correct="true|false"
+// ================================================================
+function wireOpts(container, correctLabel) {
+  const btns = (container || document).querySelectorAll('.opt-btn');
+  btns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      clearInterval(APP.state.timerInt);
+      btns.forEach(b => b.style.pointerEvents = 'none');
+      const isCorrect = this.dataset.correct === 'true';
+      if (isCorrect) {
+        this.classList.add('correct');
+        document.dispatchEvent(new CustomEvent('lv:correct'));
+      } else {
+        this.classList.add('wrong');
+        btns.forEach(b => { if (b.dataset.correct === 'true') b.classList.add('correct'); });
+        document.dispatchEvent(new CustomEvent('lv:wrong'));
+      }
+    });
+  });
+}
+
 const GAME_RENDERERS = (() => {
 
   // ── ANSWER CHECK WIRING ───────────────────────────────────
@@ -3909,7 +3933,7 @@ Object.assign(GAME_RENDERERS, SCI_RENDERERS, ENG_RENDERERS);
 })();
 
 
-// ── js/gamification.js ──────────────────────────────
+// ── js/gamification.js ──
 
 // gamification.js — LEVELS, BADGE_DEFS, SOUND, PARTICLES, MASCOT,
 //                    COMBO, POWERUPS, GQ, DAILY, level/badge helpers, init
@@ -4388,7 +4412,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 // ================================================================
 
 
-// ── js/features.js ──────────────────────────────
+// ── js/features.js ──
 
 // features.js — TABS, ADVENTURE_MAP, PET (Maths), CASTLE (English), LAB (Science)
 /* jshint esversion:6 */
