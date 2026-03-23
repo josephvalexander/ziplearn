@@ -74,7 +74,7 @@ jobs:
           BASE_PATH: ${{ steps.base.outputs.BASE_PATH }}
           BUILD_VERSION: ${{ steps.version.outputs.BUILD_VERSION }}
         run: |
-          mkdir -p dist/icons
+          mkdir -p dist/icons dist/js
 
           # a) Patch index.html — fix all absolute asset references
           sed \
@@ -98,7 +98,10 @@ jobs:
             -e "s|\"src\": \"public/|\"src\": \"${BASE_PATH}/icons/|g" \
             manifest.json > dist/manifest.json
 
-          # d) Copy icons flat into dist/icons/
+          # d) Copy JS files — no patching needed (relative paths only)
+          cp -r js/* dist/js/
+
+          # e) Copy icons flat into dist/icons/
           if [ -d "public" ]; then
             cp public/*.png dist/icons/ 2>/dev/null || true
             cp public/*.svg dist/icons/ 2>/dev/null || true
