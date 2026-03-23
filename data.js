@@ -336,3 +336,26 @@ GAME_REGISTRY.evs = {
     ]
   }
 };
+
+// ================================================================
+// DEMO GAMES — Interactive animated experiments (no timer/scoring)
+// ================================================================
+GAME_REGISTRY.math[1].games.push(
+  { id:'demo_times9',    icon:'🪄', bg:'rgba(99,102,241,0.18)', name:'9× Finger Magic!',    desc:'Learn the 9 times table with your hands', diff:'easy', badge:'fun' },
+  { id:'demo_magic_num', icon:'🧠', bg:'rgba(168,85,247,0.18)', name:'Mind Reader Trick',   desc:'The answer is always 3 — find out why!',  diff:'easy', badge:'fun' },
+  { id:'demo_fibonacci', icon:'🌻', bg:'rgba(255,215,0,0.18)',  name:'Fibonacci in Nature', desc:'Nature's secret number sequence',         diff:'easy', badge:'fun' },
+  { id:'demo_symmetry',  icon:'🔮', bg:'rgba(0,212,170,0.18)',  name:'Lines of Symmetry',   desc:'Which shapes have mirror symmetry?',       diff:'easy', badge:'fun' }
+);
+GAME_REGISTRY.sci[1].games.push(
+  { id:'demo_volcano',   icon:'🌋', bg:'rgba(255,107,53,0.18)', name:'Volcano Eruption!',   desc:'Baking soda + vinegar reaction',           diff:'easy', badge:'fun' },
+  { id:'demo_prism',     icon:'🌈', bg:'rgba(99,200,255,0.18)', name:'Rainbow from Light',  desc:'A prism splits white light into colours',  diff:'easy', badge:'fun' },
+  { id:'demo_plant',     icon:'🌱', bg:'rgba(46,213,115,0.18)', name:'How Plants Drink',    desc:'Watch water travel from roots to leaves',  diff:'easy', badge:'fun' },
+  { id:'demo_foodchain', icon:'🦁', bg:'rgba(255,215,0,0.18)',  name:'Build a Food Chain',  desc:'Tap to link Sun → plant → animals',        diff:'easy', badge:'fun' }
+);
+GAME_REGISTRY.evs[1].games.push(
+  { id:'demo_watercycle',icon:'💧', bg:'rgba(59,130,246,0.18)', name:'Water Cycle',         desc:'Evaporation, condensation, rain!',         diff:'easy', badge:'fun' },
+  { id:'demo_india',     icon:'🇮🇳', bg:'rgba(255,153,0,0.18)',  name:'Amazing India!',      desc:'8 fascinating facts about our country',    diff:'easy', badge:'fun' }
+);
+GAME_REGISTRY.eng[1].games.push(
+  { id:'demo_wordbuilder',icon:'🔤',bg:'rgba(168,85,247,0.18)', name:'Prefix Builder',      desc:'Build words with UN, RE, PRE, MIS, OVER',  diff:'easy', badge:'fun' }
+);
