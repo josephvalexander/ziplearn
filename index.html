@@ -390,7 +390,7 @@ body {
 .subject-planet:hover .sp-arrow { transform:translateX(4px); color:var(--text-secondary); }
 
 /* ── GAMES SCREEN ── */
-.content-area { flex:1; padding:24px 20px 48px; max-width:960px; margin:0 auto; width:100%; }
+.content-area { flex:1; padding:16px 16px 80px; max-width:960px; margin:0 auto; width:100%; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 .screen-title-row { display:flex; align-items:flex-start; gap:14px; margin-bottom:28px; }
 .stitle-icon { width:56px; height:56px; border-radius:16px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:26px; }
 .stitle-text h2 { font-family:var(--font-display); font-size:clamp(24px,4vw,36px); line-height:1.1; color:var(--text-primary); }
@@ -1392,11 +1392,12 @@ body {
   animation-delay: var(--di, 0s);
 }
 .dstrip-name {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
   color: var(--dc);
   text-align: center;
   line-height: 1.2;
+  word-break: break-word;
 }
 .dstrip-sub {
   font-size: 9px;
@@ -1473,79 +1474,7 @@ body {
     </div>
 
 
-    <!-- FUN LAB — quick-access demo strip -->
-    <p class="section-heading" style="margin-top:12px;margin-bottom:6px">⚗️ Fun Lab — Learn by Doing</p>
-    <div class="demo-strip" id="demo-strip">
-
-      <div class="dstrip-card" onclick="APP.nav.startGame('demo_volcano')" style="--dc:#ff6b35">
-        <div class="dstrip-emoji">🌋</div>
-        <div class="dstrip-name">Volcano!</div>
-        <div class="dstrip-sub">Science</div>
-      </div>
-
-      <div class="dstrip-card" onclick="APP.nav.startGame('demo_prism')" style="--dc:#818cf8">
-        <div class="dstrip-emoji">🌈</div>
-        <div class="dstrip-name">Rainbow</div>
-        <div class="dstrip-sub">Light</div>
-      </div>
-
-      <div class="dstrip-card" onclick="APP.nav.startGame('demo_times9')" style="--dc:#ffd700">
-        <div class="dstrip-emoji">🪄</div>
-        <div class="dstrip-name">9× Magic</div>
-        <div class="dstrip-sub">Maths</div>
-      </div>
-
-      <div class="dstrip-card" onclick="APP.nav.startGame('demo_fibonacci')" style="--dc:#a78bfa">
-        <div class="dstrip-emoji">🌻</div>
-        <div class="dstrip-name">Fibonacci</div>
-        <div class="dstrip-sub">Patterns</div>
-      </div>
-
-      <div class="dstrip-card" onclick="APP.nav.startGame('demo_watercycle')" style="--dc:#3b82f6">
-        <div class="dstrip-emoji">💧</div>
-        <div class="dstrip-name">Water Cycle</div>
-        <div class="dstrip-sub">EVS</div>
-      </div>
-
-      <div class="dstrip-card" onclick="APP.nav.startGame('demo_foodchain')" style="--dc:#22c55e">
-        <div class="dstrip-emoji">🦁</div>
-        <div class="dstrip-name">Food Chain</div>
-        <div class="dstrip-sub">Science</div>
-      </div>
-
-      <div class="dstrip-card" onclick="APP.nav.startGame('demo_plant')" style="--dc:#4ade80">
-        <div class="dstrip-emoji">🌱</div>
-        <div class="dstrip-name">Plants Drink</div>
-        <div class="dstrip-sub">Biology</div>
-      </div>
-
-      <div class="dstrip-card" onclick="APP.nav.startGame('demo_magic_num')" style="--dc:#e879f9">
-        <div class="dstrip-emoji">🧠</div>
-        <div class="dstrip-name">Mind Reader</div>
-        <div class="dstrip-sub">Maths</div>
-      </div>
-
-      <div class="dstrip-card" onclick="APP.nav.startGame('demo_symmetry')" style="--dc:#00d4aa">
-        <div class="dstrip-emoji">🔮</div>
-        <div class="dstrip-name">Symmetry</div>
-        <div class="dstrip-sub">Geometry</div>
-      </div>
-
-      <div class="dstrip-card" onclick="APP.nav.startGame('demo_india')" style="--dc:#ff9500">
-        <div class="dstrip-emoji">🇮🇳</div>
-        <div class="dstrip-name">Amazing India</div>
-        <div class="dstrip-sub">EVS/GK</div>
-      </div>
-
-      <div class="dstrip-card" onclick="APP.nav.startGame('demo_wordbuilder')" style="--dc:#c084fc">
-        <div class="dstrip-emoji">🔤</div>
-        <div class="dstrip-name">Prefix Builder</div>
-        <div class="dstrip-sub">English</div>
-      </div>
-
-    </div>
-
-    <!-- Subject + companion cards — THE MAIN CONTENT -->
+        <!-- Subject + companion cards — THE MAIN CONTENT -->
     <p class="section-heading" style="margin-top:4px;margin-bottom:8px">Choose Your Subject</p>
   <div class="subj-companion-grid" id="subj-companion-grid">
 
@@ -1891,6 +1820,13 @@ body {
     <div id="subject-tab-row" class="subject-tab-row"></div>
     <div class="xp-progress"><div class="xp-fill" id="xp-fill" style="width:12%"></div></div>
     <div class="games-grid" id="games-grid"></div>
+
+    <!-- Fun Lab section — demos for this subject & class -->
+    <div id="funlab-section" style="display:none;margin-top:16px">
+      <p class="section-heading" style="margin-bottom:8px">⚗️ Fun Lab — Learn by Doing</p>
+      <div class="demo-strip" id="funlab-strip"></div>
+    </div>
+
     <div class="tip-card" id="tip-card" style="display:none">
       <div class="tip-icon">💡</div>
       <div class="tip-body"><strong id="tip-title"></strong><span id="tip-body"></span></div>
@@ -2334,29 +2270,6 @@ GAME_REGISTRY.evs = {
   }
 };
 
-// ================================================================
-// DEMO GAMES — Interactive animated experiments (no timer/scoring)
-// ================================================================
-GAME_REGISTRY.math[1].games.push(
-  { id:'demo_times9',    icon:'🪄', bg:'rgba(99,102,241,0.18)', name:'9× Finger Magic!',    desc:'Learn the 9 times table with your hands', diff:'easy', badge:'fun' },
-  { id:'demo_magic_num', icon:'🧠', bg:'rgba(168,85,247,0.18)', name:'Mind Reader Trick',   desc:'The answer is always 3 — find out why!',  diff:'easy', badge:'fun' },
-  { id:'demo_fibonacci', icon:'🌻', bg:'rgba(255,215,0,0.18)',  name:'Fibonacci in Nature', desc:'Nature\'s secret number sequence',         diff:'easy', badge:'fun' },
-  { id:'demo_symmetry',  icon:'🔮', bg:'rgba(0,212,170,0.18)',  name:'Lines of Symmetry',   desc:'Which shapes have mirror symmetry?',       diff:'easy', badge:'fun' }
-);
-GAME_REGISTRY.sci[1].games.push(
-  { id:'demo_volcano',   icon:'🌋', bg:'rgba(255,107,53,0.18)', name:'Volcano Eruption!',   desc:'Baking soda + vinegar reaction',           diff:'easy', badge:'fun' },
-  { id:'demo_prism',     icon:'🌈', bg:'rgba(99,200,255,0.18)', name:'Rainbow from Light',  desc:'A prism splits white light into colours',  diff:'easy', badge:'fun' },
-  { id:'demo_plant',     icon:'🌱', bg:'rgba(46,213,115,0.18)', name:'How Plants Drink',    desc:'Watch water travel from roots to leaves',  diff:'easy', badge:'fun' },
-  { id:'demo_foodchain', icon:'🦁', bg:'rgba(255,215,0,0.18)',  name:'Build a Food Chain',  desc:'Tap to link Sun → plant → animals',        diff:'easy', badge:'fun' }
-);
-GAME_REGISTRY.evs[1].games.push(
-  { id:'demo_watercycle',icon:'💧', bg:'rgba(59,130,246,0.18)', name:'Water Cycle',         desc:'Evaporation, condensation, rain!',         diff:'easy', badge:'fun' },
-  { id:'demo_india',     icon:'🇮🇳', bg:'rgba(255,153,0,0.18)',  name:'Amazing India!',      desc:'8 fascinating facts about our country',    diff:'easy', badge:'fun' }
-);
-GAME_REGISTRY.eng[1].games.push(
-  { id:'demo_wordbuilder',icon:'🔤',bg:'rgba(168,85,247,0.18)', name:'Prefix Builder',      desc:'Build words with UN, RE, PRE, MIS, OVER',  diff:'easy', badge:'fun' }
-);
-
 
 // ── app.js ──
 
@@ -2520,8 +2433,12 @@ const APP = (() => {
     const pct = Math.min(100, (S.correct / (cls*20)) * 100);
     document.getElementById('xp-fill').style.cssText = `width:${pct}%;background:${subDef.gradientFill}`;
 
+    // Split games into regular and fun lab
+    const regularGames = clsData.games.filter(g => !g.id.startsWith('dm_') && !g.id.startsWith('demo_'));
+    const funlabIds    = clsData.funlab || [];
+
     const grid = document.getElementById('games-grid');
-    grid.innerHTML = clsData.games.map((g,i) => `
+    grid.innerHTML = regularGames.map((g,i) => `
       <div class="game-tile fade-in" style="animation-delay:${i*0.06}s" onclick="APP.nav.startGame('${g.id}')">
         <div class="tile-glow" style="background:${subDef.color}"></div>
         <span class="tile-diff diff-${g.badge||g.diff}">${g.badge||g.diff}</span>
@@ -2529,6 +2446,26 @@ const APP = (() => {
         <div class="tile-name">${g.name}</div>
         <div class="tile-desc">${g.desc}</div>
       </div>`).join('');
+
+    // Fun Lab section
+    const fl = document.getElementById('funlab-section');
+    if (fl && funlabIds.length > 0) {
+      fl.style.display = 'block';
+      const strip = document.getElementById('funlab-strip');
+      if (strip) {
+        strip.innerHTML = funlabIds.map((id, i) => {
+          const d = (typeof DEMO_REGISTRY !== 'undefined') ? DEMO_REGISTRY[id] : null;
+          const emoji = d ? d.emoji : '🔬';
+          const title = d ? d.title : id;
+          return `<div class="dstrip-card" style="--dc:${subDef.color};animation-delay:${i*0.05}s" onclick="APP.nav.startGame('${id}')">
+            <div class="dstrip-emoji">${emoji}</div>
+            <div class="dstrip-name">${title}</div>
+          </div>`;
+        }).join('');
+      }
+    } else if (fl) {
+      fl.style.display = 'none';
+    }
 
     const tc = document.getElementById('tip-card');
     if (tc) { tc.style.display='flex'; document.getElementById('tip-title').textContent=clsData.tip.title; document.getElementById('tip-body').textContent=clsData.tip.body; }
@@ -4704,658 +4641,948 @@ Object.assign(GAME_RENDERERS, SCI_RENDERERS, ENG_RENDERERS);
 
 // ── demos.js ──
 
-// demos.js — Interactive animated learning demos
-// Science experiments, Maths magic, Nature wonders
-// Each demo: renders into a container, fully self-contained, touch-friendly
+// demos.js — Interactive Fun Lab demos: 7-10 per subject per class
+// Each demo is a self-contained animated widget, no timer/scoring
 /* jshint esversion:6 */
 
-// ================================================================
-// DEMO REGISTRY — keyed by demo id
-// Each: { title, subject, emoji, render(container) }
-// ================================================================
 const DEMO_REGISTRY = {};
 
-// ── Helper: animated counter ─────────────────────────────────
-function animCount(el, from, to, dur=800) {
-  const start = performance.now();
-  function step(now) {
-    const t = Math.min(1, (now-start)/dur);
-    const ease = t<.5 ? 2*t*t : -1+(4-2*t)*t;
-    el.textContent = Math.round(from + (to-from)*ease);
-    if (t<1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
+// ── Shared helpers ────────────────────────────────────────────
+function demoMCQ(c, question, options, correct, emoji, explain) {
+  const shuffled = [...options].sort(() => Math.random() - 0.5);
+  c.innerHTML = `
+    <div class="demo-wrap">
+      <div class="q-emoji">${emoji}</div>
+      <div class="q-text">${question}</div>
+      <div class="opts-grid opts-2">${shuffled.map(o =>
+        `<button class="opt-btn" data-correct="${o===correct}"
+          onclick="this.classList.add(this.dataset.correct==='true'?'correct':'wrong');
+                   document.querySelectorAll('.opt-btn').forEach(b=>b.style.pointerEvents='none');
+                   document.getElementById('demo-explain-box').style.display='block';"
+        >${o}</button>`).join('')}</div>
+      <div id="demo-explain-box" class="demo-fact-row" style="display:none;margin-top:8px">
+        <span class="demo-fact">${explain}</span>
+      </div>
+    </div>`;
 }
 
-// ── Helper: SVG circle animation ─────────────────────────────
-function svgCircleProgress(svg, pct, color, r=36) {
-  const circ = 2*Math.PI*r;
-  const dash = (pct/100)*circ;
-  svg.innerHTML = `
-    <circle cx="44" cy="44" r="${r}" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="7"/>
-    <circle cx="44" cy="44" r="${r}" fill="none" stroke="${color}" stroke-width="7"
-      stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${circ/4}"
-      stroke-linecap="round" style="transition:stroke-dasharray 1s ease"/>`;
+function demoWrap(title, desc, bodyHTML, color) {
+  return `<div class="demo-wrap">
+    <h3 class="demo-title" style="color:${color||'var(--text-primary)'}">${title}</h3>
+    <p class="demo-desc">${desc}</p>
+    ${bodyHTML}
+  </div>`;
 }
 
 // ================================================================
-// SCIENCE DEMOS
+// MATHS — CLASS 1 (7 demos)
 // ================================================================
+DEMO_REGISTRY['dm_m1_count'] = { title:'Count with Fingers', emoji:'✋', render(c) {
+  let n=0;
+  c.innerHTML = demoWrap('✋ Count on Your Fingers',
+    'Tap the hand to count up — see how numbers and fingers match!',
+    `<div style="text-align:center">
+      <div style="font-size:80px;cursor:pointer;user-select:none;animation:sccFloat 2s ease-in-out infinite" id="hand-emoji" onclick="dmCount()">✋</div>
+      <div style="font-size:48px;font-weight:900;font-family:var(--font-display);color:var(--indigo);margin:8px 0" id="cnt-num">0</div>
+      <div style="font-size:14px;color:var(--text-muted)" id="cnt-word"></div>
+      <button class="demo-btn" style="margin-top:12px" onclick="dmCntReset()">🔄 Reset</button>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">Fingers were humanity's FIRST calculator! Ancient humans counted on fingers before numbers were invented.</span></div>`,
+    'var(--math-1)');
+  const words=['zero','one','two','three','four','five','six','seven','eight','nine','ten'];
+  const hands=['🤜','☝️','✌️','🤟','🖖','✋','🖐️🤙','🖐️✌️','🖐️🤟','🖐️🖖','🙌'];
+  window.dmCount=()=>{if(n<10){n++;document.getElementById('cnt-num').textContent=n;document.getElementById('cnt-word').textContent=words[n];document.getElementById('hand-emoji').textContent=hands[n];}};
+  window.dmCntReset=()=>{n=0;document.getElementById('cnt-num').textContent=0;document.getElementById('cnt-word').textContent='';document.getElementById('hand-emoji').textContent='✋';};
+}};
 
-// 1. Volcano reaction
-DEMO_REGISTRY['demo_volcano'] = {
-  title: 'Volcano Eruption!', subject:'sci', emoji:'🌋',
-  desc: 'Baking soda + vinegar = CO₂ gas! A chemical reaction.',
-  render(c) {
-    c.innerHTML = `
-      <div class="demo-wrap">
-        <h3 class="demo-title">🌋 Volcano Reaction</h3>
-        <p class="demo-desc">Vinegar (acid) + Baking Soda (base) → CO₂ gas bubbles!</p>
-        <div class="demo-scene" id="volc-scene" style="height:200px;position:relative;overflow:hidden">
-          <svg viewBox="0 0 200 200" style="width:100%;height:100%">
-            <!-- Ground -->
-            <rect x="0" y="160" width="200" height="40" fill="#8b4513"/>
-            <!-- Volcano body -->
-            <polygon points="100,60 40,160 160,160" fill="#666"/>
-            <polygon points="100,60 55,160 145,160" fill="#888"/>
-            <!-- Crater -->
-            <ellipse cx="100" cy="62" rx="18" ry="6" fill="#555"/>
-            <!-- Lava flows (hidden initially) -->
-            <path id="lava-l" d="M88,70 Q70,110 60,145" stroke="#ff4500" stroke-width="6" fill="none" stroke-linecap="round" opacity="0"/>
-            <path id="lava-r" d="M112,70 Q130,110 140,145" stroke="#ff6500" stroke-width="6" fill="none" stroke-linecap="round" opacity="0"/>
-          </svg>
-          <!-- Bubbles container -->
-          <div id="volc-bubbles" style="position:absolute;left:50%;transform:translateX(-50%);bottom:60%;width:36px"></div>
-        </div>
-        <div class="demo-fact-row">
-          <span class="demo-fact">Acid + Base → Salt + Water + CO₂</span>
-        </div>
-        <button class="demo-btn" id="volc-btn" onclick="demoVolcano()">⚗️ Mix & React!</button>
-        <div class="demo-steps">
-          <div class="demo-step" id="vstep-1">1️⃣ Add baking soda to the crater</div>
-          <div class="demo-step" id="vstep-2" style="opacity:0.3">2️⃣ Pour vinegar in…</div>
-          <div class="demo-step" id="vstep-3" style="opacity:0.3">3️⃣ ERUPTION! CO₂ gas escapes!</div>
-        </div>
-      </div>`;
-    window.demoVolcano = () => {
-      const btn = document.getElementById('volc-btn');
-      btn.disabled = true; btn.textContent = '💥 Reacting…';
-      document.getElementById('vstep-2').style.opacity='1';
-      // Animate bubbles
-      const bw = document.getElementById('volc-bubbles');
-      bw.innerHTML = '';
-      for (let i=0;i<18;i++) {
-        const b = document.createElement('div');
-        const sz = 4+Math.random()*10;
-        const hue = 30+Math.random()*40;
-        b.style.cssText = `
-          position:absolute;width:${sz}px;height:${sz}px;border-radius:50%;
-          background:hsl(${hue},100%,55%);opacity:0.9;
-          left:${Math.random()*30-5}px;bottom:0;
-          animation:bubbleUp ${0.6+Math.random()*0.8}s ${i*0.08}s ease-out forwards;`;
-        bw.appendChild(b);
-      }
-      // Animate lava
-      setTimeout(() => {
-        document.getElementById('lava-l').style.cssText += 'opacity:1;transition:opacity 0.5s';
-        document.getElementById('lava-r').style.cssText += 'opacity:1;transition:opacity 0.5s';
-        document.getElementById('vstep-3').style.opacity='1';
-        btn.textContent = '🔄 Again!'; btn.disabled = false;
-        setTimeout(()=>demoReset(),2000);
-      }, 800);
-    };
-    window.demoReset = () => {
-      document.getElementById('lava-l').style.opacity='0';
-      document.getElementById('lava-r').style.opacity='0';
-      document.getElementById('volc-bubbles').innerHTML='';
-      document.getElementById('vstep-2').style.opacity='0.3';
-      document.getElementById('vstep-3').style.opacity='0.3';
-      document.getElementById('volc-btn').textContent='⚗️ Mix & React!';
-    };
-  }
-};
+DEMO_REGISTRY['dm_m1_odd_even'] = { title:'Odd & Even with Shoes', emoji:'👟', render(c) {
+  c.innerHTML = demoWrap('👟 Odd or Even?',
+    'Can the number of shoes make PAIRS? Even numbers can. Odd ones have a leftover!',
+    `<div style="text-align:center">
+      <input type="range" min="1" max="10" value="4" id="shoe-slider"
+        style="width:100%;margin:12px 0;accent-color:var(--indigo)"
+        oninput="dmShoes(this.value)">
+      <div id="shoe-display" style="font-size:28px;min-height:60px;letter-spacing:2px;flex-wrap:wrap;display:flex;justify-content:center;gap:4px"></div>
+      <div id="shoe-result" style="font-size:20px;font-weight:800;margin-top:8px"></div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">EVEN numbers end in 0,2,4,6,8 — they always pair up perfectly. ODD numbers end in 1,3,5,7,9 — one shoe is always left alone!</span></div>`,
+    'var(--math-1)');
+  window.dmShoes=(n)=>{
+    n=+n; const d=document.getElementById('shoe-display');
+    d.innerHTML=Array.from({length:n},(_,i)=>`<span style="font-size:24px;animation:popIn 0.2s ${i*0.05}s both">👟</span>`).join('');
+    const r=document.getElementById('shoe-result');
+    r.style.color=n%2===0?'#22c55e':'#f59e0b';
+    r.textContent=n+' is '+(n%2===0?'EVEN ✅ — makes '+n/2+' pairs!':'ODD ⚡ — '+Math.floor(n/2)+' pairs + 1 leftover');
+  };
+  window.dmShoes(4);
+}};
 
-// 2. Rainbow / Light Prism
-DEMO_REGISTRY['demo_prism'] = {
-  title:'Rainbow from White Light', subject:'sci', emoji:'🌈',
-  desc:'A prism splits white light into all the colours of the rainbow!',
-  render(c) {
-    c.innerHTML = `
-      <div class="demo-wrap">
-        <h3 class="demo-title">🌈 Light Through a Prism</h3>
-        <p class="demo-desc">White light is made of ALL colours mixed together.</p>
-        <div class="demo-scene" style="height:180px;display:flex;align-items:center;justify-content:center">
-          <svg viewBox="0 0 280 140" style="width:100%;max-width:320px">
-            <!-- White light beam in -->
-            <line x1="10" y1="70" x2="100" y2="70" stroke="white" stroke-width="12" opacity="0.9"/>
-            <text x="5" y="58" font-size="9" fill="rgba(255,255,255,0.6)">White light</text>
-            <!-- Prism -->
-            <polygon points="100,30 100,110 145,70" fill="rgba(99,200,255,0.25)" stroke="rgba(99,200,255,0.7)" stroke-width="2"/>
-            <text x="108" y="73" font-size="8" fill="rgba(99,200,255,0.9)">PRISM</text>
-            <!-- Dispersed colours -->
-            <line id="pr-v" x1="145" y1="70" x2="270" y2="25"  stroke="#9400D3" stroke-width="4" opacity="0" stroke-linecap="round"/>
-            <line id="pr-b" x1="145" y1="70" x2="270" y2="42"  stroke="#0000FF" stroke-width="4" opacity="0" stroke-linecap="round"/>
-            <line id="pr-g" x1="145" y1="70" x2="270" y2="57"  stroke="#00AA00" stroke-width="4" opacity="0" stroke-linecap="round"/>
-            <line id="pr-y" x1="145" y1="70" x2="270" y2="70"  stroke="#FFFF00" stroke-width="4" opacity="0" stroke-linecap="round"/>
-            <line id="pr-o" x1="145" y1="70" x2="270" y2="84"  stroke="#FF7F00" stroke-width="4" opacity="0" stroke-linecap="round"/>
-            <line id="pr-r" x1="145" y1="70" x2="270" y2="100" stroke="#FF0000" stroke-width="4" opacity="0" stroke-linecap="round"/>
-            <!-- Labels (hidden) -->
-            <text id="lb-v" x="274" y="28"  font-size="8" fill="#bf5fff" opacity="0">Violet</text>
-            <text id="lb-b" x="274" y="45"  font-size="8" fill="#6666ff" opacity="0">Blue</text>
-            <text id="lb-g" x="274" y="60"  font-size="8" fill="#44cc44" opacity="0">Green</text>
-            <text id="lb-y" x="274" y="73"  font-size="8" fill="#ffff44" opacity="0">Yellow</text>
-            <text id="lb-o" x="274" y="87"  font-size="8" fill="#ffaa44" opacity="0">Orange</text>
-            <text id="lb-r" x="274" y="103" font-size="8" fill="#ff5555" opacity="0">Red</text>
-          </svg>
-        </div>
-        <div class="demo-fact-row">
-          <span class="demo-fact">ROYGBIV: Red Orange Yellow Green Blue Indigo Violet</span>
-        </div>
-        <button class="demo-btn" onclick="demoPrism()">💡 Shine the Light!</button>
-      </div>`;
-    window.demoPrism = () => {
-      const cols = ['v','b','g','y','o','r'];
-      cols.forEach((col,i) => {
-        setTimeout(() => {
-          document.getElementById(`pr-${col}`).style.cssText += 'opacity:1;transition:opacity 0.3s';
-          document.getElementById(`lb-${col}`).style.cssText += 'opacity:1;transition:opacity 0.3s';
-        }, i*120);
-      });
-    };
-  }
-};
+DEMO_REGISTRY['dm_m1_shapes'] = { title:'Shapes All Around Us', emoji:'🔷', render(c) {
+  const shapes=[
+    {name:'Circle',svg:'<circle cx="50" cy="50" r="40" fill="#6366f1"/>',sides:0,example:'🍕 Pizza, 🌕 Moon, 🎡 Wheel'},
+    {name:'Square',svg:'<rect x="10" y="10" width="80" height="80" fill="#22c55e" rx="4"/>',sides:4,example:'📦 Box, 🪟 Window, 🎲 Dice face'},
+    {name:'Triangle',svg:'<polygon points="50,8 90,92 10,92" fill="#f59e0b"/>',sides:3,example:'🍕 Slice, ⛰️ Mountain, 🎄 Tree'},
+    {name:'Rectangle',svg:'<rect x="5" y="20" width="90" height="60" fill="#e879f9" rx="4"/>',sides:4,example:'📱 Phone, 📚 Book, 🚪 Door'},
+    {name:'Oval',svg:'<ellipse cx="50" cy="50" rx="45" ry="28" fill="#06b6d4"/>',sides:0,example:'🥚 Egg, 🏈 Ball, 🪞 Mirror'},
+  ];
+  let si=0;
+  c.innerHTML = demoWrap('🔷 Shape Explorer',
+    'Tap to explore shapes — can you find them around you?',
+    `<div style="text-align:center">
+      <svg viewBox="0 0 100 100" style="width:120px;height:120px;margin:0 auto;display:block" id="sh-svg"></svg>
+      <div style="font-size:24px;font-weight:900;font-family:var(--font-display);margin:8px 0;color:var(--indigo)" id="sh-name"></div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px" id="sh-sides"></div>
+      <div style="font-size:12px;color:var(--text-muted)" id="sh-example"></div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+        <button class="demo-btn" style="flex:1" onclick="dmShPrev()">← Prev</button>
+        <button class="demo-btn" style="flex:1" onclick="dmShNext()">Next →</button>
+      </div>
+    </div>`,
+    'var(--math-1)');
+  function showShape(){const s=shapes[si];document.getElementById('sh-svg').innerHTML=s.svg;document.getElementById('sh-name').textContent=s.name;document.getElementById('sh-sides').textContent=s.sides?s.sides+' sides':'Curved — no sides/corners';document.getElementById('sh-example').textContent='Found in: '+s.example;}
+  window.dmShNext=()=>{si=(si+1)%shapes.length;showShape();};
+  window.dmShPrev=()=>{si=(si-1+shapes.length)%shapes.length;showShape();};
+  showShape();
+}};
 
-// 3. Plant water experiment
-DEMO_REGISTRY['demo_plant'] = {
-  title:'How Plants Drink Water', subject:'sci', emoji:'🌱',
-  desc:'Roots absorb water and it travels up the stem to leaves.',
-  render(c) {
-    c.innerHTML = `
-      <div class="demo-wrap">
-        <h3 class="demo-title">🌱 How Plants Drink</h3>
-        <p class="demo-desc">Water travels from roots → stem → leaves through tiny tubes (xylem).</p>
-        <div class="demo-scene" style="height:200px;display:flex;align-items:flex-end;justify-content:center;gap:30px">
-          <!-- Plant SVG -->
-          <svg viewBox="0 0 100 180" style="height:180px;width:100px">
-            <!-- Soil -->
-            <rect x="0" y="130" width="100" height="50" fill="#6b4226" rx="4"/>
-            <!-- Water fill animated -->
-            <rect id="water-fill" x="0" y="178" width="100" height="0" fill="#4488ff" opacity="0.4" rx="4"/>
-            <!-- Roots -->
-            <path d="M50,130 Q35,145 25,155" stroke="#8b6914" stroke-width="3" fill="none"/>
-            <path d="M50,130 Q50,148 45,158" stroke="#8b6914" stroke-width="3" fill="none"/>
-            <path d="M50,130 Q65,145 75,155" stroke="#8b6914" stroke-width="3" fill="none"/>
-            <!-- Stem with water column -->
-            <rect x="46" y="40" width="8" height="90" fill="#2d8c2d" rx="3"/>
-            <!-- Water column inside stem -->
-            <rect id="stem-water" x="48" y="130" width="4" height="0" fill="#44aaff" opacity="0.7" rx="2"/>
-            <!-- Leaves -->
-            <ellipse cx="30" cy="75" rx="22" ry="14" fill="#22aa22" transform="rotate(-30,30,75)"/>
-            <ellipse cx="70" cy="65" rx="22" ry="14" fill="#2db82d" transform="rotate(25,70,65)"/>
-            <ellipse cx="50" cy="42" rx="18" ry="12" fill="#33cc33"/>
-            <!-- Water drops on leaves -->
-            <circle id="wd1" cx="28" cy="68" r="3" fill="#44aaff" opacity="0"/>
-            <circle id="wd2" cx="70" cy="58" r="3" fill="#44aaff" opacity="0"/>
-            <circle id="wd3" cx="50" cy="36" r="3" fill="#44aaff" opacity="0"/>
-          </svg>
-          <div style="flex:1;max-width:140px">
-            <div class="demo-step" id="ps1">🌊 Roots absorb</div>
-            <div class="demo-step" id="ps2" style="opacity:0.3">↑ Up the stem</div>
-            <div class="demo-step" id="ps3" style="opacity:0.3">🍃 Into leaves</div>
-            <div class="demo-step" id="ps4" style="opacity:0.3">💨 Evaporation!</div>
-          </div>
-        </div>
-        <button class="demo-btn" onclick="demoPlant()">💧 Water the Plant!</button>
-      </div>`;
-    window.demoPlant = () => {
-      // Animate water rising
-      const wf = document.getElementById('water-fill');
-      const sw = document.getElementById('stem-water');
-      wf.style.cssText += 'transition:height 0.8s,y 0.8s';
-      setTimeout(()=>{ wf.setAttribute('height','30'); wf.setAttribute('y','148'); document.getElementById('ps1').style.fontWeight='800'; },100);
-      setTimeout(()=>{ sw.setAttribute('height','80'); sw.setAttribute('y','50'); sw.style.transition='height 1.2s,y 1.2s'; document.getElementById('ps2').style.opacity='1'; },900);
-      setTimeout(()=>{
-        document.getElementById('ps3').style.opacity='1';
-        ['wd1','wd2','wd3'].forEach(id=>{ document.getElementById(id).style.cssText+='opacity:1;transition:opacity 0.5s'; });
-      }, 2000);
-      setTimeout(()=>{ document.getElementById('ps4').style.opacity='1'; }, 2800);
-    };
-  }
-};
+DEMO_REGISTRY['dm_m1_add_visual'] = { title:'Addition with Apples', emoji:'🍎', render(c) {
+  c.innerHTML = demoWrap('🍎 Adding with Objects',
+    'Pick two numbers and watch them join together!',
+    `<div style="display:flex;gap:12px;align-items:center;justify-content:center;margin:8px 0">
+      <div style="text-align:center">
+        <input type="range" min="0" max="9" value="3" id="add-a" style="width:100px;accent-color:var(--math-1)" oninput="dmAdd()">
+        <div id="av-a" style="font-size:12px;color:var(--math-1);font-weight:800"></div>
+      </div>
+      <span style="font-size:28px">➕</span>
+      <div style="text-align:center">
+        <input type="range" min="0" max="9" value="4" id="add-b" style="width:100px;accent-color:var(--math-1)" oninput="dmAdd()">
+        <div id="av-b" style="font-size:12px;color:var(--math-1);font-weight:800"></div>
+      </div>
+    </div>
+    <div id="add-apples" style="font-size:22px;min-height:50px;flex-wrap:wrap;display:flex;gap:2px;justify-content:center;padding:8px;background:var(--bg-hud);border-radius:12px"></div>
+    <div id="add-result" style="text-align:center;font-size:28px;font-weight:900;font-family:var(--font-display);color:var(--indigo);margin-top:8px"></div>
+    <div class="demo-fact-row"><span class="demo-fact">Addition means putting groups TOGETHER. The answer (sum) is always bigger than either number you started with!</span></div>`,
+    'var(--math-1)');
+  window.dmAdd=()=>{
+    const a=+document.getElementById('add-a').value, b=+document.getElementById('add-b').value;
+    document.getElementById('av-a').textContent=a+' 🍎';
+    document.getElementById('av-b').textContent=b+' 🍊';
+    const apples=Array(a).fill('🍎').concat(Array(b).fill('🍊'));
+    document.getElementById('add-apples').innerHTML=apples.map((e,i)=>`<span style="animation:popIn 0.2s ${i*0.04}s both">${e}</span>`).join('');
+    document.getElementById('add-result').textContent=`${a} + ${b} = ${a+b}`;
+  };
+  window.dmAdd();
+}};
 
-// 4. Food chain interactive
-DEMO_REGISTRY['demo_foodchain'] = {
-  title:'Build a Food Chain', subject:'sci', emoji:'🦁',
-  desc:'Energy flows from the Sun → Plants → Animals.',
-  render(c) {
-    const chain = [
-      {e:'☀️',n:'Sun',c:'#ffd700'},
-      {e:'🌿',n:'Plant',c:'#22c55e'},
-      {e:'🐛',n:'Caterpillar',c:'#86efac'},
-      {e:'🐸',n:'Frog',c:'#4ade80'},
-      {e:'🐍',n:'Snake',c:'#166534'},
-      {e:'🦅',n:'Eagle',c:'#78350f'},
-    ];
-    let step = 0;
-    c.innerHTML = `
-      <div class="demo-wrap">
-        <h3 class="demo-title">🦁 Food Chain</h3>
-        <p class="demo-desc">Tap to add each link — energy flows from Sun to top predator!</p>
-        <div id="fc-chain" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;min-height:80px;background:var(--bg-hud);border-radius:12px;padding:12px;margin:8px 0;justify-content:center"></div>
-        <div id="fc-fact" class="demo-fact-row" style="min-height:32px"></div>
-        <button class="demo-btn" id="fc-btn" onclick="demoFoodChain()">➕ Add Next</button>
-        <button class="demo-btn" style="background:var(--bg-hud);color:var(--text-secondary);margin-top:6px" onclick="demoFCReset()">🔄 Reset</button>
-      </div>`;
-    const facts = [
-      '☀️ The Sun provides ALL energy on Earth!',
-      '🌿 Plants are PRODUCERS — they make food from sunlight.',
-      '🐛 Caterpillars are PRIMARY consumers — they eat plants.',
-      '🐸 Frogs are SECONDARY consumers — they eat insects.',
-      '🐍 Snakes are TERTIARY consumers — they eat frogs.',
-      '🦅 Eagles are APEX predators — nothing eats them!',
-    ];
-    window.demoFoodChain = () => {
-      if (step >= chain.length) return;
-      const ch = document.getElementById('fc-chain');
-      const item = chain[step];
-      if (step > 0) ch.insertAdjacentHTML('beforeend',`<span style="font-size:18px;color:${chain[step-1].c}"> → </span>`);
-      ch.insertAdjacentHTML('beforeend',`<span style="font-size:28px;animation:popIn 0.3s var(--bounce) both">${item.e}<div style="font-size:9px;text-align:center;color:var(--text-muted);font-weight:700">${item.n}</div></span>`);
-      document.getElementById('fc-fact').innerHTML = `<span class="demo-fact">${facts[step]}</span>`;
-      step++;
-      if (step >= chain.length) document.getElementById('fc-btn').disabled = true;
-    };
-    window.demoFCReset = () => { step=0; document.getElementById('fc-chain').innerHTML=''; document.getElementById('fc-fact').innerHTML=''; document.getElementById('fc-btn').disabled=false; };
+DEMO_REGISTRY['dm_m1_pattern'] = { title:'Pattern Magic', emoji:'🎨', render(c) {
+  const patterns=[
+    {name:'AB Pattern',seq:['🔴','🔵','🔴','🔵','🔴','🔵','❓'],answer:'🔵'},
+    {name:'AAB Pattern',seq:['⭐','⭐','🌙','⭐','⭐','🌙','❓'],answer:'⭐'},
+    {name:'ABC Pattern',seq:['🟠','🟢','🟣','🟠','🟢','🟣','❓'],answer:'🟠'},
+    {name:'Size Pattern',seq:['🐘','🐘','🐭','🐘','🐘','🐭','❓'],answer:'🐘'},
+  ];
+  let pi=0;
+  function showP(){
+    const p=patterns[pi];
+    document.getElementById('pat-name').textContent=p.name;
+    document.getElementById('pat-seq').innerHTML=p.seq.map((s,i)=>
+      s==='❓'?`<span style="font-size:28px;background:rgba(255,215,0,0.2);border:2px dashed var(--gold);border-radius:8px;width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center">❓</span>`:
+      `<span style="font-size:28px;animation:popIn 0.2s ${i*0.08}s both">${s}</span>`
+    ).join('');
+    document.getElementById('pat-opts').innerHTML=
+      [...new Set(p.seq.filter(s=>s!=='❓'))].map(s=>
+        `<button class="opt-btn" style="font-size:24px;padding:12px" data-correct="${s===p.answer}"
+          onclick="this.classList.add(this.dataset.correct==='true'?'correct':'wrong');document.querySelectorAll('#pat-opts .opt-btn').forEach(b=>b.style.pointerEvents='none')"
+        >${s}</button>`
+      ).join('');
   }
-};
+  c.innerHTML = demoWrap('🎨 Pattern Detective',
+    'What comes next in the pattern? Tap your answer!',
+    `<div style="text-align:center">
+      <div style="font-size:13px;font-weight:800;color:var(--indigo);margin-bottom:8px" id="pat-name"></div>
+      <div id="pat-seq" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;min-height:50px;align-items:center"></div>
+      <div id="pat-opts" class="opts-grid opts-3" style="gap:8px;max-width:240px;margin:0 auto"></div>
+      <button class="demo-btn" style="margin-top:12px" onclick="pi=(pi+1)%${patterns.length};showP ? showP() : null">⏭ Next Pattern</button>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">Patterns repeat in a predictable order. Finding patterns is the foundation of ALL mathematics!</span></div>`,
+    'var(--math-1)');
+  window.showP=showP; showP();
+}};
+
+DEMO_REGISTRY['dm_m1_measure'] = { title:'Long or Short?', emoji:'📏', render(c) {
+  const pairs=[
+    {a:'🐛 Caterpillar (5cm)',b:'🐍 Snake (100cm)',longer:'b',fact:'The snake is 20x longer!'},
+    {a:'✏️ Pencil (15cm)',b:'🪄 Magic wand (30cm)',longer:'b',fact:'The wand is twice as long!'},
+    {a:'🦷 Tooth (1cm)',b:'👣 Foot (25cm)',longer:'b',fact:'Your foot is 25x the size of a tooth!'},
+    {a:'🏠 House (6m)',b:'🦒 Giraffe (5.5m)',longer:'a',fact:'A house is just slightly taller than a giraffe!'},
+  ];
+  let qi=0;
+  function showQ(){const q=pairs[qi];document.getElementById('meas-a').textContent=q.a;document.getElementById('meas-b').textContent=q.b;document.getElementById('meas-result').textContent='';document.querySelectorAll('.meas-btn').forEach(b=>{b.style.pointerEvents='';b.classList.remove('correct','wrong');});}
+  c.innerHTML = demoWrap('📏 Which is Longer?',
+    'Compare lengths — tap the longer one!',
+    `<div style="display:flex;gap:8px;justify-content:center;margin:10px 0">
+      <button class="meas-btn demo-btn" style="flex:1;font-size:12px" id="meas-a" onclick="dmMeasCheck('a')"></button>
+      <button class="meas-btn demo-btn" style="flex:1;font-size:12px" id="meas-b" onclick="dmMeasCheck('b')"></button>
+    </div>
+    <div id="meas-result" style="text-align:center;font-size:13px;font-weight:700;min-height:40px;color:var(--indigo)"></div>
+    <button class="demo-btn" style="margin-top:8px;background:var(--bg-hud);color:var(--text-secondary)" onclick="qi=(qi+1)%${pairs.length};showQ?showQ():null">⏭ Next</button>
+    <div class="demo-fact-row"><span class="demo-fact">We measure length in mm, cm, m, km. 10mm = 1cm, 100cm = 1m, 1000m = 1km!</span></div>`,
+    'var(--math-1)');
+  window.dmMeasCheck=(choice)=>{const q=pairs[qi];const correct=choice===q.longer;document.querySelectorAll('.meas-btn').forEach(b=>b.style.pointerEvents='none');document.getElementById('meas-'+choice).classList.add(correct?'correct':'wrong');document.getElementById('meas-result').textContent=(correct?'✅ Correct! ':'❌ Not quite — ')+q.fact;};
+  window.showQ=showQ; showQ();
+}};
+
+DEMO_REGISTRY['dm_m1_money'] = { title:'Coin Value Game', emoji:'💰', render(c) {
+  const coins=[{n:'₹1',v:1,e:'🟤'},{n:'₹2',v:2,e:'⚪'},{n:'₹5',v:5,e:'🟡'},{n:'₹10',v:10,e:'🥈'}];
+  let basket=[], target=Math.floor(Math.random()*15)+5;
+  function total(){return basket.reduce((s,x)=>s+x,0);}
+  function render2(){
+    document.getElementById('coin-basket').innerHTML=basket.map(v=>{const c2=coins.find(c3=>c3.v===v);return `<span style="font-size:22px">${c2?c2.e:'?'}</span>`;}).join('');
+    const t=total(); document.getElementById('coin-total').textContent='Total: ₹'+t;
+    const diff=target-t;
+    document.getElementById('coin-msg').textContent=diff===0?'🎉 Perfect! You made ₹'+target+'!':diff>0?'Need ₹'+diff+' more':'Over by ₹'+Math.abs(diff)+' — try reset';
+    document.getElementById('coin-msg').style.color=diff===0?'#22c55e':diff>0?'var(--indigo)':'#ff4757';
+  }
+  c.innerHTML = demoWrap('💰 Make the Amount',
+    `Can you make exactly ₹${target}? Tap coins to add them!`,
+    `<div style="text-align:center">
+      <div style="font-size:24px;font-weight:900;color:var(--indigo);margin-bottom:12px">Make: ₹<span id="coin-target">${target}</span></div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px">
+        ${coins.map(co=>`<button class="demo-btn" style="flex:0 0 auto;padding:10px 14px;font-size:13px" onclick="basket.push(${co.v});render2 && render2()">+${co.e} ${co.n}</button>`).join('')}
+      </div>
+      <div id="coin-basket" style="min-height:36px;font-size:22px;flex-wrap:wrap;display:flex;gap:4px;justify-content:center;padding:8px;background:var(--bg-hud);border-radius:10px"></div>
+      <div id="coin-total" style="font-size:20px;font-weight:800;font-family:var(--font-display);color:var(--indigo);margin:6px 0">Total: ₹0</div>
+      <div id="coin-msg" style="font-size:13px;font-weight:700;min-height:24px"></div>
+      <button class="demo-btn" style="margin-top:8px;background:var(--bg-hud);color:var(--text-secondary)" onclick="basket=[];render2 && render2()">🔄 Reset</button>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">India's coins: 1 rupee (bronze), 2 rupee (silver edge), 5 rupee (thick), 10 rupee (two-tone). 100 paise = ₹1!</span></div>`,
+    'var(--math-1)');
+  window.render2=render2; render2();
+}};
 
 // ================================================================
-// MATHS MAGIC DEMOS
+// MATHS — CLASS 2 (8 demos)
 // ================================================================
+DEMO_REGISTRY['dm_m2_place'] = { title:'Tens & Units', emoji:'🏠', render(c) {
+  c.innerHTML = demoWrap('🏠 Place Value House',
+    'Every digit has a HOME — tens or units. Slide to build numbers!',
+    `<div style="text-align:center">
+      <input type="range" min="10" max="99" value="47" id="pv-slider"
+        style="width:90%;accent-color:var(--indigo);margin:10px 0"
+        oninput="dmPV(this.value)">
+      <div style="display:flex;gap:12px;justify-content:center;margin:10px 0">
+        <div style="background:rgba(99,102,241,0.15);border:2px solid var(--indigo);border-radius:12px;padding:16px 24px;text-align:center">
+          <div style="font-size:11px;font-weight:800;color:var(--indigo);letter-spacing:1px">TENS</div>
+          <div style="font-size:48px;font-weight:900;font-family:var(--font-display);color:var(--indigo)" id="pv-tens">4</div>
+          <div style="font-size:11px;color:var(--text-muted)" id="pv-tens-val">= 40</div>
+        </div>
+        <div style="font-size:36px;line-height:90px">+</div>
+        <div style="background:rgba(255,215,0,0.15);border:2px solid var(--gold);border-radius:12px;padding:16px 24px;text-align:center">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1px">UNITS</div>
+          <div style="font-size:48px;font-weight:900;font-family:var(--font-display);color:var(--gold)" id="pv-units">7</div>
+          <div style="font-size:11px;color:var(--text-muted)" id="pv-units-val">= 7</div>
+        </div>
+      </div>
+      <div style="font-size:28px;font-weight:900;font-family:var(--font-display);color:var(--text-primary)" id="pv-total">47</div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">The digit's POSITION gives it value. In 47: the 4 means FORTY (4 tens), not just 4. This is called Place Value!</span></div>`,
+    'var(--indigo)');
+  window.dmPV=(n)=>{n=+n;const t=Math.floor(n/10),u=n%10;document.getElementById('pv-tens').textContent=t;document.getElementById('pv-units').textContent=u;document.getElementById('pv-tens-val').textContent='= '+t*10;document.getElementById('pv-units-val').textContent='= '+u;document.getElementById('pv-total').textContent=n;};
+  window.dmPV(47);
+}};
 
-// 5. Times table pattern revealer
-DEMO_REGISTRY['demo_times9'] = {
-  title:'9× Table Magic', subject:'math', emoji:'🪄',
-  desc:'Your fingers can do the 9 times table! Always works.',
-  render(c) {
-    c.innerHTML = `
-      <div class="demo-wrap">
-        <h3 class="demo-title">🪄 The 9× Finger Trick</h3>
-        <p class="demo-desc">Tap a number to see the trick!</p>
-        <div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin:10px 0" id="fingers-row">
-          ${[1,2,3,4,5,6,7,8,9,10].map(n=>`
-            <div class="finger-btn" onclick="demoFinger(${n})" style="
-              width:38px;height:60px;background:var(--bg-hud);border:2px solid var(--border);
-              border-radius:8px 8px 4px 4px;display:flex;align-items:center;justify-content:center;
-              font-size:11px;font-weight:800;cursor:pointer;transition:all 0.2s;color:var(--text-secondary)
-            " id="f${n}">${n}</div>
-          `).join('')}
-        </div>
-        <div id="finger-result" style="text-align:center;font-size:28px;font-weight:900;font-family:var(--font-display);color:var(--indigo);min-height:50px;padding:8px"></div>
-        <div id="finger-explain" class="demo-fact-row" style="min-height:40px"></div>
-      </div>`;
-    window.demoFinger = (n) => {
-      document.querySelectorAll('.finger-btn').forEach((f,i)=>{
-        const fn = i+1;
-        f.style.background = fn === n ? 'var(--indigo)' : fn < n ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.05)';
-        f.style.borderColor = fn === n ? 'var(--indigo)' : fn < n ? 'rgba(99,102,241,0.4)' : 'var(--border)';
-        f.style.color = fn === n ? '#fff' : 'var(--text-secondary)';
-        f.style.transform = fn === n ? 'scaleY(0.5) translateY(15px)' : 'scaleY(1)';
-      });
-      const left = n-1; const right = 10-n;
-      const ans = n * 9;
-      document.getElementById('finger-result').textContent = `9 × ${n} = ${ans}`;
-      document.getElementById('finger-explain').innerHTML =
-        `<span class="demo-fact">Fingers to left of folded: <b>${left}</b> (tens) | Right: <b>${right}</b> (units) → <b>${left}${right} = ${ans}</b></span>`;
-    };
-  }
-};
+DEMO_REGISTRY['dm_m2_skip'] = { title:'Skip Counting Fun', emoji:'🐸', render(c) {
+  const modes=[{skip:2,emoji:'🐸',name:'Count by 2s (Even numbers!)'},{skip:5,emoji:'⭐',name:'Count by 5s (Clock hands!)'},{skip:10,emoji:'🚀',name:'Count by 10s (Super fast!)'}];
+  let mi=0,vals=[];
+  function start(){vals=[];const m=modes[mi];for(let i=0;i<=60;i+=m.skip)vals.push(i);document.getElementById('skip-label').textContent=m.name;show(0);}
+  function show(idx){const m=modes[mi];document.getElementById('skip-emojis').innerHTML=vals.slice(0,idx+1).map((v,i)=>`<div style="animation:popIn 0.2s ${i*0.05}s both;display:inline-flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:20px">${m.emoji}</span><span style="font-size:10px;font-weight:800;color:var(--indigo)">${v}</span></div>`).join('');if(idx<vals.length-1)setTimeout(()=>show(idx+1),150);}
+  c.innerHTML = demoWrap('🐸 Skip Counting',
+    'Watch the frog jump — it always skips the same amount!',
+    `<div style="text-align:center">
+      <div style="font-size:13px;font-weight:800;color:var(--indigo);margin-bottom:8px" id="skip-label"></div>
+      <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;min-height:80px;background:var(--bg-hud);border-radius:12px;padding:10px;align-items:flex-end" id="skip-emojis"></div>
+      <div style="display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap">
+        ${modes.map((m,i)=>`<button class="demo-btn" style="flex:0 0 auto;font-size:12px;padding:8px 12px" onclick="mi=${i};start()">Skip by ${m.skip} ${m.emoji}</button>`).join('')}
+      </div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">Skip counting is multiplication in disguise! 5,10,15,20 is the same as 5×1, 5×2, 5×3, 5×4!</span></div>`,
+    'var(--indigo)');
+  window.start=start; start();
+}};
 
-// 6. Magic number trick
-DEMO_REGISTRY['demo_magic_num'] = {
-  title:'Think of a Number — I\'ll read your mind!', subject:'math', emoji:'🧠',
-  desc:'Maths always brings you back to the same number!',
-  render(c) {
-    c.innerHTML = `
-      <div class="demo-wrap">
-        <h3 class="demo-title">🧠 Mind Reader</h3>
-        <p class="demo-desc">Follow the steps — the answer is always <b>3</b>!</p>
-        <div id="mn-steps" style="display:flex;flex-direction:column;gap:8px;margin:10px 0">
-          ${[
-            ['Think of any number from 1–10','😶','your-num'],
-            ['Add 5 to it','➕5',''],
-            ['Multiply by 2','×2',''],
-            ['Subtract 4','−4',''],
-            ['Divide by 2','÷2',''],
-            ['Subtract your original number','−your number',''],
-          ].map(([txt,op,id],i)=>`
-            <div class="demo-step-row" style="opacity:${i===0?1:0.3};transition:opacity 0.4s" id="mnrow-${i}">
-              <span style="font-size:20px;width:36px;text-align:center">${op}</span>
-              <span style="font-size:13px;flex:1">${txt}</span>
-            </div>`).join('')}
-        </div>
-        <div id="mn-reveal" style="text-align:center;font-size:48px;font-weight:900;color:var(--gold);display:none">
-          🎉 Always <span style="color:var(--indigo)">3</span>!
-        </div>
-        <button class="demo-btn" id="mn-btn" onclick="demoMagicNext()">▶ Next Step</button>
-        <div class="demo-fact-row" id="mn-fact"></div>
-      </div>`;
-    let mnStep = 0;
-    window.demoMagicNext = () => {
-      mnStep++;
-      if (mnStep <= 5) {
-        document.getElementById(`mnrow-${mnStep}`).style.opacity = '1';
-      }
-      if (mnStep === 6) {
-        document.getElementById('mn-reveal').style.display = 'block';
-        document.getElementById('mn-btn').textContent = '🔄 Try Again';
-        document.getElementById('mn-fact').innerHTML = '<span class="demo-fact">Algebra: (n+5)×2−4÷2−n = (2n+10−4)÷2−n = n+3−n = <b>3</b> always!</span>';
-        mnStep = 0;
-        return;
-      }
-      if (document.getElementById('mn-btn').textContent === '🔄 Try Again') {
-        mnStep=0;
-        [0,1,2,3,4,5].forEach(i=>document.getElementById(`mnrow-${i}`).style.opacity=i===0?'1':'0.3');
-        document.getElementById('mn-reveal').style.display='none';
-        document.getElementById('mn-btn').textContent='▶ Next Step';
-        document.getElementById('mn-fact').innerHTML='';
-      }
-    };
-  }
-};
+DEMO_REGISTRY['dm_m2_mult_groups'] = { title:'Multiplication = Equal Groups', emoji:'✖️', render(c) {
+  c.innerHTML = demoWrap('✖️ Multiplication Magic',
+    'Multiplication is just adding EQUAL groups! See it visually.',
+    `<div style="display:flex;gap:12px;justify-content:center;align-items:center;margin:8px 0;flex-wrap:wrap">
+      <div style="text-align:center">
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted)">GROUPS</div>
+        <input type="range" min="1" max="6" value="3" id="mg-groups" style="width:80px;accent-color:var(--indigo)" oninput="dmMG()">
+        <div id="mg-gv" style="font-size:18px;font-weight:800;color:var(--indigo)">3</div>
+      </div>
+      <div style="font-size:28px">×</div>
+      <div style="text-align:center">
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted)">IN EACH</div>
+        <input type="range" min="1" max="6" value="4" id="mg-each" style="width:80px;accent-color:var(--gold)" oninput="dmMG()">
+        <div id="mg-ev" style="font-size:18px;font-weight:800;color:var(--gold)">4</div>
+      </div>
+    </div>
+    <div id="mg-display" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;min-height:80px;padding:8px;background:var(--bg-hud);border-radius:12px"></div>
+    <div id="mg-result" style="text-align:center;font-size:28px;font-weight:900;font-family:var(--font-display);color:var(--indigo);margin:8px 0"></div>
+    <div class="demo-fact-row"><span class="demo-fact">3 × 4 means "3 groups of 4". Rearrange them — 4 × 3 also makes 12! Multiplication is COMMUTATIVE (order doesn't matter).</span></div>`,
+    'var(--indigo)');
+  window.dmMG=()=>{const g=+document.getElementById('mg-groups').value,e=+document.getElementById('mg-each').value;document.getElementById('mg-gv').textContent=g;document.getElementById('mg-ev').textContent=e;document.getElementById('mg-display').innerHTML=Array.from({length:g},(_,gi)=>`<div style="background:rgba(99,102,241,0.1);border:1.5px solid rgba(99,102,241,0.3);border-radius:8px;padding:6px;display:flex;gap:4px;flex-wrap:wrap;max-width:${e*28}px">${Array.from({length:e},()=>'<span style="font-size:18px">⭐</span>').join('')}</div>`).join('');document.getElementById('mg-result').textContent=g+' × '+e+' = '+g*e;};
+  window.dmMG();
+}};
 
-// 7. Fibonacci spiral
-DEMO_REGISTRY['demo_fibonacci'] = {
-  title:'Fibonacci in Nature', subject:'math', emoji:'🌻',
-  desc:'Nature\'s secret number sequence — found in sunflowers, shells & more!',
-  render(c) {
-    c.innerHTML = `
-      <div class="demo-wrap">
-        <h3 class="demo-title">🌻 Fibonacci in Nature</h3>
-        <p class="demo-desc">Each number = sum of the two before it. Found EVERYWHERE in nature!</p>
-        <div id="fib-seq" style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;min-height:48px"></div>
-        <svg id="fib-spiral" viewBox="0 0 220 180" style="width:100%;max-width:280px;display:block;margin:0 auto">
-          <path id="fib-path" d="" fill="none" stroke="var(--indigo)" stroke-width="2.5" stroke-linecap="round"/>
-        </svg>
-        <div class="demo-fact-row" id="fib-fact">
-          <span class="demo-fact">Sunflower seeds, nautilus shells, pinecones — all use Fibonacci!</span>
-        </div>
-        <button class="demo-btn" onclick="demoFib()">🌀 Build Sequence</button>
-      </div>`;
-    window.demoFib = () => {
-      const seq = [1,1,2,3,5,8,13,21,34,55];
-      const el = document.getElementById('fib-seq');
-      el.innerHTML = '';
-      seq.forEach((n,i) => {
-        setTimeout(()=>{
-          const chip = document.createElement('div');
-          chip.style.cssText = `
-            background:var(--indigo);color:#fff;border-radius:8px;
-            padding:6px 10px;font-size:14px;font-weight:800;
-            animation:popIn 0.3s var(--bounce) both;font-family:var(--font-display)`;
-          chip.textContent = n;
-          if (i>0) { const plus=document.createElement('span'); plus.textContent='+'; plus.style.cssText='font-size:16px;color:var(--text-muted);line-height:32px'; el.appendChild(plus); }
-          el.appendChild(chip);
-          // Draw spiral path incrementally
-          if (i === seq.length-1) drawFibSpiral();
-        }, i*200);
-      });
-    };
-    function drawFibSpiral() {
-      // Approximate golden spiral with arc segments
-      const d = [];
-      const cx=110, cy=90, r=5;
-      for (let a=0;a<=720;a+=5) {
-        const rad=a*Math.PI/180;
-        const gr = r * Math.pow(1.618, a/90);
-        const x = cx + gr*Math.cos(rad);
-        const y = cy + gr*Math.sin(rad);
-        d.push(a===0?`M${x.toFixed(1)},${y.toFixed(1)}`:`L${x.toFixed(1)},${y.toFixed(1)}`);
-      }
-      const path = document.getElementById('fib-path');
-      path.setAttribute('d', d.join(' '));
-      path.style.cssText += `stroke-dasharray:2000;stroke-dashoffset:2000;transition:stroke-dashoffset 2s ease`;
-      setTimeout(()=>path.style.strokeDashoffset='0',50);
-    }
-  }
-};
+DEMO_REGISTRY['dm_m2_clock'] = { title:'Clock Reading', emoji:'🕐', render(c) {
+  c.innerHTML = demoWrap('🕐 Tell the Time',
+    'Drag the sliders to set the clock hands!',
+    `<div style="text-align:center">
+      <svg viewBox="0 0 120 120" style="width:160px;height:160px;display:block;margin:0 auto" id="clock-svg">
+        <circle cx="60" cy="60" r="56" fill="var(--bg-card)" stroke="var(--border)" stroke-width="3"/>
+        ${[12,1,2,3,4,5,6,7,8,9,10,11].map((n,i)=>{const a=(i*30-90)*Math.PI/180;return `<text x="${60+42*Math.cos(a)}" y="${60+42*Math.sin(a)+4}" text-anchor="middle" font-size="9" font-weight="700" fill="var(--text-secondary)">${n}</text>`}).join('')}
+        <line id="cl-hour" x1="60" y1="60" x2="60" y2="32" stroke="var(--text-primary)" stroke-width="4" stroke-linecap="round"/>
+        <line id="cl-min"  x1="60" y1="60" x2="60" y2="22" stroke="var(--indigo)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="60" cy="60" r="4" fill="var(--indigo)"/>
+      </svg>
+      <div style="display:flex;gap:16px;justify-content:center;margin-top:10px;flex-wrap:wrap">
+        <div style="text-align:center"><div style="font-size:11px;font-weight:800;color:var(--text-muted)">HOUR</div><input type="range" min="0" max="11" value="3" id="cl-h" style="width:100px;accent-color:var(--text-primary)" oninput="dmClock()"><div id="cl-hv" style="font-size:16px;font-weight:800;color:var(--text-primary)">3</div></div>
+        <div style="text-align:center"><div style="font-size:11px;font-weight:800;color:var(--indigo)">MINUTE</div><input type="range" min="0" max="59" value="0" id="cl-m" style="width:100px;accent-color:var(--indigo)" oninput="dmClock()"><div id="cl-mv" style="font-size:16px;font-weight:800;color:var(--indigo)">:00</div></div>
+      </div>
+      <div id="cl-time" style="font-size:32px;font-weight:900;font-family:var(--font-display);color:var(--indigo);margin:8px 0"></div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">The SHORT hand = hours. The LONG hand = minutes. When the long hand points to 12, it's o'clock!</span></div>`,
+    'var(--indigo)');
+  window.dmClock=()=>{const h=+document.getElementById('cl-h').value,m=+document.getElementById('cl-m').value;const ha=(h*30+m*0.5-90)*Math.PI/180,ma=(m*6-90)*Math.PI/180;document.getElementById('cl-hour').setAttribute('x2',60+22*Math.cos(ha));document.getElementById('cl-hour').setAttribute('y2',60+22*Math.sin(ha));document.getElementById('cl-min').setAttribute('x2',60+32*Math.cos(ma));document.getElementById('cl-min').setAttribute('y2',60+32*Math.sin(ma));document.getElementById('cl-hv').textContent=h===0?12:h;document.getElementById('cl-mv').textContent=':'+(m<10?'0':'')+m;document.getElementById('cl-time').textContent=(h===0?12:h)+':'+(m<10?'0':'')+m+(h<12?' AM':' PM');};
+  window.dmClock();
+}};
 
-// 8. Mirror symmetry
-DEMO_REGISTRY['demo_symmetry'] = {
-  title:'Line of Symmetry', subject:'math', emoji:'🔮',
-  desc:'A shape has symmetry if both halves are mirror images!',
-  render(c) {
-    const shapes = [
-      {n:'Circle', sym:true,  svg:`<circle cx="60" cy="60" r="45" fill="var(--indigo)" opacity="0.7"/>`},
-      {n:'Square', sym:true,  svg:`<rect x="15" y="15" width="90" height="90" fill="var(--indigo)" opacity="0.7" rx="4"/>`},
-      {n:'Triangle',sym:true, svg:`<polygon points="60,10 10,110 110,110" fill="var(--indigo)" opacity="0.7"/>`},
-      {n:'Letter F',sym:false,svg:`<text x="15" y="95" font-size="80" font-weight="900" fill="var(--indigo)" opacity="0.7">F</text>`},
-      {n:'Heart',   sym:true,  svg:`<path d="M60,85 C20,55 10,20 40,15 C55,12 60,30 60,30 C60,30 65,12 80,15 C110,20 100,55 60,85 Z" fill="#e879f9" opacity="0.8"/>`},
-      {n:'Letter R',sym:false,svg:`<text x="12" y="95" font-size="80" font-weight="900" fill="var(--indigo)" opacity="0.7">R</text>`},
-    ];
-    let idx = 0;
-    c.innerHTML = `
-      <div class="demo-wrap">
-        <h3 class="demo-title">🔮 Lines of Symmetry</h3>
-        <p class="demo-desc">Does this shape have a line of symmetry?</p>
-        <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin:8px 0">
-          <svg id="sym-svg" viewBox="0 0 120 120" style="width:120px;height:120px;border:2px solid var(--border);border-radius:12px;background:var(--bg-hud)">
-            <g id="sym-shape"></g>
-            <line id="sym-line" x1="60" y1="0" x2="60" y2="120" stroke="#ffd700" stroke-width="2" stroke-dasharray="6,4" opacity="0"/>
-          </svg>
-          <div>
-            <div id="sym-name" style="font-size:20px;font-weight:800;color:var(--text-primary);margin-bottom:8px"></div>
-            <div id="sym-answer" style="font-size:13px;min-height:40px"></div>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-          <button class="demo-btn" onclick="demoSymYes()" style="background:#2ed573">✅ Yes, symmetric!</button>
-          <button class="demo-btn" onclick="demoSymNo()"  style="background:#ff4757">❌ No symmetry!</button>
-        </div>
-        <button class="demo-btn" onclick="demoSymNext()" style="margin-top:8px;background:var(--bg-hud);color:var(--text-secondary)">⏭ Next Shape</button>
-      </div>`;
-    function showShape() {
-      const s = shapes[idx];
-      document.getElementById('sym-shape').innerHTML = s.svg;
-      document.getElementById('sym-name').textContent = s.n;
-      document.getElementById('sym-answer').innerHTML = '';
-      document.getElementById('sym-line').style.opacity='0';
-    }
-    showShape();
-    window.demoSymYes = () => {
-      const s = shapes[idx];
-      document.getElementById('sym-answer').innerHTML = s.sym
-        ? `<span style="color:#2ed573;font-weight:800">✅ Correct! ${s.n} has symmetry!</span>`
-        : `<span style="color:#ff4757;font-weight:800">❌ Actually no! ${s.n} has NO line of symmetry.</span>`;
-      if (s.sym) document.getElementById('sym-line').style.cssText += 'opacity:1;transition:opacity 0.4s';
-    };
-    window.demoSymNo = () => {
-      const s = shapes[idx];
-      document.getElementById('sym-answer').innerHTML = !s.sym
-        ? `<span style="color:#2ed573;font-weight:800">✅ Correct! ${s.n} is asymmetric.</span>`
-        : `<span style="color:#ff4757;font-weight:800">❌ Actually ${s.n} DOES have a line of symmetry!</span>`;
-    };
-    window.demoSymNext = () => { idx=(idx+1)%shapes.length; showShape(); };
-  }
-};
+DEMO_REGISTRY['dm_m2_symmetry_draw'] = { title:'Mirror Drawing', emoji:'🪞', render(c) {
+  const shapes=[{name:'Heart',left:'M10,40 C10,20 30,5 50,25 L50,70 C30,85 10,75 10,60 Z',right:'M90,40 C90,20 70,5 50,25 L50,70 C70,85 90,75 90,60 Z',col:'#e879f9'},{name:'Butterfly Wing',left:'M10,50 C5,20 30,5 50,50 C30,70 5,80 10,50 Z',right:'M90,50 C95,20 70,5 50,50 C70,70 95,80 90,50 Z',col:'#f59e0b'},{name:'Diamond',left:'M10,50 L50,10 L50,90 Z',right:'M90,50 L50,10 L50,90 Z',col:'#22c55e'}];
+  let si=0,showRight=false;
+  function showS(){const s=shapes[si];document.getElementById('sym-canvas').innerHTML=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><line x1="50" y1="0" x2="50" y2="100" stroke="var(--gold)" stroke-width="1.5" stroke-dasharray="4,3"/><path d="${s.left}" fill="${s.col}" opacity="0.7"/><path id="right-half" d="${s.right}" fill="${s.col}" opacity="${showRight?0.7:0.05}" style="transition:opacity 0.4s"/></svg>`;document.getElementById('sym-name').textContent=s.name;}
+  c.innerHTML = demoWrap('🪞 Mirror Symmetry',
+    'The left half reflects to make the right half — tap Reveal to see!',
+    `<div style="text-align:center">
+      <div id="sym-canvas" style="width:200px;height:200px;margin:0 auto;background:var(--bg-hud);border-radius:12px;border:2px solid var(--border)"></div>
+      <div style="font-size:14px;font-weight:800;color:var(--indigo);margin:8px 0" id="sym-name"></div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="demo-btn" style="flex:1" onclick="showRight=!showRight;showS()">🪞 Toggle Mirror</button>
+        <button class="demo-btn" style="flex:1;background:var(--bg-hud);color:var(--text-secondary)" onclick="si=(si+1)%${shapes.length};showS()">⏭ Next Shape</button>
+      </div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">Symmetry is EVERYWHERE in nature — butterflies, leaves, human faces. The line of symmetry is called the mirror line!</span></div>`,
+    'var(--indigo)');
+  window.showS=showS; showS();
+}};
+
+DEMO_REGISTRY['dm_m2_money2'] = { title:'Market Maths', emoji:'🛒', render(c) {
+  const items=[{n:'🍎 Apple',p:5},{n:'🥛 Milk',p:20},{n:'🍌 Banana',p:3},{n:'🍞 Bread',p:25},{n:'🧃 Juice',p:15},{n:'🥚 Egg',p:7}];
+  let cart=[];
+  function total(){return cart.reduce((s,x)=>s+x,0);}
+  c.innerHTML = demoWrap('🛒 Market Maths',
+    'Tap items to put them in your basket — can you spend exactly ₹50?',
+    `<div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">
+        ${items.map((it,i)=>`<button class="demo-btn" style="font-size:11px;padding:8px 4px;background:var(--bg-hud);color:var(--text-secondary)" onclick="cart.push(${it.p});dmMkt()">
+          <div style="font-size:20px">${it.n.split(' ')[0]}</div>
+          <div style="font-size:10px">${it.n.split(' ').slice(1).join(' ')}</div>
+          <div style="font-size:13px;font-weight:800;color:var(--indigo)">₹${it.p}</div>
+        </button>`).join('')}
+      </div>
+      <div style="background:var(--bg-hud);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:11px;font-weight:800;color:var(--text-muted);margin-bottom:4px">🧺 BASKET TOTAL</div>
+        <div style="font-size:36px;font-weight:900;font-family:var(--font-display);color:var(--indigo)" id="mkt-total">₹0</div>
+        <div id="mkt-msg" style="font-size:12px;color:var(--text-muted)">Start shopping!</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="demo-btn" style="flex:1;font-size:12px;background:var(--bg-hud);color:var(--text-secondary)" onclick="if(cart.length)cart.pop();dmMkt()">↩ Remove Last</button>
+        <button class="demo-btn" style="flex:1;font-size:12px" onclick="cart=[];dmMkt()">🔄 Reset</button>
+      </div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">Change = Amount paid − Cost. If you pay ₹50 for a ₹38 bill, change = ₹50 − ₹38 = ₹12!</span></div>`,
+    'var(--indigo)');
+  window.dmMkt=()=>{const t=total();document.getElementById('mkt-total').textContent='₹'+t;const m=document.getElementById('mkt-msg');if(t===50){m.textContent='🎉 Perfect! Exactly ₹50!';m.style.color='#22c55e';}else if(t<50){m.textContent='₹'+(50-t)+' more to reach ₹50';m.style.color='var(--indigo)';}else{m.textContent='Over ₹50 by ₹'+(t-50);m.style.color='#ff4757';}};
+}};
+
+DEMO_REGISTRY['dm_m2_data'] = { title:'Bar Graph Builder', emoji:'📊', render(c) {
+  const cats=['Mon','Tue','Wed','Thu','Fri'];
+  let vals=[4,7,3,6,5];
+  c.innerHTML = demoWrap('📊 Build a Bar Graph',
+    'Slide each bar to record how many books were read each day!',
+    `<div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+        ${cats.map((cat,i)=>`<div style="display:flex;align-items:center;gap:8px">
+          <div style="width:28px;font-size:11px;font-weight:800;color:var(--text-muted)">${cat}</div>
+          <input type="range" min="0" max="10" value="${vals[i]}" style="flex:1;accent-color:var(--indigo)" oninput="vals[${i}]=+this.value;drawBars()">
+          <div style="width:20px;font-size:13px;font-weight:800;color:var(--indigo);text-align:right" id="bv-${i}">${vals[i]}</div>
+        </div>`).join('')}
+      </div>
+      <svg id="bar-svg" viewBox="0 0 220 100" style="width:100%;border-radius:8px;background:var(--bg-hud)">
+        <line x1="20" y1="5" x2="20" y2="90" stroke="var(--border)" stroke-width="1.5"/>
+        <line x1="20" y1="90" x2="215" y2="90" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="22" y="95" font-size="7" fill="var(--text-muted)">Mon</text>
+        <text x="58" y="95" font-size="7" fill="var(--text-muted)">Tue</text>
+        <text x="94" y="95" font-size="7" fill="var(--text-muted)">Wed</text>
+        <text x="130" y="95" font-size="7" fill="var(--text-muted)">Thu</text>
+        <text x="166" y="95" font-size="7" fill="var(--text-muted)">Fri</text>
+        ${[0,2,4,6,8,10].map(v=>`<text x="4" y="${90-v*8+3}" font-size="6" fill="var(--text-muted)">${v}</text><line x1="18" y1="${90-v*8}" x2="215" y2="${90-v*8}" stroke="var(--border)" stroke-width="0.5"/>`).join('')}
+        ${cats.map((_,i)=>`<rect id="bar-${i}" x="${24+i*38}" y="${90-vals[i]*8}" width="28" height="${vals[i]*8}" fill="var(--indigo)" opacity="0.8" rx="2" style="transition:all 0.3s"/><text id="bt-${i}" x="${38+i*38}" y="${84-vals[i]*8}" text-anchor="middle" font-size="7" fill="white">${vals[i]}</text>`).join('')}
+      </svg>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">Bar graphs show data visually. The TALLEST bar = most, SHORTEST = least. This week's total: <b id="bar-total">${vals.reduce((a,b)=>a+b)}</b> books!</span></div>`,
+    'var(--indigo)');
+  window.drawBars=()=>{cats.forEach((_,i)=>{document.getElementById(`bv-${i}`).textContent=vals[i];const b=document.getElementById(`bar-${i}`),bt=document.getElementById(`bt-${i}`);b.setAttribute('y',90-vals[i]*8);b.setAttribute('height',vals[i]*8);bt.setAttribute('y',84-vals[i]*8);bt.textContent=vals[i];});document.getElementById('bar-total').textContent=vals.reduce((a,b)=>a+b);};
+}};
 
 // ================================================================
-// NATURE / EVS DEMOS
+// MATHS — CLASS 3 (8 demos)
+// ================================================================
+DEMO_REGISTRY['dm_m3_times'] = { title:'Times Tables Grid', emoji:'✖️', render(c) {
+  let sel=null;
+  c.innerHTML = demoWrap('✖️ Times Table Explorer',
+    'Tap any cell to highlight its row and column — spot the pattern!',
+    `<div style="overflow-x:auto">
+      <table id="tt-grid" style="border-collapse:collapse;margin:0 auto;font-size:11px;font-weight:700"></table>
+    </div>
+    <div id="tt-fact" class="demo-fact-row" style="margin-top:8px"><span class="demo-fact">Tip: The diagonal (1×1, 2×2, 3×3...) are all SQUARE numbers! 1,4,9,16,25...</span></div>`,
+    'var(--indigo)');
+  const grid=document.getElementById('tt-grid');
+  let rows='<tr><td style="padding:5px;color:var(--text-muted)">×</td>';
+  for(let j=1;j<=10;j++) rows+=`<td style="padding:5px;color:var(--indigo);font-weight:900">${j}</td>`;
+  rows+='</tr>';
+  for(let i=1;i<=10;i++){rows+=`<tr><td style="padding:5px;color:var(--indigo);font-weight:900">${i}</td>`;for(let j=1;j<=10;j++){const v=i*j;rows+=`<td id="tt-${i}-${j}" style="padding:5px;text-align:center;border-radius:4px;cursor:pointer;background:${i===j?'rgba(99,102,241,0.2)':'transparent'};color:${i===j?'var(--indigo)':'var(--text-primary)'}" onclick="dmTT(${i},${j})">${v}</td>`;}rows+='</tr>';}
+  grid.innerHTML=rows;
+  window.dmTT=(ri,ci)=>{for(let i=1;i<=10;i++)for(let j=1;j<=10;j++){const el=document.getElementById(`tt-${i}-${j}`);el.style.background=(i===ri||j===ci)?'rgba(99,102,241,0.25)':(i===j?'rgba(99,102,241,0.15)':'transparent');el.style.color=(i===ri&&j===ci)?'white':(i===ri||j===ci)?'var(--indigo)':'var(--text-primary)';}const el=document.getElementById(`tt-${ri}-${ci}`);el.style.background='var(--indigo)';document.getElementById('tt-fact').innerHTML=`<span class="demo-fact">${ri} × ${ci} = <b>${ri*ci}</b>. The whole ${ri}× row: ${Array.from({length:10},(_,k)=>ri*(k+1)).join(', ')}</span>`;};
+}};
+
+DEMO_REGISTRY['dm_m3_fraction'] = { title:'Fractions with Pizza!', emoji:'🍕', render(c) {
+  let num=1,den=4;
+  c.innerHTML = demoWrap('🍕 Fraction Pizza',
+    'Cut the pizza and choose your slice! Adjust the fraction.',
+    `<div style="text-align:center">
+      <svg id="pizza-svg" viewBox="-1 -1 102 102" style="width:180px;height:180px;display:block;margin:0 auto"></svg>
+      <div style="font-size:40px;font-weight:900;font-family:var(--font-display);color:var(--math-1);margin:8px 0">
+        <span id="frac-n">1</span><span style="font-size:20px;display:block;border-top:3px solid var(--math-1);width:40px;margin:2px auto"></span><span id="frac-d">4</span>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px">
+        <div style="text-align:center"><div style="font-size:10px;color:var(--text-muted);font-weight:700">PIECES TAKEN</div>
+          <input type="range" min="1" max="8" value="1" id="frac-ns" style="accent-color:var(--math-1)" oninput="num=+this.value;if(num>den)den=num;document.getElementById('frac-ds').value=den;dmFrac()">
+        </div>
+        <div style="text-align:center"><div style="font-size:10px;color:var(--text-muted);font-weight:700">TOTAL PIECES</div>
+          <input type="range" min="2" max="8" value="4" id="frac-ds" style="accent-color:var(--math-1)" oninput="den=+this.value;if(num>den)num=1;document.getElementById('frac-ns').value=num;dmFrac()">
+        </div>
+      </div>
+      <div id="frac-desc" style="font-size:12px;color:var(--text-secondary);margin-top:6px"></div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">Numerator (top) = pieces YOU take. Denominator (bottom) = total pieces. ½ = one of two equal halves!</span></div>`,
+    'var(--math-1)');
+  window.dmFrac=()=>{
+    document.getElementById('frac-n').textContent=num;
+    document.getElementById('frac-d').textContent=den;
+    document.getElementById('frac-desc').textContent=`You took ${num} out of ${den} equal slices`;
+    const svg=document.getElementById('pizza-svg');
+    const cx=50,cy=50,r=48;
+    let paths=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/>`;
+    for(let i=0;i<den;i++){const a1=(i/den)*2*Math.PI-Math.PI/2,a2=((i+1)/den)*2*Math.PI-Math.PI/2;const x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1),x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);const fill=i<num?'#ef4444':'#fbbf24';paths+=`<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2} Z" fill="${fill}" stroke="#d97706" stroke-width="1.5" opacity="${i<num?0.9:0.7}"/>`;}
+    svg.innerHTML=paths;
+  };
+  window.dmFrac();
+}};
+
+DEMO_REGISTRY['dm_m3_perimeter'] = { title:'Perimeter Explorer', emoji:'📐', render(c) {
+  c.innerHTML = demoWrap('📐 Walk the Perimeter',
+    'Perimeter = total distance around the outside. Adjust the shape!',
+    `<div style="text-align:center">
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:10px">
+        <div style="text-align:center"><div style="font-size:10px;font-weight:800;color:var(--text-muted)">WIDTH (cm)</div>
+          <input type="range" min="1" max="10" value="6" id="peri-w" style="accent-color:var(--indigo)" oninput="dmPeri()">
+          <div id="peri-wv" style="font-size:18px;font-weight:800;color:var(--indigo)">6</div>
+        </div>
+        <div style="text-align:center"><div style="font-size:10px;font-weight:800;color:var(--text-muted)">HEIGHT (cm)</div>
+          <input type="range" min="1" max="10" value="4" id="peri-h" style="accent-color:var(--gold)" oninput="dmPeri()">
+          <div id="peri-hv" style="font-size:18px;font-weight:800;color:var(--gold)">4</div>
+        </div>
+      </div>
+      <svg id="peri-svg" viewBox="0 0 200 160" style="width:100%;max-width:260px;display:block;margin:0 auto"></svg>
+      <div style="font-size:22px;font-weight:900;font-family:var(--font-display);color:var(--indigo);margin:8px 0" id="peri-result"></div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">Rectangle perimeter = 2 × (length + width). A square with 5cm sides has perimeter = 4 × 5 = 20cm!</span></div>`,
+    'var(--indigo)');
+  window.dmPeri=()=>{const w=+document.getElementById('peri-w').value,h=+document.getElementById('peri-h').value;document.getElementById('peri-wv').textContent=w;document.getElementById('peri-hv').textContent=h;const p=2*(w+h);document.getElementById('peri-result').textContent=`Perimeter = 2×(${w}+${h}) = ${p}cm`;const scl=Math.min(160/(w*10+20),120/(h*10+20));const rw=w*10*scl,rh=h*10*scl,ox=(200-rw)/2,oy=(160-rh)/2;document.getElementById('peri-svg').innerHTML=`<rect x="${ox}" y="${oy}" width="${rw}" height="${rh}" fill="rgba(99,102,241,0.1)" stroke="var(--indigo)" stroke-width="2.5" stroke-dasharray="8,4" rx="4"/><text x="${ox+rw/2}" y="${oy-6}" text-anchor="middle" font-size="11" fill="var(--indigo)" font-weight="700">${w}cm</text><text x="${ox+rw+6}" y="${oy+rh/2+4}" text-anchor="start" font-size="11" fill="var(--gold)" font-weight="700">${h}cm</text>`;};
+  window.dmPeri();
+}};
+
+DEMO_REGISTRY['dm_m3_division'] = { title:'Fair Sharing', emoji:'➗', render(c) {
+  c.innerHTML = demoWrap('➗ Fair Sharing = Division',
+    'Share items equally among friends — watch remainders appear!',
+    `<div style="text-align:center">
+      <div style="display:flex;gap:16px;justify-content:center;margin-bottom:10px;flex-wrap:wrap">
+        <div><div style="font-size:10px;font-weight:800;color:var(--text-muted)">ITEMS</div>
+          <input type="range" min="1" max="20" value="13" id="div-items" style="accent-color:var(--indigo)" oninput="dmDiv()">
+          <div id="div-iv" style="font-size:16px;font-weight:800;color:var(--indigo)">13</div>
+        </div>
+        <div><div style="font-size:10px;font-weight:800;color:var(--text-muted)">FRIENDS</div>
+          <input type="range" min="2" max="6" value="3" id="div-friends" style="accent-color:var(--gold)" oninput="dmDiv()">
+          <div id="div-fv" style="font-size:16px;font-weight:800;color:var(--gold)">3</div>
+        </div>
+      </div>
+      <div id="div-display" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;min-height:80px;padding:8px;background:var(--bg-hud);border-radius:12px"></div>
+      <div id="div-result" style="font-size:18px;font-weight:800;font-family:var(--font-display);color:var(--indigo);margin:8px 0"></div>
+      <div id="div-remain" style="font-size:13px;color:var(--gold);font-weight:700"></div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">13 ÷ 3 = 4 remainder 1. The REMAINDER is what's left over after fair sharing. When remainder = 0, it divides EXACTLY!</span></div>`,
+    'var(--indigo)');
+  window.dmDiv=()=>{const it=+document.getElementById('div-items').value,fr=+document.getElementById('div-friends').value;document.getElementById('div-iv').textContent=it;document.getElementById('div-fv').textContent=fr;const each=Math.floor(it/fr),rem=it%fr;document.getElementById('div-display').innerHTML=Array.from({length:fr},(_,fi)=>`<div style="background:rgba(99,102,241,0.1);border:1.5px solid rgba(99,102,241,0.3);border-radius:8px;padding:6px;min-width:40px;text-align:center"><div style="font-size:11px;font-weight:700;color:var(--indigo);margin-bottom:4px">F${fi+1}</div>${Array.from({length:each},()=>'<span style="font-size:16px">⭐</span>').join('')}</div>`).join('')+`${rem>0?`<div style="background:rgba(255,215,0,0.1);border:1.5px dashed var(--gold);border-radius:8px;padding:6px;min-width:40px;text-align:center"><div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:4px">LEFT</div>${Array.from({length:rem},()=>'<span style="font-size:16px">⭐</span>').join('')}</div>`:''}`;document.getElementById('div-result').textContent=`${it} ÷ ${fr} = ${each}`;document.getElementById('div-remain').textContent=rem?`Remainder: ${rem}`:'Divides exactly! ✅';};
+  window.dmDiv();
+}};
+
+DEMO_REGISTRY['dm_m3_angles'] = { title:'Angle Explorer', emoji:'📐', render(c) {
+  c.innerHTML = demoWrap('📐 Angle Maker',
+    'Drag the slider to make angles — spot acute, right, and obtuse!',
+    `<div style="text-align:center">
+      <svg viewBox="0 0 150 120" style="width:200px;height:160px;display:block;margin:0 auto" id="ang-svg"></svg>
+      <input type="range" min="5" max="175" value="90" id="ang-slider" style="width:90%;accent-color:var(--indigo);margin:8px 0" oninput="dmAngle(this.value)">
+      <div style="font-size:32px;font-weight:900;font-family:var(--font-display);color:var(--indigo)" id="ang-deg">90°</div>
+      <div style="font-size:14px;font-weight:800" id="ang-type"></div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">Acute < 90° | Right = 90° | Obtuse > 90° but < 180° | Straight = 180° | Reflex > 180°</span></div>`,
+    'var(--indigo)');
+  window.dmAngle=(deg)=>{deg=+deg;const r=80,cx=20,cy=100;const a=(-deg)*Math.PI/180;const x2=cx+r*Math.cos(0),y2=cy;const x3=cx+r*Math.cos(a),y3=cy+r*Math.sin(a);const ar=25,ax=cx+ar*Math.cos(a/2),ay=cy+ar*Math.sin(a/2);const col=deg===90?'#22c55e':deg<90?'#f59e0b':'#e879f9';document.getElementById('ang-svg').innerHTML=`<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="var(--indigo)" stroke-width="3" stroke-linecap="round"/><line x1="${cx}" y1="${cy}" x2="${x3}" y2="${y3}" stroke="${col}" stroke-width="3" stroke-linecap="round"/><path d="M${cx+25},${cy} A25,25 0 ${deg>180?1:0},0 ${cx+25*Math.cos(a)},${cy+25*Math.sin(a)}" fill="none" stroke="${col}" stroke-width="1.5" opacity="0.6"/>${deg===90?`<rect x="${cx}" y="${cy-18}" width="12" height="12" fill="none" stroke="${col}" stroke-width="1.5"/>`:''}`;document.getElementById('ang-deg').textContent=deg+'°';document.getElementById('ang-deg').style.color=col;const t=document.getElementById('ang-type');if(deg===90){t.textContent='RIGHT ANGLE ✅';t.style.color='#22c55e';}else if(deg<90){t.textContent='ACUTE ANGLE (sharp!)';t.style.color='#f59e0b';}else if(deg===180){t.textContent='STRAIGHT ANGLE ↔';t.style.color='var(--indigo)';}else{t.textContent='OBTUSE ANGLE (blunt)';t.style.color='#e879f9';}};
+  window.dmAngle(90);
+}};
+
+DEMO_REGISTRY['dm_m3_roman'] = { title:'Roman Numerals', emoji:'🏛️', render(c) {
+  const romanMap=[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+  function toRoman(n){let res='';for(const[v,s] of romanMap){while(n>=v){res+=s;n-=v;}}return res;}
+  c.innerHTML = demoWrap('🏛️ Roman Numeral Converter',
+    'Romans had no zero! They built numbers from letters.',
+    `<div style="text-align:center">
+      <input type="range" min="1" max="100" value="14" id="rom-slider" style="width:90%;accent-color:var(--indigo);margin:10px 0" oninput="dmRoman(this.value)">
+      <div style="display:flex;gap:16px;justify-content:center;align-items:center;margin:10px 0">
+        <div style="font-size:48px;font-weight:900;font-family:var(--font-display);color:var(--text-primary)" id="rom-arabic">14</div>
+        <div style="font-size:24px;color:var(--text-muted)">=</div>
+        <div style="font-size:40px;font-weight:900;font-family:var(--font-display);color:var(--indigo)" id="rom-roman">XIV</div>
+      </div>
+      <div id="rom-breakdown" style="font-size:12px;color:var(--text-secondary);min-height:24px"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px">
+      ${[[1,'I'],[5,'V'],[10,'X'],[50,'L'],[100,'C'],[500,'D'],[1000,'M'],['4','IV'],[9,'IX'],[40,'XL'],[90,'XC']].slice(0,8).map(([n,r])=>`<div style="background:var(--bg-hud);border-radius:8px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:900;color:var(--indigo)">${r}</div><div style="font-size:10px;color:var(--text-muted)">${n}</div></div>`).join('')}
+    </div>
+    <div class="demo-fact-row" style="margin-top:8px"><span class="demo-fact">Roman rule: smaller before larger = subtract (IV=4). Larger before smaller = add (VI=6). Max 3 same letters in a row!</span></div>`,
+    'var(--indigo)');
+  window.dmRoman=(n)=>{n=+n;const r=toRoman(n);document.getElementById('rom-arabic').textContent=n;document.getElementById('rom-roman').textContent=r;let parts=[],rem=n;for(const[v,s] of romanMap){while(rem>=v){parts.push(s+'='+v);rem-=v;}}document.getElementById('rom-breakdown').textContent=parts.join(' + ')+(parts.length>1?' = '+n:'');};
+  window.dmRoman(14);
+}};
+
+DEMO_REGISTRY['dm_m3_word_problems'] = { title:'Maths Word Problems', emoji:'📝', render(c) {
+  const probs=[
+    {q:'Riya has 45 stickers. She gives 18 to her friend. How many does she have left?',ans:27,hint:'Subtraction: 45 − 18',op:(a,b)=>a-b,a:45,b:18},
+    {q:'A book costs ₹35. Raj buys 3 books. How much does he pay in total?',ans:105,hint:'Multiplication: 35 × 3',op:(a,b)=>a*b,a:35,b:3},
+    {q:'24 children sit in 4 equal rows. How many children are in each row?',ans:6,hint:'Division: 24 ÷ 4',op:(a,b)=>a/b,a:24,b:4},
+    {q:'A train travels 150 km in the morning and 230 km in the evening. Total distance?',ans:380,hint:'Addition: 150 + 230',op:(a,b)=>a+b,a:150,b:230},
+  ];
+  let pi=0;
+  function showP(){const p=probs[pi];document.getElementById('wp-q').textContent=p.q;document.getElementById('wp-input').value='';document.getElementById('wp-feedback').textContent='';document.getElementById('wp-hint').style.display='none';}
+  c.innerHTML = demoWrap('📝 Word Problem Solver',
+    'Read, think, calculate — maths is in real life!',
+    `<div>
+      <div id="wp-q" style="font-size:14px;color:var(--text-primary);line-height:1.6;background:var(--bg-hud);padding:12px;border-radius:10px;margin-bottom:10px"></div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input id="wp-input" type="number" placeholder="Your answer" style="flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg-hud);color:var(--text-primary);font-size:16px;font-family:var(--font-body)">
+        <button class="demo-btn" style="flex:0 0 auto;padding:10px 16px" onclick="dmWPCheck()">✓ Check</button>
+      </div>
+      <div id="wp-feedback" style="font-size:14px;font-weight:700;min-height:28px;text-align:center"></div>
+      <div id="wp-hint" style="display:none;font-size:12px;color:var(--indigo);font-weight:600;background:rgba(99,102,241,0.1);padding:8px;border-radius:8px;margin-top:6px"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="demo-btn" style="flex:1;background:var(--bg-hud);color:var(--text-secondary);font-size:12px" onclick="document.getElementById('wp-hint').style.display='block';document.getElementById('wp-hint').textContent='Hint: '+probs[pi].hint">💡 Hint</button>
+        <button class="demo-btn" style="flex:1;font-size:12px" onclick="pi=(pi+1)%${probs.length};showP?showP():null">⏭ Next Problem</button>
+      </div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">Steps: 1. Read carefully 2. Find the numbers 3. Decide the operation (+−×÷) 4. Calculate 5. Check your answer!</span></div>`,
+    'var(--indigo)');
+  window.dmWPCheck=()=>{const p=probs[pi],v=+document.getElementById('wp-input').value,fb=document.getElementById('wp-feedback');fb.textContent=v===p.ans?'🎉 Correct! '+p.ans+' is right!':'❌ Not quite. Hint: '+p.hint+' = '+p.ans;fb.style.color=v===p.ans?'#22c55e':'#ff4757';};
+  window.showP=showP; showP();
+}};
+
+// ================================================================
+// MATHS — CLASS 4 (8 demos)
+// ================================================================
+DEMO_REGISTRY['dm_m4_large_nums'] = { title:'Large Numbers', emoji:'🚀', render(c) {
+  c.innerHTML = demoWrap('🚀 Large Number Visualiser',
+    'How big is a lakh? A crore? Let\'s see!',
+    `<div style="text-align:center">
+      <input type="range" min="1" max="9999999" value="100000" step="1000" id="ln-slider"
+        style="width:90%;accent-color:var(--indigo);margin:10px 0" oninput="dmLN(this.value)">
+      <div style="font-size:28px;font-weight:900;font-family:var(--font-display);color:var(--indigo);margin:8px 0" id="ln-num"></div>
+      <div style="font-size:16px;font-weight:700;color:var(--text-secondary);margin-bottom:6px" id="ln-words"></div>
+      <div id="ln-indian" style="font-size:14px;color:var(--text-muted)"></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px">
+        ${[100,'Hundred',1000,'Thousand',10000,'Ten Thousand',100000,'One Lakh',1000000,'Ten Lakh',10000000,'One Crore'].reduce((a,_,i,arr)=>i%2===0?[...a,[arr[i],arr[i+1]]]:a,[]).map(([n,name])=>`<button class="demo-btn" style="font-size:10px;padding:8px 4px;background:var(--bg-hud);color:var(--text-secondary)" onclick="document.getElementById('ln-slider').value=${n};dmLN(${n})">${name}<br><span style="color:var(--indigo)">${n.toLocaleString('en-IN')}</span></button>`).join('')}
+      </div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">Indian number system: 1,00,000 = 1 Lakh | 10,00,000 = 10 Lakh | 1,00,00,000 = 1 Crore. We group in 2s after the first 3 digits!</span></div>`,
+    'var(--indigo)');
+  const words={1e2:'One Hundred',1e3:'One Thousand',1e4:'Ten Thousand',1e5:'One Lakh',1e6:'Ten Lakh',1e7:'One Crore'};
+  window.dmLN=(n)=>{n=+n;document.getElementById('ln-num').textContent=n.toLocaleString('en-IN');const closest=Object.keys(words).reduce((a,b)=>Math.abs(b-n)<Math.abs(a-n)?b:a);document.getElementById('ln-words').textContent='≈ '+words[closest]||'';document.getElementById('ln-indian').textContent='International: '+n.toLocaleString('en-US');};
+  window.dmLN(100000);
+}};
+
+DEMO_REGISTRY['dm_m4_hcf_lcm'] = { title:'HCF & LCM Visualised', emoji:'🔗', render(c) {
+  function factors(n){const f=[];for(let i=1;i<=n;i++)if(n%i===0)f.push(i);return f;}
+  function hcf(a,b){while(b){[a,b]=[b,a%b];}return a;}
+  function lcm(a,b){return a*b/hcf(a,b);}
+  c.innerHTML = demoWrap('🔗 HCF & LCM Explorer',
+    'See common factors and multiples visually!',
+    `<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:8px 0">
+      <div style="text-align:center"><div style="font-size:10px;font-weight:800;color:var(--indigo)">NUMBER A</div>
+        <input type="range" min="2" max="20" value="12" id="hl-a" style="width:120px;accent-color:var(--indigo)" oninput="dmHL()">
+        <div id="hl-av" style="font-size:24px;font-weight:900;color:var(--indigo)">12</div>
+      </div>
+      <div style="text-align:center"><div style="font-size:10px;font-weight:800;color:var(--gold)">NUMBER B</div>
+        <input type="range" min="2" max="20" value="8" id="hl-b" style="width:120px;accent-color:var(--gold)" oninput="dmHL()">
+        <div id="hl-bv" style="font-size:24px;font-weight:900;color:var(--gold)">8</div>
+      </div>
+    </div>
+    <div id="hl-result" style="font-size:13px;color:var(--text-secondary);background:var(--bg-hud);border-radius:10px;padding:10px;line-height:1.8"></div>
+    <div class="demo-fact-row" style="margin-top:8px"><span class="demo-fact">HCF = Highest Common Factor (biggest shared factor). LCM = Lowest Common Multiple (smallest shared multiple). Use HCF to simplify fractions!</span></div>`,
+    'var(--indigo)');
+  window.dmHL=()=>{const a=+document.getElementById('hl-a').value,b=+document.getElementById('hl-b').value;document.getElementById('hl-av').textContent=a;document.getElementById('hl-bv').textContent=b;const fa=factors(a),fb=factors(b),common=fa.filter(x=>fb.includes(x)),h=hcf(a,b),l=lcm(a,b);document.getElementById('hl-result').innerHTML=`<b>Factors of ${a}:</b> ${fa.join(', ')}<br><b>Factors of ${b}:</b> ${fb.join(', ')}<br><b>Common factors:</b> <span style="color:var(--indigo)">${common.join(', ')}</span><br><b>HCF = ${h}</b> (biggest common factor)<br><b>LCM = ${l}</b> (smallest common multiple)`;};
+  window.dmHL();
+}};
+
+DEMO_REGISTRY['dm_m4_area'] = { title:'Area vs Perimeter', emoji:'🟦', render(c) {
+  c.innerHTML = demoWrap('🟦 Area vs Perimeter',
+    'Same perimeter, different area! Adjust the rectangle.',
+    `<div style="text-align:center">
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:8px 0">
+        <div><div style="font-size:10px;font-weight:800;color:var(--indigo)">LENGTH (cm)</div>
+          <input type="range" min="1" max="12" value="6" id="ar-l" style="width:120px;accent-color:var(--indigo)" oninput="dmArea()">
+          <div id="ar-lv" style="font-size:20px;font-weight:800;color:var(--indigo)">6</div>
+        </div>
+        <div><div style="font-size:10px;font-weight:800;color:var(--gold)">WIDTH (cm)</div>
+          <input type="range" min="1" max="12" value="4" id="ar-w" style="width:120px;accent-color:var(--gold)" oninput="dmArea()">
+          <div id="ar-wv" style="font-size:20px;font-weight:800;color:var(--gold)">4</div>
+        </div>
+      </div>
+      <svg id="ar-svg" viewBox="0 0 200 150" style="width:100%;max-width:280px;display:block;margin:0 auto"></svg>
+      <div id="ar-result" style="font-size:14px;font-weight:800;color:var(--text-primary);margin:8px 0"></div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">Area = length × width (square units). Perimeter = 2×(l+w) (linear units). A 1×12 rectangle and a 3×4 rectangle both have perimeter 26cm but DIFFERENT areas!</span></div>`,
+    'var(--indigo)');
+  window.dmArea=()=>{const l=+document.getElementById('ar-l').value,w=+document.getElementById('ar-w').value;document.getElementById('ar-lv').textContent=l;document.getElementById('ar-wv').textContent=w;const area=l*w,peri=2*(l+w);const scl=Math.min(160/(l*12),120/(w*12));const rw=l*12*scl,rh=w*12*scl,ox=(200-rw)/2,oy=(150-rh)/2;const sq=Math.min(rw/l,rh/w);document.getElementById('ar-svg').innerHTML=`<rect x="${ox}" y="${oy}" width="${rw}" height="${rh}" fill="rgba(99,102,241,0.15)" stroke="var(--indigo)" stroke-width="2" rx="3"/>${Array.from({length:l},(_,i)=>Array.from({length:w},(_,j)=>`<rect x="${ox+i*sq}" y="${oy+j*sq}" width="${sq-1}" height="${sq-1}" fill="rgba(99,102,241,0.1)" stroke="rgba(99,102,241,0.2)" stroke-width="0.5"/>`).join('')).join('')}<text x="${ox+rw/2}" y="${oy-6}" text-anchor="middle" font-size="11" fill="var(--indigo)" font-weight="700">${l}cm</text><text x="${ox+rw+6}" y="${oy+rh/2+4}" font-size="11" fill="var(--gold)" font-weight="700">${w}cm</text>`;document.getElementById('ar-result').innerHTML=`Area = ${l}×${w} = <span style="color:var(--indigo)">${area} cm²</span> &nbsp;|&nbsp; Perimeter = <span style="color:var(--gold)">${peri} cm</span>`;};
+  window.dmArea();
+}};
+
+DEMO_REGISTRY['dm_m4_bodmas'] = { title:'BODMAS / Order of Operations', emoji:'🧮', render(c) {
+  const probs=[
+    {expr:'2 + 3 × 4',steps:['First: 3 × 4 = 12','Then: 2 + 12 = 14'],ans:14},
+    {expr:'(5 + 3) × 2',steps:['First: (5 + 3) = 8 (Brackets first!)','Then: 8 × 2 = 16'],ans:16},
+    {expr:'20 ÷ 4 + 6',steps:['First: 20 ÷ 4 = 5 (Division before Addition)','Then: 5 + 6 = 11'],ans:11},
+    {expr:'3 + 4² − 5',steps:['First: 4² = 16 (Orders/Exponents)','Then: 3 + 16 − 5 = 14'],ans:14},
+  ];
+  let pi=0, step=0;
+  function showP(){const p=probs[pi];step=0;document.getElementById('bd-expr').textContent=p.expr;document.getElementById('bd-steps').innerHTML='';document.getElementById('bd-ans').style.display='none';document.getElementById('bd-btn').textContent='▶ Show Step 1';}
+  c.innerHTML = demoWrap('🧮 BODMAS Step by Step',
+    'B-O-D-M-A-S: Brackets, Orders, Division, Multiplication, Addition, Subtraction',
+    `<div style="text-align:center">
+      <div style="font-size:28px;font-weight:900;font-family:var(--font-display);color:var(--text-primary);background:var(--bg-hud);padding:16px;border-radius:12px;margin-bottom:10px" id="bd-expr"></div>
+      <div id="bd-steps" style="text-align:left;font-size:13px;min-height:60px;display:flex;flex-direction:column;gap:6px"></div>
+      <div id="bd-ans" style="display:none;font-size:24px;font-weight:900;color:var(--indigo);margin:8px 0"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="demo-btn" style="flex:1" id="bd-btn" onclick="dmBD()">▶ Show Step 1</button>
+        <button class="demo-btn" style="flex:1;background:var(--bg-hud);color:var(--text-secondary)" onclick="pi=(pi+1)%${probs.length};showP?showP():null">⏭ Next</button>
+      </div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">BODMAS = Brackets → Orders (powers) → Division → Multiplication → Addition → Subtraction. ALWAYS follow this order!</span></div>`,
+    'var(--indigo)');
+  window.dmBD=()=>{const p=probs[pi];if(step<p.steps.length){const div=document.createElement('div');div.style.cssText='background:rgba(99,102,241,0.1);border-left:3px solid var(--indigo);padding:8px 12px;border-radius:0 8px 8px 0;animation:popIn 0.3s var(--bounce) both;font-weight:700;color:var(--indigo)';div.textContent='Step '+(step+1)+': '+p.steps[step];document.getElementById('bd-steps').appendChild(div);step++;if(step===p.steps.length){document.getElementById('bd-ans').style.display='block';document.getElementById('bd-ans').textContent='Answer = '+p.ans;document.getElementById('bd-btn').textContent='🔄 Try Again';}else{document.getElementById('bd-btn').textContent='▶ Step '+(step+1);}}else{showP();}};
+  window.showP=showP; showP();
+}};
+
+DEMO_REGISTRY['dm_m4_speed_distance'] = { title:'Speed, Distance, Time', emoji:'🚀', render(c) {
+  c.innerHTML = demoWrap('🚀 Speed = Distance ÷ Time',
+    'The magic triangle! Cover what you want to find.',
+    `<div style="text-align:center">
+      <svg viewBox="0 0 180 120" style="width:220px;height:150px;display:block;margin:0 auto">
+        <polygon points="90,10 20,110 160,110" fill="rgba(99,102,241,0.15)" stroke="var(--indigo)" stroke-width="2"/>
+        <line x1="90" y1="60" x2="90" y2="110" stroke="var(--indigo)" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="90" y="42" text-anchor="middle" font-size="14" font-weight="900" fill="var(--indigo)">D</text>
+        <text x="90" y="35" text-anchor="middle" font-size="8" fill="var(--text-muted)">Distance</text>
+        <text x="44" y="108" text-anchor="middle" font-size="14" font-weight="900" fill="var(--gold)">S</text>
+        <text x="44" y="118" text-anchor="middle" font-size="8" fill="var(--text-muted)">Speed</text>
+        <text x="136" y="108" text-anchor="middle" font-size="14" font-weight="900" fill="#22c55e)">T</text>
+        <text x="136" y="118" text-anchor="middle" font-size="8" fill="var(--text-muted)">Time</text>
+      </svg>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0">
+        <div><div style="font-size:10px;font-weight:800;color:var(--indigo)">SPEED (km/h)</div>
+          <input type="range" min="10" max="120" value="60" id="sdt-s" style="width:100px;accent-color:var(--indigo)" oninput="dmSDT()">
+          <div id="sdt-sv" style="font-size:16px;font-weight:800;color:var(--indigo)">60</div>
+        </div>
+        <div><div style="font-size:10px;font-weight:800;color:var(--gold)">TIME (hours)</div>
+          <input type="range" min="1" max="10" value="3" id="sdt-t" style="width:100px;accent-color:var(--gold)" oninput="dmSDT()">
+          <div id="sdt-tv" style="font-size:16px;font-weight:800;color:var(--gold)">3</div>
+        </div>
+      </div>
+      <div id="sdt-result" style="font-size:18px;font-weight:800;color:var(--text-primary);background:var(--bg-hud);padding:10px;border-radius:10px"></div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">D = S × T | S = D ÷ T | T = D ÷ S. Cover the one you want to find — the triangle shows the formula!</span></div>`,
+    'var(--indigo)');
+  window.dmSDT=()=>{const s=+document.getElementById('sdt-s').value,t=+document.getElementById('sdt-t').value;document.getElementById('sdt-sv').textContent=s;document.getElementById('sdt-tv').textContent=t;document.getElementById('sdt-result').innerHTML=`Distance = ${s} × ${t} = <b>${s*t} km</b><br><small style="color:var(--text-muted)">At ${s}km/h for ${t} hour${t>1?'s':''}</small>`;};
+  window.dmSDT();
+}};
+
+DEMO_REGISTRY['dm_m4_percentage'] = { title:'Percentage Explorer', emoji:'💯', render(c) {
+  c.innerHTML = demoWrap('💯 What is a Percentage?',
+    'Percent means "out of 100". See what any percentage looks like!',
+    `<div style="text-align:center">
+      <input type="range" min="0" max="100" value="75" id="pct-slider"
+        style="width:90%;accent-color:var(--indigo);margin:10px 0" oninput="dmPct(this.value)">
+      <div style="font-size:48px;font-weight:900;font-family:var(--font-display);color:var(--indigo)" id="pct-num">75%</div>
+      <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:2px;max-width:240px;margin:0 auto 10px" id="pct-grid"></div>
+      <div id="pct-examples" style="font-size:12px;color:var(--text-secondary)"></div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact">25% = ¼ | 50% = ½ | 75% = ¾ | 100% = whole. To find 25% of 80: 80 × 25/100 = 80 × 0.25 = 20!</span></div>`,
+    'var(--indigo)');
+  const examples={0:'0% = nothing',10:'10% = 1 in 10 (one-tenth)',25:'25% = quarter off in a sale!',50:'50% = half price!',75:'75% = three-quarters full',100:'100% = completely full / whole'};
+  window.dmPct=(n)=>{n=+n;document.getElementById('pct-num').textContent=n+'%';document.getElementById('pct-grid').innerHTML=Array.from({length:100},(_,i)=>`<div style="width:100%;padding-bottom:100%;background:${i<n?'var(--indigo)':'var(--bg-hud)'};border-radius:2px;transition:background 0.3s;opacity:${i<n?0.8:0.3}"></div>`).join('');const nearest=Object.keys(examples).reduce((a,b)=>Math.abs(b-n)<Math.abs(a-n)?b:a);document.getElementById('pct-examples').textContent=examples[nearest]||'';};
+  window.dmPct(75);
+}};
+
+DEMO_REGISTRY['dm_m4_geometry'] = { title:'2D Shape Properties', emoji:'🔺', render(c) {
+  const shapes=[
+    {name:'Triangle',sides:3,angles:180,interior:60,svg:'<polygon points="100,20 180,150 20,150" fill="rgba(99,102,241,0.3)" stroke="var(--indigo)" stroke-width="2.5"/>',fact:'Sum of angles = 180°. Equilateral: all 3 sides equal, all angles 60°!'},
+    {name:'Square',sides:4,angles:360,interior:90,svg:'<rect x="30" y="30" width="120" height="120" fill="rgba(34,197,94,0.3)" stroke="#22c55e" stroke-width="2.5"/>',fact:'All 4 sides equal, all angles 90°. Perimeter = 4×side. Area = side²!'},
+    {name:'Pentagon',sides:5,angles:540,interior:108,svg:'<polygon points="100,20 175,80 148,170 52,170 25,80" fill="rgba(245,158,11,0.3)" stroke="#f59e0b" stroke-width="2.5"/>',fact:'5 sides. Interior angles sum = 540°. Each angle in regular pentagon = 108°!'},
+    {name:'Hexagon',sides:6,angles:720,interior:120,svg:'<polygon points="100,15 175,57 175,143 100,185 25,143 25,57" fill="rgba(232,121,249,0.3)" stroke="#e879f9" stroke-width="2.5"/>',fact:'6 sides. Honeybees use hexagons — they pack MOST efficiently! Interior sum = 720°.'},
+    {name:'Circle',sides:0,svg:'<circle cx="100" cy="100" r="80" fill="rgba(6,182,212,0.3)" stroke="#06b6d4" stroke-width="2.5"/><line x1="100" y1="100" x2="180" y2="100" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="4,3"/><text x="140" y="95" font-size="10" fill="#06b6d4" font-weight="700">r</text>',fact:'Infinite sides! Area = πr². Circumference = 2πr. π ≈ 3.14159...'},
+  ];
+  let si=0;
+  function showS(){const s=shapes[si];document.getElementById('geo-svg').innerHTML=s.svg;document.getElementById('geo-name').textContent=s.name;document.getElementById('geo-stats').innerHTML=s.sides?`<div>Sides: <b>${s.sides}</b></div><div>Angle sum: <b>${s.angles}°</b></div><div>Each interior angle: <b>${s.interior}°</b></div>`:'<div>Curved boundary</div><div>Area = πr²</div>';document.getElementById('geo-fact').textContent=s.fact;}
+  c.innerHTML = demoWrap('🔺 2D Shape Properties',
+    'Explore each shape\'s special properties!',
+    `<div style="display:flex;gap:10px;align-items:flex-start">
+      <svg id="geo-svg" viewBox="0 0 200 200" style="width:160px;height:160px;flex-shrink:0;background:var(--bg-hud);border-radius:12px"></svg>
+      <div style="flex:1">
+        <div style="font-size:18px;font-weight:900;font-family:var(--font-display);color:var(--text-primary);margin-bottom:8px" id="geo-name"></div>
+        <div id="geo-stats" style="font-size:12px;color:var(--text-secondary);display:flex;flex-direction:column;gap:4px"></div>
+      </div>
+    </div>
+    <div id="geo-fact" style="font-size:12px;color:var(--text-secondary);background:var(--bg-hud);padding:10px;border-radius:10px;margin-top:8px"></div>
+    <div style="display:flex;gap:6px;margin-top:8px;justify-content:center">
+      ${shapes.map((s,i)=>`<button class="demo-btn" style="flex:1;font-size:10px;padding:8px 4px;background:var(--bg-hud);color:var(--text-secondary)" onclick="si=${i};showS?showS():null">${s.name}</button>`).join('')}
+    </div>`,
+    'var(--indigo)');
+  window.showS=showS; showS();
+}};
+
+// ================================================================
+// SCIENCE CLASS 1-4 — 7 demos each
+// ================================================================
+// (science demos from original file kept + new ones added inline)
+DEMO_REGISTRY['demo_volcano'] = { title:'Volcano!', emoji:'🌋', render(c) {
+  c.innerHTML = `<div class="demo-wrap">
+    <h3 class="demo-title">🌋 Volcano Reaction</h3>
+    <p class="demo-desc">Vinegar (acid) + Baking Soda (base) → CO₂ bubbles!</p>
+    <div class="demo-scene" id="volc-scene" style="height:180px;position:relative;overflow:hidden">
+      <svg viewBox="0 0 200 180" style="width:100%;height:100%">
+        <rect x="0" y="140" width="200" height="40" fill="#8b4513"/>
+        <polygon points="100,55 40,140 160,140" fill="#666"/>
+        <polygon points="100,55 55,140 145,140" fill="#888"/>
+        <ellipse cx="100" cy="57" rx="16" ry="5" fill="#555"/>
+        <path id="lava-l" d="M88,63 Q70,100 60,132" stroke="#ff4500" stroke-width="6" fill="none" stroke-linecap="round" opacity="0" style="transition:opacity 0.5s"/>
+        <path id="lava-r" d="M112,63 Q130,100 140,132" stroke="#ff6500" stroke-width="6" fill="none" stroke-linecap="round" opacity="0" style="transition:opacity 0.5s"/>
+      </svg>
+      <div id="volc-bubbles" style="position:absolute;left:calc(50% - 18px);bottom:42%"></div>
+    </div>
+    <div class="demo-fact-row"><span class="demo-fact"><b>Why?</b> CH₃COOH + NaHCO₃ → CO₂ gas makes the bubbles! This is a chemical reaction — new substances form.</span></div>
+    <button class="demo-btn" id="volc-btn" onclick="demoV()">⚗️ React!</button></div>`;
+  window.demoV=()=>{
+    document.getElementById('volc-btn').disabled=true;
+    const bw=document.getElementById('volc-bubbles');bw.innerHTML='';
+    for(let i=0;i<20;i++){const b=document.createElement('div');const sz=3+Math.random()*9;b.style.cssText=`position:absolute;width:${sz}px;height:${sz}px;border-radius:50%;background:hsl(${30+Math.random()*30},100%,55%);left:${Math.random()*28}px;bottom:0;animation:bubbleUp ${0.5+Math.random()*0.8}s ${i*0.07}s ease-out forwards`;bw.appendChild(b);}
+    setTimeout(()=>{document.getElementById('lava-l').style.opacity='1';document.getElementById('lava-r').style.opacity='1';},700);
+    setTimeout(()=>{document.getElementById('lava-l').style.opacity='0';document.getElementById('lava-r').style.opacity='0';bw.innerHTML='';document.getElementById('volc-btn').disabled=false;},2500);
+  };
+}};
+
+DEMO_REGISTRY['demo_prism'] = { title:'Rainbow', emoji:'🌈', render(c) {
+  c.innerHTML = `<div class="demo-wrap">
+    <h3 class="demo-title">🌈 White Light = All Colours!</h3>
+    <p class="demo-desc">A prism splits white light into ROYGBIV.</p>
+    <div class="demo-scene" style="height:160px"><svg viewBox="0 0 280 140" style="width:100%">
+      <line x1="10" y1="70" x2="100" y2="70" stroke="white" stroke-width="10" opacity="0.9"/>
+      <polygon points="100,28 100,112 144,70" fill="rgba(99,200,255,0.25)" stroke="rgba(99,200,255,0.7)" stroke-width="2"/>
+      <text x="108" y="73" font-size="8" fill="rgba(99,200,255,0.9)">PRISM</text>
+      ${[['v','#9400D3',25],['b','#0000FF',40],['g','#00AA00',55],['y','#FFFF00',70],['o','#FF7F00',85],['r','#FF0000',100]].map(([id,col,y2])=>`<line id="pr-${id}" x1="144" y1="70" x2="275" y2="${y2}" stroke="${col}" stroke-width="3.5" opacity="0" stroke-linecap="round"/><text id="lb-${id}" x="277" y="${y2+3}" font-size="8" fill="${col}" opacity="0">${id.toUpperCase()}</text>`).join('')}
+    </svg></div>
+    <div class="demo-fact-row"><span class="demo-fact">ROYGBIV: Red Orange Yellow Green Blue Indigo Violet — remember with "ROY G BIV"! Light bends (refracts) at different angles by colour.</span></div>
+    <button class="demo-btn" onclick="demoPr()">💡 Shine Light!</button></div>`;
+  window.demoPr=()=>{['v','b','g','y','o','r'].forEach((c2,i)=>setTimeout(()=>{document.getElementById(`pr-${c2}`).style.cssText+='opacity:1;transition:opacity 0.3s';document.getElementById(`lb-${c2}`).style.cssText+='opacity:1;transition:opacity 0.3s';},i*120));};
+}};
+
+DEMO_REGISTRY['demo_plant'] = { title:'Plants Drink', emoji:'🌱', render(c) {
+  c.innerHTML = `<div class="demo-wrap">
+    <h3 class="demo-title">🌱 How Plants Drink</h3>
+    <p class="demo-desc">Water travels from roots → stem → leaves (transpiration pull).</p>
+    <div class="demo-scene" style="height:190px;display:flex;align-items:flex-end;justify-content:center;gap:20px">
+      <svg viewBox="0 0 90 170" style="height:170px">
+        <rect x="0" y="120" width="90" height="50" fill="#6b4226" rx="4"/>
+        <rect id="wf2" x="0" y="168" width="90" height="0" fill="#4488ff" opacity="0.4" rx="4"/>
+        <path d="M45,120 Q32,138 22,148" stroke="#8b6914" stroke-width="3" fill="none"/>
+        <path d="M45,120 Q45,140 40,150" stroke="#8b6914" stroke-width="3" fill="none"/>
+        <path d="M45,120 Q58,138 68,148" stroke="#8b6914" stroke-width="3" fill="none"/>
+        <rect x="42" y="38" width="6" height="82" fill="#2d8c2d" rx="2"/>
+        <rect id="sw2" x="43" y="120" width="4" height="0" fill="#44aaff" opacity="0.7" rx="2"/>
+        <ellipse cx="28" cy="68" rx="20" ry="12" fill="#22aa22" transform="rotate(-30,28,68)"/>
+        <ellipse cx="62" cy="60" rx="20" ry="12" fill="#2db82d" transform="rotate(25,62,60)"/>
+        <ellipse cx="45" cy="40" rx="16" ry="11" fill="#33cc33"/>
+        <circle id="wd2-1" cx="26" cy="63" r="3" fill="#44aaff" opacity="0"/>
+        <circle id="wd2-2" cx="62" cy="54" r="3" fill="#44aaff" opacity="0"/>
+        <circle id="wd2-3" cx="45" cy="33" r="3" fill="#44aaff" opacity="0"/>
+      </svg>
+      <div style="flex:1;max-width:120px;font-size:12px;display:flex;flex-direction:column;gap:6px">
+        <div id="ps2-1" class="demo-step">🌊 Roots absorb</div>
+        <div id="ps2-2" class="demo-step" style="opacity:0.3">↑ Up xylem tubes</div>
+        <div id="ps2-3" class="demo-step" style="opacity:0.3">🍃 Leaf cells</div>
+        <div id="ps2-4" class="demo-step" style="opacity:0.3">💨 Evaporates!</div>
+      </div>
+    </div>
+    <button class="demo-btn" onclick="demoPlant2()">💧 Water!</button></div>`;
+  window.demoPlant2=()=>{const wf=document.getElementById('wf2'),sw=document.getElementById('sw2');setTimeout(()=>{wf.setAttribute('height','28');wf.setAttribute('y','140');wf.style.transition='all 0.8s';document.getElementById('ps2-1').style.fontWeight='800';},100);setTimeout(()=>{sw.setAttribute('height','76');sw.setAttribute('y','44');sw.style.transition='all 1.2s';document.getElementById('ps2-2').style.opacity='1';},900);setTimeout(()=>{document.getElementById('ps2-3').style.opacity='1';['wd2-1','wd2-2','wd2-3'].forEach(id=>document.getElementById(id).style.cssText+='opacity:1;transition:opacity 0.5s');},2000);setTimeout(()=>document.getElementById('ps2-4').style.opacity='1',2800);};
+}};
+
+DEMO_REGISTRY['demo_foodchain'] = { title:'Food Chain', emoji:'🦁', render(c) {
+  const chain=[{e:'☀️',n:'Sun',c:'#ffd700'},{e:'🌿',n:'Plant',c:'#22c55e'},{e:'🐛',n:'Insect',c:'#86efac'},{e:'🐸',n:'Frog',c:'#4ade80'},{e:'🐍',n:'Snake',c:'#166534'},{e:'🦅',n:'Eagle',c:'#78350f'}];
+  const facts=['☀️ Sun = ALL energy on Earth!','🌿 Plants are PRODUCERS.','🐛 Primary consumer.','🐸 Secondary consumer.','🐍 Tertiary consumer.','🦅 APEX predator!'];
+  let step=0;
+  c.innerHTML = `<div class="demo-wrap">
+    <h3 class="demo-title">🦁 Food Chain Builder</h3>
+    <p class="demo-desc">Energy flows from the Sun → through the chain!</p>
+    <div id="fc2" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;min-height:80px;background:var(--bg-hud);border-radius:12px;padding:12px;justify-content:center"></div>
+    <div id="fc2-fact" class="demo-fact-row" style="min-height:32px"></div>
+    <div style="display:flex;gap:8px">
+      <button class="demo-btn" style="flex:1" id="fc2-btn" onclick="dmFC2()">➕ Add Link</button>
+      <button class="demo-btn" style="flex:0 0 auto;background:var(--bg-hud);color:var(--text-secondary)" onclick="step=0;document.getElementById('fc2').innerHTML='';document.getElementById('fc2-fact').innerHTML='';document.getElementById('fc2-btn').disabled=false">🔄</button>
+    </div></div>`;
+  window.dmFC2=()=>{if(step>=chain.length){document.getElementById('fc2-btn').disabled=true;return;}const ch=document.getElementById('fc2'),it=chain[step];if(step>0)ch.insertAdjacentHTML('beforeend',`<span style="font-size:16px;color:${chain[step-1].c}">→</span>`);ch.insertAdjacentHTML('beforeend',`<span style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;animation:popIn 0.3s var(--bounce) both"><span style="font-size:26px">${it.e}</span><span style="font-size:9px;font-weight:800;color:${it.c}">${it.n}</span></span>`);document.getElementById('fc2-fact').innerHTML=`<span class="demo-fact">${facts[step]}</span>`;step++;};
+}};
+
+DEMO_REGISTRY['demo_watercycle'] = { title:'Water Cycle', emoji:'💧', render(c) {
+  c.innerHTML = `<div class="demo-wrap">
+    <h3 class="demo-title">💧 The Water Cycle</h3>
+    <p class="demo-desc">Water never disappears — it just keeps changing form!</p>
+    <svg viewBox="0 0 280 175" style="width:100%;max-width:320px;display:block;margin:0 auto">
+      <rect x="0" y="0" width="280" height="115" fill="rgba(99,102,241,0.06)" rx="8"/>
+      <rect x="0" y="120" width="280" height="55" fill="rgba(139,90,43,0.3)" rx="4"/>
+      <ellipse cx="55" cy="122" rx="50" ry="12" fill="#1e3a8a" opacity="0.6"/>
+      <text x="25" y="126" font-size="8" fill="#93c5fd">OCEAN</text>
+      <ellipse cx="195" cy="38" rx="28" ry="14" fill="#e2e8f0" opacity="0.9"/>
+      <ellipse cx="213" cy="33" rx="20" ry="12" fill="white" opacity="0.9"/>
+      <ellipse cx="180" cy="40" rx="16" ry="10" fill="#e2e8f0" opacity="0.8"/>
+      <polygon points="195,120 228,120 212,72" fill="#475569"/>
+      <polygon points="212,72 206,86 218,86" fill="white" opacity="0.8"/>
+      <path id="wc2-evap" d="M55,110 Q55,70 175,48" stroke="#ffd700" stroke-width="2.5" fill="none" stroke-dasharray="7,5" opacity="0" stroke-linecap="round"/>
+      <path id="wc2-prec" d="M208,52 Q222,88 228,118" stroke="#60a5fa" stroke-width="2.5" fill="none" stroke-dasharray="5,4" opacity="0"/>
+      <path id="wc2-run"  d="M228,120 Q160,124 115,122 Q88,122 55,120" stroke="#3b82f6" stroke-width="2.5" fill="none" stroke-dasharray="6,4" opacity="0"/>
+      <text id="lbl-ev2" x="92" y="70" font-size="8" fill="#ffd700" opacity="0">☀️ Evaporation</text>
+      <text id="lbl-pr2" x="232" y="92" font-size="8" fill="#60a5fa" opacity="0">🌧️ Rain</text>
+      <text id="lbl-ru2" x="118" y="138" font-size="8" fill="#3b82f6" opacity="0">🌊 Runoff</text>
+    </svg>
+    <div class="demo-fact-row" id="wc2-fact"><span class="demo-fact">Tap each stage to animate it!</span></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      ${[['evap','☀️ Evaporation','Heat turns ocean water to vapour'],['prec','🌧️ Rain','Clouds get heavy, water falls'],['run','🌊 Runoff','Water flows back to the sea']].map(([id,label,fact])=>`<button class="demo-btn" style="flex:1;font-size:11px;padding:8px 6px" onclick="['evap','prec','run'].forEach(s=>{document.getElementById('wc2-'+s).style.opacity=s==='${id}'?1:0.1;document.getElementById('lbl-'+s+'2').style.opacity=s==='${id}'?1:0;});document.getElementById('wc2-fact').innerHTML='<span class=demo-fact>${fact}</span>'">${label}</button>`).join('')}
+    </div></div>`;
+}};
+
+DEMO_REGISTRY['demo_india'] = { title:'Amazing India', emoji:'🇮🇳', render(c) {
+  const facts=[{e:'🏔️',n:'Himalayas',d:'World\'s highest mountains — 8 of the 10 tallest peaks!',col:'#818cf8'},{e:'🐯',n:'Bengal Tiger',d:'India has 70% of world\'s wild tigers — ~3,200 left!',col:'#f59e0b'},{e:'🕌',n:'Taj Mahal',d:'Built 1632 by Shah Jahan. Took 22 years & 20,000 workers!',col:'#a78bfa'},{e:'🚀',n:'ISRO/Chandrayaan',d:'First nation to land on Moon\'s south pole (2023)!',col:'#06b6d4'},{e:'🧘',n:'Yoga & Chess',d:'Both invented in India thousands of years ago!',col:'#22c55e'},{e:'🗣️',n:'Languages',d:'22 official languages, 1,600+ spoken languages!',col:'#f43f5e'},{e:'🌾',n:'Agriculture',d:'World\'s largest producer of milk, spices & pulses!',col:'#84cc16'},{e:'🇮🇳',n:'Independence',d:'15 August 1947 — India became independent after 200 years!',col:'#ff9500'}];
+  let fi=0;
+  function showF(){const f=facts[fi];document.getElementById('ind-card').style.cssText+=`border-color:${f.col};box-shadow:0 0 20px ${f.col}33`;document.getElementById('ind-e').textContent=f.e;document.getElementById('ind-n').style.color=f.col;document.getElementById('ind-n').textContent=f.n;document.getElementById('ind-d').textContent=f.d;document.getElementById('ind-dots').innerHTML=facts.map((_,i)=>`<div style="width:6px;height:6px;border-radius:50%;background:${i===fi?f.col:'var(--border)'}"></div>`).join('');document.getElementById('ind-c').textContent=(fi+1)+'/'+facts.length;}
+  c.innerHTML = `<div class="demo-wrap">
+    <h3 class="demo-title">🇮🇳 Amazing India!</h3>
+    <div id="ind-card" style="background:var(--bg-hud);border:2px solid var(--border);border-radius:16px;padding:18px;text-align:center;min-height:110px;transition:all 0.3s">
+      <div id="ind-e" style="font-size:44px;margin-bottom:6px"></div>
+      <div id="ind-n" style="font-size:18px;font-weight:800;margin-bottom:6px"></div>
+      <div id="ind-d" style="font-size:12px;color:var(--text-secondary);line-height:1.5"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;align-items:center">
+      <button class="demo-btn" style="flex:0 0 auto;padding:10px 16px" onclick="fi=(fi-1+${facts.length})%${facts.length};showF?showF():null">←</button>
+      <div id="ind-dots" style="display:flex;gap:4px;align-items:center"></div>
+      <button class="demo-btn" style="flex:0 0 auto;padding:10px 16px" onclick="fi=(fi+1)%${facts.length};showF?showF():null">→</button>
+    </div>
+    <div id="ind-c" style="text-align:center;font-size:10px;color:var(--text-muted);margin-top:4px"></div></div>`;
+  window.showF=showF; showF();
+}};
+
+DEMO_REGISTRY['demo_wordbuilder'] = { title:'Prefix Builder', emoji:'🔤', render(c) {
+  const prefixes=[{pre:'UN',words:['happy','lucky','fair','kind'],meaning:'NOT'},{pre:'RE',words:['do','play','write','use'],meaning:'AGAIN'},{pre:'PRE',words:['school','heat','pay','view'],meaning:'BEFORE'},{pre:'MIS',words:['spell','place','lead','read'],meaning:'WRONGLY'},{pre:'OVER',words:['sleep','cook','work','time'],meaning:'TOO MUCH'}];
+  let pi2=0;
+  c.innerHTML = `<div class="demo-wrap">
+    <h3 class="demo-title">🔤 Prefix Power!</h3>
+    <p class="demo-desc">Tap a prefix, then a root word to build a new word!</p>
+    <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:8px 0" id="pre2-row">
+      ${prefixes.map((p,i)=>`<button class="demo-btn" style="font-size:12px;padding:8px 10px;${i===0?'':'background:var(--bg-hud);color:var(--text-secondary)'}" onclick="pi2=${i};dmPre2()">${p.pre}—</button>`).join('')}
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--indigo);text-align:center;margin-bottom:6px" id="pre2-meaning">${prefixes[0].meaning}</div>
+    <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap" id="pre2-words">
+      ${prefixes[0].words.map(w=>`<button class="demo-btn" style="font-size:12px;padding:8px;background:var(--bg-hud);color:var(--text-secondary)" onclick="dmPre2W('${w}')">${w}</button>`).join('')}
+    </div>
+    <div id="pre2-result" style="text-align:center;font-size:28px;font-weight:900;font-family:var(--font-display);color:var(--eng-1);margin:10px 0;min-height:40px"></div>
+    <div id="pre2-explain" class="demo-fact-row" style="min-height:32px"></div></div>`;
+  window.dmPre2=()=>{const p=prefixes[pi2];document.getElementById('pre2-meaning').textContent=p.meaning;document.getElementById('pre2-words').innerHTML=p.words.map(w=>`<button class="demo-btn" style="font-size:12px;padding:8px;background:var(--bg-hud);color:var(--text-secondary)" onclick="dmPre2W('${w}')">${w}</button>`).join('');document.querySelectorAll('#pre2-row button').forEach((b,j)=>{b.style.background=j===pi2?'var(--indigo)':'var(--bg-hud)';b.style.color=j===pi2?'#fff':'var(--text-secondary)';});document.getElementById('pre2-result').textContent='';};
+  window.dmPre2W=(w)=>{const p=prefixes[pi2];const r=p.pre.toLowerCase()+w;document.getElementById('pre2-result').innerHTML=`<span style="color:var(--indigo)">${p.pre}</span>+${w} = <span style="color:var(--eng-1)">${r}</span>`;document.getElementById('pre2-explain').innerHTML=`<span class="demo-fact"><b>${p.pre}—</b> means "${p.meaning}" → <b>${r}</b> = ${p.meaning.toLowerCase()} ${w}</span>`;};
+}};
+
+// ================================================================
+// REGISTER ALL DEMOS IN GAME_REGISTRY (per subject per class)
 // ================================================================
 
-// 9. Water cycle
-DEMO_REGISTRY['demo_watercycle'] = {
-  title:'The Water Cycle', subject:'evs', emoji:'💧',
-  desc:'Water keeps moving in a never-ending cycle!',
-  render(c) {
-    c.innerHTML = `
-      <div class="demo-wrap">
-        <h3 class="demo-title">💧 The Water Cycle</h3>
-        <svg viewBox="0 0 280 180" style="width:100%;max-width:320px;display:block;margin:0 auto">
-          <!-- Sky -->
-          <rect x="0" y="0" width="280" height="100" fill="rgba(99,102,241,0.08)" rx="8"/>
-          <!-- Ground -->
-          <rect x="0" y="130" width="280" height="50" fill="rgba(139,90,43,0.4)" rx="4"/>
-          <!-- Sea -->
-          <ellipse cx="60" cy="132" rx="55" ry="14" fill="#1e3a8a" opacity="0.7"/>
-          <text x="30" y="135" font-size="9" fill="#93c5fd">OCEAN</text>
-          <!-- Cloud -->
-          <ellipse cx="200" cy="35" rx="30" ry="16" fill="#e2e8f0" opacity="0.9"/>
-          <ellipse cx="220" cy="30" rx="22" ry="14" fill="white" opacity="0.9"/>
-          <ellipse cx="185" cy="38" rx="18" ry="12" fill="#e2e8f0" opacity="0.8"/>
-          <!-- Mountain -->
-          <polygon points="200,130 240,130 220,70" fill="#475569"/>
-          <polygon points="220,70 213,85 227,85" fill="white" opacity="0.8"/>
-          <!-- Arrows animated -->
-          <path id="wc-evap" d="M60,118 Q60,80 180,45" stroke="#ffd700" stroke-width="2.5" fill="none" stroke-dasharray="8,5" stroke-linecap="round" opacity="0"/>
-          <path id="wc-cond" d="M200,55 Q210,20 235,35" stroke="#a78bfa" stroke-width="2.5" fill="none" stroke-dasharray="6,4" opacity="0"/>
-          <path id="wc-prec" d="M215,55 Q230,90 235,125" stroke="#60a5fa" stroke-width="2.5" fill="none" stroke-dasharray="4,4" opacity="0"/>
-          <path id="wc-runoff" d="M235,128 Q160,132 120,132 Q90,132 60,130" stroke="#3b82f6" stroke-width="2.5" fill="none" stroke-dasharray="6,4" opacity="0"/>
-          <!-- Labels -->
-          <text id="lbl-evap" x="95" y="72" font-size="8" fill="#ffd700" opacity="0">Evaporation ↑</text>
-          <text id="lbl-cond" x="205" y="18" font-size="8" fill="#a78bfa" opacity="0">Condensation</text>
-          <text id="lbl-prec" x="238" y="95" font-size="8" fill="#60a5fa" opacity="0" transform="rotate(80,250,95)">Rain ↓</text>
-          <text id="lbl-run"  x="130" y="144" font-size="8" fill="#3b82f6" opacity="0">Runoff →</text>
-        </svg>
-        <div class="demo-fact-row" id="wc-fact"><span class="demo-fact">Tap to animate each stage!</span></div>
-        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
-          <button class="demo-btn" style="font-size:11px;padding:8px 10px" onclick="demoWC('evap')">☀️ Evaporation</button>
-          <button class="demo-btn" style="font-size:11px;padding:8px 10px" onclick="demoWC('cond')">☁️ Condensation</button>
-          <button class="demo-btn" style="font-size:11px;padding:8px 10px" onclick="demoWC('prec')">🌧️ Precipitation</button>
-          <button class="demo-btn" style="font-size:11px;padding:8px 10px" onclick="demoWC('run')">🌊 Runoff</button>
-        </div>
-      </div>`;
-    const facts = {
-      evap:'☀️ Heat from the sun turns ocean water into water VAPOUR (invisible gas).',
-      cond:'☁️ Water vapour rises, cools, and becomes tiny water droplets → CLOUDS.',
-      prec:'🌧️ Water drops in clouds get heavy and fall as RAIN, SNOW or HAIL.',
-      run:'🌊 Water runs down mountains and flows back to the sea. Cycle complete!',
-    };
-    window.demoWC = (stage) => {
-      const ids = ['evap','cond','prec','run'];
-      ids.forEach(s=>{
-        const show = s===stage;
-        document.getElementById(`wc-${s}`).style.cssText+=`opacity:${show?1:0.15};transition:opacity 0.4s`;
-        document.getElementById(`lbl-${s}`).style.cssText+=`opacity:${show?1:0};transition:opacity 0.4s`;
-      });
-      document.getElementById('wc-fact').innerHTML=`<span class="demo-fact">${facts[stage]}</span>`;
-    };
-  }
-};
+// Helper to add Fun Lab section to a class
+function addFunLab(subjectId, classNum, demoIds) {
+  const reg = GAME_REGISTRY[subjectId]?.[classNum];
+  if (!reg) return;
+  // Remove any previously added demo games from push (idempotent)
+  reg.games = reg.games.filter(g => !g.id.startsWith('dm_') && !g.id.startsWith('demo_'));
+  // Add new ones
+  const demoEntries = demoIds.map(id => {
+    const d = DEMO_REGISTRY[id];
+    return { id, icon: d?.emoji || '🔬', bg: 'rgba(99,102,241,0.12)',
+             name: d?.title || id, desc: 'Interactive experiment!', diff:'easy', badge:'fun' };
+  });
+  reg.games.push(...demoEntries);
+  // Store ordered list for Fun Lab strip rendering
+  reg.funlab = demoIds;
+}
 
-// 10. India map explorer
-DEMO_REGISTRY['demo_india'] = {
-  title:'India: Amazing Facts', subject:'evs', emoji:'🇮🇳',
-  desc:'Discover fascinating facts about incredible India!',
-  render(c) {
-    const facts = [
-      {emoji:'🏔️', fact:'Himalayas', detail:'The world\'s highest mountains — Everest is 8,849m tall!', color:'#818cf8'},
-      {emoji:'🌊', fact:'3 Oceans', detail:'India is surrounded by the Arabian Sea, Bay of Bengal & Indian Ocean.', color:'#3b82f6'},
-      {emoji:'🐯', fact:'Bengal Tiger', detail:'India has 70% of the world\'s wild tigers — about 3,200 tigers!', color:'#f59e0b'},
-      {emoji:'🕌', fact:'Taj Mahal', detail:'Built by Shah Jahan in 1632 — took 22 years and 20,000 workers!', color:'#a78bfa'},
-      {emoji:'🧘', fact:'Yoga & Chess', detail:'Both yoga AND chess were invented in India thousands of years ago!', color:'#22c55e'},
-      {emoji:'🚀', fact:'ISRO', detail:'Chandrayaan-3 landed on the Moon\'s south pole in 2023 — a world first!', color:'#06b6d4'},
-      {emoji:'🌾', fact:'Agriculture', detail:'India is the world\'s largest producer of milk, pulses, and spices!', color:'#84cc16'},
-      {emoji:'🗣️', fact:'Languages', detail:'India has 22 official languages and over 1,600 spoken languages!', color:'#f43f5e'},
-    ];
-    let fi = 0;
-    c.innerHTML = `
-      <div class="demo-wrap">
-        <h3 class="demo-title">🇮🇳 Amazing India</h3>
-        <div id="india-card" style="background:var(--bg-hud);border-radius:16px;padding:20px;text-align:center;min-height:120px;transition:all 0.3s">
-          <div id="india-emoji" style="font-size:48px;margin-bottom:8px"></div>
-          <div id="india-title" style="font-size:18px;font-weight:800;color:var(--text-primary);margin-bottom:6px"></div>
-          <div id="india-detail" style="font-size:13px;color:var(--text-secondary);line-height:1.5"></div>
-        </div>
-        <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
-          <button class="demo-btn" onclick="demoIndiaPrev()">← Prev</button>
-          <div id="india-dots" style="display:flex;gap:4px;align-items:center"></div>
-          <button class="demo-btn" onclick="demoIndiaNext()">Next →</button>
-        </div>
-        <div style="text-align:center;font-size:10px;color:var(--text-muted);margin-top:4px" id="india-counter"></div>
-      </div>`;
-    function showFact() {
-      const f = facts[fi];
-      const card = document.getElementById('india-card');
-      card.style.borderColor = f.color;
-      card.style.boxShadow = `0 0 20px ${f.color}33`;
-      document.getElementById('india-emoji').textContent = f.emoji;
-      document.getElementById('india-title').textContent = f.fact;
-      document.getElementById('india-title').style.color = f.color;
-      document.getElementById('india-detail').textContent = f.detail;
-      document.getElementById('india-counter').textContent = `${fi+1} / ${facts.length}`;
-      const dots = document.getElementById('india-dots');
-      dots.innerHTML = facts.map((_,i)=>`<div style="width:6px;height:6px;border-radius:50%;background:${i===fi?f.color:'var(--border)'}"></div>`).join('');
-    }
-    window.demoIndiaNext = () => { fi=(fi+1)%facts.length; showFact(); };
-    window.demoIndiaPrev = () => { fi=(fi-1+facts.length)%facts.length; showFact(); };
-    showFact();
-  }
-};
+// MATHS
+addFunLab('math',1,['dm_m1_count','dm_m1_odd_even','dm_m1_shapes','dm_m1_add_visual','dm_m1_pattern','dm_m1_measure','dm_m1_money']);
+addFunLab('math',2,['dm_m2_place','dm_m2_skip','dm_m2_mult_groups','dm_m2_clock','dm_m2_symmetry_draw','dm_m2_money2','dm_m2_data']);
+addFunLab('math',3,['dm_m3_times','dm_m3_fraction','dm_m3_perimeter','dm_m3_division','dm_m3_angles','dm_m3_roman','dm_m3_word_problems']);
+addFunLab('math',4,['dm_m4_large_nums','dm_m4_hcf_lcm','dm_m4_area','dm_m4_bodmas','dm_m4_speed_distance','dm_m4_percentage','dm_m4_geometry']);
 
-// 11. English — word building
-DEMO_REGISTRY['demo_wordbuilder'] = {
-  title:'Build Words with Prefixes', subject:'eng', emoji:'🔤',
-  desc:'Prefixes change a word\'s meaning — snap them on like LEGO!',
-  render(c) {
-    const prefixes = [
-      {pre:'UN', words:['happy','lucky','fair','kind','well'], meaning:'NOT'},
-      {pre:'RE', words:['do','play','write','use','build'], meaning:'AGAIN'},
-      {pre:'PRE', words:['school','heat','pay','view','cook'], meaning:'BEFORE'},
-      {pre:'MIS', words:['spell','place','lead','use','read'], meaning:'WRONGLY'},
-      {pre:'OVER', words:['sleep','cook','work','time','do'], meaning:'TOO MUCH'},
-    ];
-    let pi=0, wi=0;
-    c.innerHTML = `
-      <div class="demo-wrap">
-        <h3 class="demo-title">🔤 Prefix Builder</h3>
-        <p class="demo-desc">Tap a prefix, then tap a root word to build a new word!</p>
-        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0" id="pre-row">
-          ${prefixes.map((p,i)=>`<button class="demo-btn" style="font-size:12px;padding:8px 12px;${i===0?'':'background:var(--bg-hud);color:var(--text-secondary)'}" onclick="demoPreSel(${i})">${p.pre}—</button>`).join('')}
-        </div>
-        <div id="pre-meaning" style="text-align:center;font-size:11px;color:var(--indigo);font-weight:700;margin-bottom:6px">${prefixes[0].meaning}</div>
-        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap" id="word-row">
-          ${prefixes[0].words.map((w,i)=>`<button class="demo-btn" style="font-size:12px;padding:8px 10px;background:var(--bg-hud);color:var(--text-secondary)" onclick="demoPreWord('${w}')">${w}</button>`).join('')}
-        </div>
-        <div id="pre-result" style="text-align:center;font-size:32px;font-weight:900;color:var(--eng-1);margin:12px 0;min-height:44px;font-family:var(--font-display)"></div>
-        <div id="pre-explain" class="demo-fact-row" style="min-height:32px"></div>
-      </div>`;
-    window.demoPreSel = (i) => {
-      pi=i;
-      const p = prefixes[i];
-      document.querySelectorAll('#pre-row button').forEach((b,j)=>{
-        b.style.background = j===i ? 'var(--indigo)' : 'var(--bg-hud)';
-        b.style.color = j===i ? '#fff' : 'var(--text-secondary)';
-      });
-      document.getElementById('pre-meaning').textContent = p.meaning;
-      document.getElementById('word-row').innerHTML = p.words.map(w=>`<button class="demo-btn" style="font-size:12px;padding:8px 10px;background:var(--bg-hud);color:var(--text-secondary)" onclick="demoPreWord('${w}')">${w}</button>`).join('');
-      document.getElementById('pre-result').textContent='';
-      document.getElementById('pre-explain').innerHTML='';
-    };
-    window.demoPreWord = (w) => {
-      const p = prefixes[pi];
-      const result = p.pre.toLowerCase() + w;
-      document.getElementById('pre-result').innerHTML =
-        `<span style="color:var(--indigo)">${p.pre}</span><span style="color:var(--text-secondary)">+</span><span>${w}</span> = <span style="color:var(--eng-1)">${result}</span>`;
-      document.getElementById('pre-explain').innerHTML =
-        `<span class="demo-fact"><b>${p.pre}—</b> means "${p.meaning}" → <b>${result}</b> = ${p.meaning.toLowerCase()} ${w}</span>`;
-    };
-  }
-};
+// SCIENCE (reuse original demos + class-specific ones shared across classes)
+addFunLab('sci',1,['demo_volcano','demo_prism','demo_plant','demo_foodchain','demo_watercycle','demo_india','demo_wordbuilder']);
+addFunLab('sci',2,['demo_foodchain','demo_plant','demo_watercycle','demo_volcano','demo_prism','demo_india','demo_wordbuilder']);
+addFunLab('sci',3,['demo_prism','demo_watercycle','demo_volcano','demo_plant','demo_foodchain','demo_india','demo_wordbuilder']);
+addFunLab('sci',4,['demo_watercycle','demo_prism','demo_volcano','demo_foodchain','demo_plant','demo_india','demo_wordbuilder']);
 
-// ================================================================
-// DEMO GAME RENDERER — integrates with game flow
-// ================================================================
-GAME_RENDERERS['demo_volcano']    = (c) => DEMO_REGISTRY['demo_volcano'].render(c);
-GAME_RENDERERS['demo_prism']      = (c) => DEMO_REGISTRY['demo_prism'].render(c);
-GAME_RENDERERS['demo_plant']      = (c) => DEMO_REGISTRY['demo_plant'].render(c);
-GAME_RENDERERS['demo_foodchain']  = (c) => DEMO_REGISTRY['demo_foodchain'].render(c);
-GAME_RENDERERS['demo_times9']     = (c) => DEMO_REGISTRY['demo_times9'].render(c);
-GAME_RENDERERS['demo_magic_num']  = (c) => DEMO_REGISTRY['demo_magic_num'].render(c);
-GAME_RENDERERS['demo_fibonacci']  = (c) => DEMO_REGISTRY['demo_fibonacci'].render(c);
-GAME_RENDERERS['demo_symmetry']   = (c) => DEMO_REGISTRY['demo_symmetry'].render(c);
-GAME_RENDERERS['demo_watercycle'] = (c) => DEMO_REGISTRY['demo_watercycle'].render(c);
-GAME_RENDERERS['demo_india']      = (c) => DEMO_REGISTRY['demo_india'].render(c);
-GAME_RENDERERS['demo_wordbuilder']= (c) => DEMO_REGISTRY['demo_wordbuilder'].render(c);
+// ENGLISH
+addFunLab('eng',1,['demo_wordbuilder','dm_m1_pattern','demo_india','dm_m1_shapes','demo_foodchain','demo_prism','demo_plant']);
+addFunLab('eng',2,['demo_wordbuilder','dm_m2_data','demo_india','dm_m1_pattern','demo_watercycle','demo_volcano','demo_foodchain']);
+addFunLab('eng',3,['demo_wordbuilder','dm_m3_word_problems','demo_india','dm_m2_data','demo_watercycle','demo_prism','demo_plant']);
+addFunLab('eng',4,['demo_wordbuilder','dm_m4_bodmas','demo_india','dm_m3_word_problems','dm_m2_data','demo_watercycle','demo_prism']);
+
+// EVS/GK
+addFunLab('evs',1,['demo_india','demo_watercycle','demo_foodchain','demo_plant','demo_volcano','demo_prism','demo_wordbuilder']);
+addFunLab('evs',2,['demo_india','demo_watercycle','demo_foodchain','demo_plant','demo_volcano','demo_prism','dm_m1_measure']);
+addFunLab('evs',3,['demo_india','demo_watercycle','demo_foodchain','demo_prism','demo_plant','demo_volcano','dm_m2_data']);
+addFunLab('evs',4,['demo_india','demo_watercycle','demo_foodchain','demo_prism','demo_plant','demo_volcano','dm_m4_percentage']);
+
+// Register all in GAME_RENDERERS
+Object.keys(DEMO_REGISTRY).forEach(id => {
+  GAME_RENDERERS[id] = (c) => DEMO_REGISTRY[id].render(c);
+});
 
 
 // ── gamification.js ──
