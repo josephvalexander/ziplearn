@@ -850,35 +850,42 @@ body {
 #scr-home .home-scroll { padding-bottom: 8px; }
 
 /* Back button — fixed floating pill, bottom-left, above bottom-nav */
+/* ── Back button ───────────────────────────────────────────────
+   Mobile  : sits inside .app-header (header-left) as a small icon button
+   Desktop : text link in header-left, more space available
+   NOT a floating pill — never overlaps content
+───────────────────────────────────────────────────────────────── */
 .nav-back {
   display: none;
-  position: fixed;
-  bottom: 76px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 600;
-  background: var(--indigo);
-  border: none;
-  border-radius: 28px;
-  padding: 12px 24px;
-  font-size: 15px;
-  font-weight: 800;
-  color: #fff;
-  box-shadow: 0 4px 24px rgba(99,102,241,0.5);
-  cursor: pointer;
   align-items: center;
-  gap: 8px;
-  letter-spacing: 0.3px;
+  gap: 5px;
+  background: var(--bg-hud);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 12px 6px 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.18s var(--smooth);
   font-family: var(--font-body);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .nav-back.show {
   display: inline-flex;
-  animation: backBtnIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
 }
-@keyframes backBtnIn {
-  from { opacity:0; transform:translateX(-50%) translateY(16px) scale(0.9); }
-  to   { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+.nav-back:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+  transform: translateX(-2px);
+}
+/* Desktop: slightly larger */
+@media (min-width: 768px) {
+  .nav-back {
+    padding: 7px 16px 7px 10px;
+    font-size: 14px;
+  }
 }
 
 /* Bottom nav — compact on very small screens */
@@ -1405,6 +1412,33 @@ body {
   font-weight: 600;
 }
 
+
+/* ── Header left group (back btn + logo) ──────────────────── */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  min-width: 0;
+}
+/* Hide logo text on very small screens when back is shown to save space */
+.nav-back.show ~ .logo-wrap .logo-tagline,
+.header-left:has(.nav-back.show) .logo-tagline {
+  display: none;
+}
+@media (max-width: 380px) {
+  .nav-back.show + .logo-wrap .logo-name {
+    font-size: 16px;
+  }
+}
+
 </style>
 
 <body>
@@ -1420,15 +1454,18 @@ body {
 
 <!-- ============ GLOBAL HEADER ============ -->
 <header class="app-header">
-  <div class="logo-wrap" onclick="nav.goHome()">
-    <div class="logo-planet">
-      <svg width="22" height="26" viewBox="0 0 22 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polygon points="13,1 3,14 10,14 9,25 19,12 12,12" fill="white" opacity="0.95"/>
-      </svg>
-    </div>
-    <div>
-      <div class="logo-name">Zipplearn</div>
-      <div class="logo-tagline">FAST · FUN · SMART</div>
+  <div class="header-left">
+    <button class="nav-back" id="nav-back" onclick="nav.goBack()">← Back</button>
+    <div class="logo-wrap" onclick="nav.goHome()">
+      <div class="logo-planet">
+        <svg width="22" height="26" viewBox="0 0 22 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="13,1 3,14 10,14 9,25 19,12 12,12" fill="white" opacity="0.95"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-name">Zipplearn</div>
+        <div class="logo-tagline" id="logo-tagline-text">FAST · FUN · SMART</div>
+      </div>
     </div>
   </div>
   <div class="header-right">
@@ -1436,9 +1473,6 @@ body {
     <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode" onclick="THEME.toggle()">🌙</button>
   </div>
 </header>
-
-<!-- Floating back button - position:fixed works here outside header -->
-<button class="nav-back" id="nav-back" onclick="nav.goBack()">← Back</button>
 
 <!-- ============================================================
      SCREEN: HOME
@@ -2346,16 +2380,15 @@ const APP = (() => {
       nav.history.push('play');
       showScreen('play');
 
-      if (gameId.startsWith('demo_')) {
+      if (gameId.startsWith('demo_') || gameId.startsWith('dm_')) {
         // Demo mode — no timer, no scoring, just show the interactive content
         // Set subject based on demo type for theme colouring
-        const demoSubjectMap = {
-          demo_volcano:'sci', demo_prism:'sci', demo_plant:'sci', demo_foodchain:'sci',
-          demo_times9:'math', demo_magic_num:'math', demo_fibonacci:'math', demo_symmetry:'math',
-          demo_watercycle:'evs', demo_india:'evs',
-          demo_wordbuilder:'eng',
-        };
-        S.selectedSubject = demoSubjectMap[gameId] || 'sci';
+        // Keep current subject (set when user opened the class)
+        // or fall back by prefix
+        if (!S.selectedSubject) {
+          S.selectedSubject = gameId.startsWith('dm_m') ? 'math' :
+                              gameId.startsWith('demo_') ? 'sci' : 'evs';
+        }
         // Hide normal HUD, show demo UI
         const hud = document.querySelector('.game-header');
         if (hud) hud.style.display = 'none';
